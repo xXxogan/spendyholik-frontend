@@ -1,0 +1,2140 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>SpendyHolik — учёт личных финансов</title>
+<style>
+/* ─── tokens ───────────────────────────────────────────────────────── */
+:root {
+  --bg:      oklch(98.8% 0.004 250);
+  --surface: oklch(100% 0 0);
+  --fg:      oklch(19% 0.014 250);
+  --muted:   oklch(52% 0.014 250);
+  --border:  oklch(91% 0.006 250);
+  --accent:  oklch(50% 0.17 255);
+  --accent-strong: oklch(43% 0.16 255);
+  --on-accent: oklch(99% 0.002 250);
+
+  --positive: oklch(58% 0.14 155);
+  --negative: oklch(57% 0.18 26);
+  --warning:  oklch(70% 0.14 72);
+
+  --cat-food:     oklch(62% 0.14 155);
+  --cat-transport:oklch(58% 0.15 255);
+  --cat-housing:  oklch(68% 0.13 82);
+  --cat-dining:   oklch(58% 0.17 36);
+  --cat-fun:      oklch(62% 0.16 344);
+  --cat-health:   oklch(60% 0.11 195);
+  --cat-shopping: oklch(55% 0.15 300);
+  --cat-subs:     oklch(50% 0.05 250);
+  --cat-salary:   oklch(60% 0.15 155);
+  --cat-transfer: oklch(52% 0.02 250);
+
+  --accent-soft:  color-mix(in oklch, var(--accent) 12%, transparent);
+  --fg-soft:      color-mix(in oklch, var(--fg) 5%, transparent);
+  --positive-soft:color-mix(in oklch, var(--positive) 14%, transparent);
+  --negative-soft:color-mix(in oklch, var(--negative) 14%, transparent);
+  --warning-soft: color-mix(in oklch, var(--warning) 16%, transparent);
+  --stage-bg: oklch(94% 0.007 250);
+
+  --font-display: -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif;
+  --font-body:    -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
+  --font-mono:    ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, monospace;
+
+  --sbh: 44px;
+  --tbh: 86px;
+  --sidenav-w: 0px;
+  --radius: 12px;
+  --radius-lg: 18px;
+}
+[data-theme="dark"] {
+  --bg:      oklch(15.5% 0.012 250);
+  --surface: oklch(20.5% 0.014 250);
+  --fg:      oklch(96% 0.004 250);
+  --muted:   oklch(70% 0.012 250);
+  --border:  oklch(29% 0.012 250);
+  --accent:  oklch(72% 0.15 255);
+  --accent-strong: oklch(64% 0.16 255);
+  --on-accent: oklch(16% 0.02 255);
+  --positive: oklch(74% 0.14 155);
+  --negative: oklch(72% 0.16 26);
+  --warning:  oklch(82% 0.13 78);
+  --cat-food:     oklch(74% 0.14 155);
+  --cat-transport:oklch(74% 0.14 255);
+  --cat-housing:  oklch(80% 0.12 82);
+  --cat-dining:   oklch(74% 0.15 36);
+  --cat-fun:      oklch(76% 0.14 344);
+  --cat-health:   oklch(74% 0.12 195);
+  --cat-shopping: oklch(72% 0.14 300);
+  --cat-subs:     oklch(72% 0.06 250);
+  --cat-salary:   oklch(74% 0.15 155);
+  --cat-transfer: oklch(72% 0.03 250);
+  --stage-bg: oklch(12% 0.01 250);
+}
+
+/* ─── base ─────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--stage-bg);
+  color: var(--fg);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+img, svg { display: block; max-width: 100%; }
+button { font: inherit; cursor: pointer; color: inherit; background: none; border: 0; padding: 0; }
+a { color: inherit; text-decoration: none; }
+h1, h2, h3, h4, p { margin: 0; }
+::-webkit-scrollbar { display: none; }
+
+.sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
+.ic { width: 22px; height: 22px; flex: none; }
+
+/* ─── stage / phone ────────────────────────────────────────────────── */
+.stage {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  padding: 40px 24px;
+}
+@media (max-height: 900px) { .stage { justify-content: flex-start; } }
+.stage-note {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  color: color-mix(in oklch, var(--muted) 80%, transparent);
+}
+.phone {
+  position: relative;
+  width: 390px;
+  height: 844px;
+  background: var(--bg);
+  border: 1px solid oklch(88% 0.008 250);
+  border-radius: 52px;
+  overflow: hidden;
+  box-shadow: 0 44px 90px -34px oklch(20% 0.03 260 / 0.45);
+  flex: none;
+}
+[data-theme="dark"] .phone { border-color: oklch(30% 0.012 250); }
+
+.statusbar {
+  position: absolute; top: 0; left: 0; right: 0; height: var(--sbh);
+  z-index: 60; display: flex; align-items: center; justify-content: space-between;
+  padding: 0 28px 0 32px; pointer-events: none;
+  color: var(--fg);
+}
+.sb-time { font-family: var(--font-mono); font-size: 15px; font-weight: 600; }
+.sb-icons { display: flex; align-items: center; gap: 6px; }
+.sb-icons svg { width: 16px; height: 12px; }
+
+/* ─── screens ──────────────────────────────────────────────────────── */
+.screen {
+  position: absolute; inset: 0;
+  left: var(--sidenav-w);
+  padding-top: var(--sbh);
+  display: none;
+  flex-direction: column;
+  background: var(--bg);
+  overflow: hidden;
+}
+.screen.active { display: flex; animation: screenIn 0.24s ease; }
+.screen.auth-screen { left: 0; }
+@keyframes screenIn { from { opacity: 0; transform: translateX(10px); } to { opacity: 1; transform: none; } }
+.screen-scroll { flex: 1; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+.tab-screen .screen-scroll { padding-bottom: calc(var(--tbh) + 14px); }
+.screen-pad { padding: 8px 18px 24px; }
+.flat { padding-top: 0; }
+
+/* ─── app bar ──────────────────────────────────────────────────────── */
+.appbar {
+  display: flex; align-items: center; gap: 12px;
+  padding: 6px 16px;
+  min-height: 52px;
+  flex: none;
+}
+.appbar-title { font-size: 18px; font-weight: 640; letter-spacing: -0.01em; flex: 1; }
+.appbar-title.centered { text-align: center; }
+.iconbtn {
+  width: 40px; height: 40px; border-radius: 12px;
+  display: grid; place-items: center; flex: none;
+  color: var(--fg);
+}
+.iconbtn:hover { background: var(--fg-soft); }
+.iconbtn .ic { width: 22px; height: 22px; }
+.wordmark { font-family: var(--font-display); font-size: 20px; font-weight: 700; letter-spacing: -0.02em; }
+.wordmark b { color: var(--accent); font-weight: 700; }
+
+/* ─── tab bar / fab ────────────────────────────────────────────────── */
+.tabbar {
+  position: absolute; left: 0; right: 0; bottom: 0; height: var(--tbh);
+  z-index: 40; display: none;
+  background: color-mix(in oklch, var(--surface) 92%, transparent);
+  backdrop-filter: blur(18px);
+  border-top: 1px solid var(--border);
+  padding: 8px 8px 22px;
+}
+.tab {
+  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px;
+  color: var(--muted); font-size: 10.5px; font-weight: 500;
+  transition: color 0.15s ease;
+}
+.tab .ic { width: 23px; height: 23px; }
+.tab.active { color: var(--accent); }
+.tab-label { line-height: 1; }
+.fab {
+  position: absolute; right: 18px; bottom: calc(var(--tbh) + 14px);
+  width: 58px; height: 58px; border-radius: 20px;
+  background: var(--accent); color: var(--on-accent);
+  display: grid; place-items: center; z-index: 35;
+  box-shadow: 0 12px 24px -8px oklch(43% 0.16 255 / 0.55);
+  transition: transform 0.08s ease, background 0.15s ease;
+}
+.fab:hover { background: var(--accent-strong); }
+.fab:active { transform: scale(0.96); }
+.fab .ic { width: 26px; height: 26px; }
+
+/* ─── side navigation (tablet rail / desktop sidebar) ─────────────── */
+.sidenav {
+  display: none;
+  position: absolute; left: 0; top: 0; bottom: 0;
+  width: var(--sidenav-w);
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  z-index: 45;
+  flex-direction: column;
+  padding: 18px 14px;
+}
+.snav-brand { display: flex; align-items: center; gap: 11px; padding: 4px 8px 20px; }
+.snav-mark {
+  width: 34px; height: 34px; border-radius: 11px; flex: none;
+  background: linear-gradient(150deg, var(--accent), var(--accent-strong));
+  color: var(--on-accent); display: grid; place-items: center; font-weight: 800; font-size: 15px;
+}
+.snav-word { font-family: var(--font-display); font-size: 18px; font-weight: 700; letter-spacing: -0.02em; white-space: nowrap; }
+.snav-word b { color: var(--accent); font-weight: 700; }
+.snav-nav, .snav-links { display: flex; flex-direction: column; gap: 2px; }
+.snav-links { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
+.snav-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 12px; border-radius: 11px;
+  color: var(--muted); font-size: 14.5px; font-weight: 560; text-align: left;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.snav-item:hover { background: var(--fg-soft); color: var(--fg); }
+.snav-item.active { background: var(--accent-soft); color: var(--accent); }
+.snav-ico { width: 22px; height: 22px; display: grid; place-items: center; flex: none; }
+.snav-ico .ic { width: 21px; height: 21px; }
+.snav-label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.snav-user { margin-top: auto; display: flex; align-items: center; gap: 10px; padding: 14px 8px 0; border-top: 1px solid var(--border); }
+.snav-user-meta { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.snav-user-meta b { font-size: 13.5px; font-weight: 640; }
+.snav-user-meta span { font-size: 12px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* dashboard page title (desktop) */
+.dash-title { display: none; font-size: 20px; font-weight: 660; letter-spacing: -0.01em; }
+
+/* pinned bottom action row */
+.screen-foot { padding: 14px 24px 28px; flex: none; }
+
+/* ─── buttons ──────────────────────────────────────────────────────── */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 13px 20px; border-radius: 14px;
+  font-size: 15px; font-weight: 600; letter-spacing: -0.005em;
+  border: 1px solid transparent;
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.05s ease;
+}
+.btn:active { transform: translateY(1px); }
+.btn-block { width: 100%; }
+.btn-primary { background: var(--accent); color: var(--on-accent); }
+.btn-primary:hover { background: var(--accent-strong); }
+.btn-secondary { background: transparent; color: var(--fg); border-color: var(--border); }
+.btn-secondary:hover { border-color: var(--fg); }
+.btn-ghost { background: transparent; color: var(--accent); padding-inline: 10px; }
+.btn-danger { background: var(--negative-soft); color: var(--negative); }
+.btn-danger:hover { background: var(--negative); color: oklch(99% 0 0); }
+.btn-sm { padding: 9px 14px; font-size: 13.5px; border-radius: 11px; }
+:is(.btn, .tab, .iconbtn, .fab, .chip, .seg, .tx-row, .list-row, .acc-card, .gi, .swatch, .snav-item):focus-visible {
+  outline: 2px solid var(--accent); outline-offset: 2px;
+}
+
+/* ─── primitives ───────────────────────────────────────────────────── */
+.muted { color: var(--muted); }
+.small { font-size: 13px; }
+.mono, .num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.pos { color: var(--positive); }
+.neg { color: var(--negative); }
+.divider { height: 1px; background: var(--border); border: 0; margin: 4px 0; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); }
+.card-pad { padding: 18px; }
+.avatar {
+  width: 40px; height: 40px; border-radius: 14px; flex: none;
+  background: var(--accent-soft); color: var(--accent);
+  display: grid; place-items: center; font-weight: 700; font-size: 15px;
+}
+.section-head { display: flex; align-items: center; justify-content: space-between; margin: 20px 0 10px; }
+.section-head h2 { font-size: 16px; font-weight: 640; letter-spacing: -0.01em; }
+.link { color: var(--accent); font-size: 13.5px; font-weight: 600; }
+
+.icon {
+  width: 42px; height: 42px; border-radius: 13px; flex: none;
+  display: grid; place-items: center;
+  background: color-mix(in oklch, var(--c, var(--accent)) 14%, transparent);
+  color: var(--c, var(--accent));
+}
+.icon .ic { width: 21px; height: 21px; }
+.icon.xs { width: 34px; height: 34px; border-radius: 11px; }
+.icon.xs .ic { width: 18px; height: 18px; }
+.icon.lg { width: 54px; height: 54px; border-radius: 16px; }
+.icon.lg .ic { width: 26px; height: 26px; }
+
+/* ─── balance hero ─────────────────────────────────────────────────── */
+.balance-card {
+  border-radius: 22px; padding: 20px 20px 18px; color: var(--on-accent);
+  background: linear-gradient(150deg, var(--accent), var(--accent-strong));
+  box-shadow: 0 18px 34px -18px oklch(43% 0.16 255 / 0.7);
+}
+.balance-label { font-size: 13px; opacity: 0.82; letter-spacing: 0.01em; }
+.balance-value { font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: 36px; font-weight: 640; letter-spacing: -0.02em; margin: 4px 0 2px; }
+.balance-delta { font-size: 13px; font-weight: 600; opacity: 0.95; }
+.balance-delta .ic { width: 14px; height: 14px; vertical-align: -2px; display: inline; }
+
+/* ─── account cards ────────────────────────────────────────────────── */
+.acc-scroll { display: flex; gap: 12px; overflow-x: auto; padding: 2px 2px 6px; margin: 0 -2px; }
+.acc-card {
+  flex: none; width: 200px; text-align: left;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 18px;
+  padding: 15px 16px; display: flex; flex-direction: column; gap: 14px;
+  transition: border-color 0.15s ease;
+}
+.acc-card:hover { border-color: var(--fg); }
+.acc-top { display: flex; align-items: center; gap: 9px; }
+.acc-type { font-size: 12.5px; color: var(--muted); font-weight: 500; }
+.acc-top .chev { margin-left: auto; color: var(--muted); }
+.acc-top .chev .ic { width: 16px; height: 16px; }
+.acc-name { font-size: 15px; font-weight: 600; }
+.acc-balance { font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: 21px; font-weight: 640; letter-spacing: -0.01em; }
+
+/* ─── transaction rows ─────────────────────────────────────────────── */
+.tx-row {
+  width: 100%; display: flex; align-items: center; gap: 12px;
+  padding: 12px 2px; text-align: left; border-radius: 12px;
+  transition: background 0.12s ease;
+}
+.tx-row:hover { background: var(--fg-soft); }
+.tx-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.tx-title { font-size: 15px; font-weight: 560; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tx-sub { font-size: 12.5px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tx-amt { font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: 15px; font-weight: 600; }
+.date-label { font-family: var(--font-mono); font-size: 11.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); margin: 18px 0 2px; }
+
+/* ─── progress / widgets ───────────────────────────────────────────── */
+.progress { height: 7px; background: var(--fg-soft); border-radius: 999px; overflow: hidden; }
+.progress-fill { height: 100%; border-radius: 999px; background: var(--c, var(--accent)); }
+.progress-fill.warn { background: var(--warning); }
+.progress-fill.over { background: var(--negative); }
+.goal-widget { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px; }
+.mini-row { display: flex; align-items: center; gap: 12px; }
+
+/* ─── chips / segmented ────────────────────────────────────────────── */
+.chips { display: flex; gap: 8px; overflow-x: auto; padding: 2px; }
+.chip {
+  flex: none; padding: 7px 13px; border-radius: 999px; font-size: 13px; font-weight: 560;
+  border: 1px solid var(--border); color: var(--muted); white-space: nowrap;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+.chip:hover { border-color: var(--fg); color: var(--fg); }
+.chip.active { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+.segmented { display: flex; background: var(--fg-soft); border-radius: 12px; padding: 3px; }
+.seg { flex: 1; padding: 8px 10px; border-radius: 9px; font-size: 13.5px; font-weight: 600; color: var(--muted); text-align: center; transition: background 0.15s ease, color 0.15s ease; }
+.seg.active { background: var(--surface); color: var(--fg); box-shadow: 0 1px 4px oklch(20% 0.02 250 / 0.12); }
+
+/* ─── list rows ────────────────────────────────────────────────────── */
+.list-row {
+  width: 100%; display: flex; align-items: center; gap: 13px;
+  padding: 12px 2px; text-align: left; border-radius: 12px;
+}
+.list-row:hover { background: var(--fg-soft); }
+.list-main { flex: 1; min-width: 0; }
+.list-title { font-size: 15px; font-weight: 560; }
+.list-sub { font-size: 12.5px; color: var(--muted); margin-top: 1px; }
+.trailing { color: var(--muted); display: flex; align-items: center; gap: 6px; }
+.trailing .ic { width: 17px; height: 17px; }
+.badge { width: 9px; height: 9px; border-radius: 50%; background: var(--accent); flex: none; }
+
+/* ─── switch ───────────────────────────────────────────────────────── */
+.switch { width: 46px; height: 28px; border-radius: 999px; background: var(--fg-soft); position: relative; flex: none; transition: background 0.18s ease; }
+.switch::after { content: ''; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: var(--surface); box-shadow: 0 1px 3px oklch(20% 0.02 250 / 0.3); transition: transform 0.18s ease; }
+.switch.on { background: var(--accent); }
+.switch.on::after { transform: translateX(18px); }
+
+/* ─── forms ────────────────────────────────────────────────────────── */
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field label { font-size: 12.5px; font-weight: 600; color: var(--muted); }
+.input, .textarea, .select {
+  width: 100%; padding: 13px 14px; border: 1px solid var(--border); border-radius: 13px;
+  background: var(--surface); color: var(--fg); font: inherit; font-size: 15px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.input:focus, .textarea:focus, .select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.textarea { min-height: 88px; resize: vertical; line-height: 1.5; }
+.amount-input { font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: 40px; font-weight: 640; letter-spacing: -0.02em; border: 0; background: transparent; width: 100%; text-align: center; padding: 8px 0; }
+.amount-input:focus { outline: none; }
+
+/* ─── category picker ──────────────────────────────────────────────── */
+.cat-group { border-bottom: 1px solid var(--border); }
+.cat-group-head { width: 100%; display: flex; align-items: center; gap: 10px; padding: 14px 2px; text-align: left; }
+.cat-group-head .caret { margin-left: auto; color: var(--muted); transition: transform 0.18s ease; }
+.cat-group-head .caret .ic { width: 18px; height: 18px; }
+.cat-group.open .caret { transform: rotate(90deg); }
+.cat-children { display: none; padding: 0 0 6px 44px; }
+.cat-group.open .cat-children { display: block; }
+.cat-row { width: 100%; display: flex; align-items: center; gap: 11px; padding: 9px 2px; text-align: left; border-radius: 11px; }
+.cat-row:hover { background: var(--fg-soft); }
+.cat-row .name { flex: 1; font-size: 14.5px; font-weight: 520; }
+
+/* ─── pickers ──────────────────────────────────────────────────────── */
+.grid-icons { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; }
+.gi { aspect-ratio: 1; border-radius: 13px; border: 1px solid var(--border); display: grid; place-items: center; color: var(--muted); transition: all 0.12s ease; }
+.gi:hover { border-color: var(--fg); }
+.gi.active { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+.color-row { display: flex; gap: 10px; flex-wrap: wrap; }
+.swatch { width: 34px; height: 34px; border-radius: 50%; border: 2px solid transparent; position: relative; }
+.swatch::before { content: ''; position: absolute; inset: 5px; border-radius: 50%; background: var(--c); }
+.swatch.active { border-color: var(--c); }
+.swatch.active::after { content: '✓'; position: absolute; inset: 0; display: grid; place-items: center; color: oklch(100% 0 0); font-size: 14px; font-weight: 800; text-shadow: 0 1px 2px oklch(0% 0 0 / 0.4); }
+
+/* ─── charts ───────────────────────────────────────────────────────── */
+.donut-wrap { position: relative; width: 176px; height: 176px; margin: 0 auto; }
+.donut-center { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; }
+.donut-center .v { font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: 22px; font-weight: 640; }
+.donut-center .l { font-size: 12px; color: var(--muted); }
+.legend { display: flex; flex-direction: column; gap: 10px; }
+.legend-item { display: flex; align-items: center; gap: 10px; font-size: 13.5px; }
+.legend-dot { width: 10px; height: 10px; border-radius: 3.5px; background: var(--c); flex: none; }
+.legend-item .pull { margin-left: auto; font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-weight: 600; }
+.chart-legend { display: flex; gap: 16px; justify-content: center; font-size: 12.5px; color: var(--muted); }
+.chart-legend span { display: flex; align-items: center; gap: 6px; }
+.chart-legend i { width: 9px; height: 9px; border-radius: 3px; display: inline-block; }
+
+/* ─── stat tiles / summary ─────────────────────────────────────────── */
+.stat-tile { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 14px 16px; }
+.stat-tile .v { font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: 19px; font-weight: 640; letter-spacing: -0.01em; }
+.stat-tile .l { font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+.kv-row { display: flex; align-items: center; justify-content: space-between; padding: 13px 2px; }
+.kv-row .k { color: var(--muted); font-size: 14.5px; }
+.kv-row .v { font-weight: 600; font-size: 14.5px; }
+
+/* ─── sheets / toast ───────────────────────────────────────────────── */
+.sheet { position: absolute; inset: 0; z-index: 70; display: none; }
+.sheet.open { display: block; }
+.sheet-backdrop { position: absolute; inset: 0; background: oklch(14% 0.02 250 / 0.42); animation: fadeIn 0.2s ease; }
+.sheet-panel {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  background: var(--surface); border-radius: 22px 22px 0 0;
+  padding: 10px 18px 30px; max-height: 88%;
+  overflow-y: auto;
+  animation: sheetUp 0.26s cubic-bezier(0.2, 0.9, 0.3, 1);
+}
+.sheet-handle { width: 40px; height: 5px; border-radius: 999px; background: var(--border); margin: 4px auto 14px; }
+@keyframes sheetUp { from { transform: translateY(40px); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.toast {
+  position: absolute; left: 50%; bottom: 120px; transform: translateX(-50%) translateY(10px);
+  background: var(--fg); color: var(--bg); padding: 12px 18px; border-radius: 13px;
+  font-size: 14px; font-weight: 560; z-index: 80; opacity: 0; pointer-events: none;
+  box-shadow: 0 10px 30px -8px oklch(10% 0.02 250 / 0.5);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  max-width: 86%; text-align: center;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ─── auth / onboarding ────────────────────────────────────────────── */
+.auth-wrap { flex: 1; display: flex; flex-direction: column; padding: 16px 24px 28px; }
+.splash { align-items: center; justify-content: center; text-align: center; gap: 14px; }
+.splash .logo-mark { width: 72px; height: 72px; border-radius: 22px; background: linear-gradient(150deg, var(--accent), var(--accent-strong)); display: grid; place-items: center; color: var(--on-accent); box-shadow: 0 16px 34px -14px oklch(43% 0.16 255 / 0.7); }
+.splash .logo-mark svg { width: 36px; height: 36px; }
+.spinner { width: 22px; height: 22px; border-radius: 50%; border: 2.5px solid var(--border); border-top-color: var(--accent); animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.ob-slide { display: none; flex: 1; flex-direction: column; align-items: center; text-align: center; padding: 20px 8px 8px; }
+.ob-slide.active { display: flex; animation: screenIn 0.3s ease; }
+.ob-illu { width: 200px; height: 200px; border-radius: 28px; display: grid; place-items: center; margin: 26px 0 34px; }
+.ob-illu svg { width: 92px; height: 92px; }
+.ob-dots { display: flex; gap: 7px; justify-content: center; margin: 24px 0; }
+.ob-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--border); transition: all 0.2s ease; }
+.ob-dot.active { width: 22px; border-radius: 999px; background: var(--accent); }
+.currency-row { display: flex; align-items: center; gap: 13px; padding: 14px 4px; border-bottom: 1px solid var(--border); width: 100%; text-align: left; }
+.currency-row .code { font-family: var(--font-mono); font-weight: 640; width: 44px; }
+.currency-row .radio { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--border); margin-left: auto; display: grid; place-items: center; transition: all 0.12s ease; }
+.currency-row.selected .radio { border-color: var(--accent); }
+.currency-row.selected .radio::after { content: ''; width: 11px; height: 11px; border-radius: 50%; background: var(--accent); }
+
+/* ─── tablet + desktop shell ───────────────────────────────────────── */
+@media (min-width: 720px) {
+  :root { --sidenav-w: 76px; --sbh: 0px; --tbh: 0px; }
+  .stage { display: block; padding: 0; }
+  .stage-note { display: none; }
+  .phone {
+    width: 100%; height: 100dvh; max-width: none; margin: 0;
+    border: 0; border-radius: 0; box-shadow: none;
+  }
+  .statusbar { display: none; }
+  .tabbar { display: none !important; }
+  .sidenav { display: flex; }
+  .appbar { max-width: 780px; margin-inline: auto; width: 100%; }
+  .screen-pad { max-width: 780px; margin-inline: auto; }
+  .screen-foot { max-width: 780px; margin-inline: auto; width: 100%; }
+  .auth-wrap { max-width: 430px; margin-inline: auto; width: 100%; }
+  .fab { bottom: 24px; right: 28px; }
+  .toast { bottom: 32px; }
+  .sheet-panel { left: auto; right: 24px; bottom: 24px; width: 460px; max-width: calc(100vw - 48px); border-radius: 20px; }
+  #screen-dashboard .wordmark { display: none; }
+  #screen-dashboard .appbar > .avatar { display: none; }
+  #screen-dashboard .dash-title { display: block; }
+}
+
+@media (min-width: 720px) and (max-width: 1079.98px) {
+  .sidenav { padding: 16px 10px; align-items: center; }
+  .snav-brand { justify-content: center; padding: 4px 0 18px; }
+  .snav-word, .snav-label, .snav-user-meta { display: none; }
+  .snav-item { justify-content: center; padding: 12px; width: 100%; }
+  .snav-links { align-items: center; }
+  .snav-user { justify-content: center; padding: 12px 0 0; }
+}
+
+@media (min-width: 1080px) {
+  :root { --sidenav-w: 264px; }
+  .acc-scroll { display: grid; grid-template-columns: repeat(2, 1fr); overflow: visible; }
+  .acc-card { width: auto; }
+}
+
+/* ─── mobile: full-bleed ───────────────────────────────────────────── */
+@media (max-width: 440px) {
+  .stage { padding: 0; }
+  .stage-note { display: none; }
+  .phone { width: 100%; height: 100dvh; border-radius: 0; border: 0; box-shadow: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- icon sprite -->
+<svg class="sprite" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M5.5 9.5V20a1 1 0 0 0 1 1H10v-5h4v5h3.5a1 1 0 0 0 1-1V9.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-receipt" viewBox="0 0 24 24"><path d="M6 3h12v18l-2-1.4L14 21l-2-1.4L10 21l-2-1.4L6 21V3z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M9.5 8h5M9.5 12h5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 20V11M11 20V4M18 20v-6" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></symbol>
+    <symbol id="i-pie" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M12 12V3.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M12 12 5.3 16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.8" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M4.5 20c1.3-3.6 3.9-5.4 7.5-5.4s6.2 1.8 7.5 5.4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+    <symbol id="i-back" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-chev" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="m16 16 4.5 4.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
+    <symbol id="i-filter" viewBox="0 0 24 24"><path d="M4 5h16l-6.2 7.2V19l-3.6 1.8v-5.6L4 5z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></symbol>
+    <symbol id="i-card" viewBox="0 0 24 24"><rect x="2.5" y="5.5" width="19" height="13" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M2.5 10h19" stroke="currentColor" stroke-width="1.7"/><path d="M6 15h4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
+    <symbol id="i-cash" viewBox="0 0 24 24"><rect x="2.5" y="6.5" width="19" height="11" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="12" r="2.6" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M6 9.5h.01M18 14.5h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+    <symbol id="i-bank" viewBox="0 0 24 24"><path d="M3.5 9 12 4l8.5 5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M5.5 9.5V17M10 9.5V17M14 9.5V17M18.5 9.5V17M3.5 20.5h17" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
+    <symbol id="i-credit" viewBox="0 0 24 24"><rect x="2.5" y="5" width="19" height="14" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M2.5 9.5h19" stroke="currentColor" stroke-width="1.7"/><path d="M6.5 14.5h5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
+    <symbol id="i-line" viewBox="0 0 24 24"><path d="M3.5 17.5 8 13l3.5 3 6-6.5L20.5 12" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M3.5 20.5h17" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
+    <symbol id="i-cal" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="16" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M8 3v4M16 3v4M3.5 11h17" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
+    <symbol id="i-camera" viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v9.5a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 18.5V9a1 1 0 0 1 1-1z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="12" cy="13.5" r="3.2" fill="none" stroke="currentColor" stroke-width="1.7"/></symbol>
+    <symbol id="i-edit" viewBox="0 0 24 24"><path d="M4 20l1-4L16.5 4.5a2.1 2.1 0 0 1 3 3L8 19l-4 1z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M13.5 7.5l3 3" stroke="currentColor" stroke-width="1.7"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M9.5 7V4.5h5V7M6.5 7l1 13h9l1-13M10 11v6M14 11v6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-cart" viewBox="0 0 24 24"><path d="M3.5 4.5h2l2.4 11.5a1.5 1.5 0 0 0 1.5 1.2h7.4a1.5 1.5 0 0 0 1.5-1.2L20.5 8H6.2" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="20" r="1.3" fill="currentColor"/><circle cx="17" cy="20" r="1.3" fill="currentColor"/></symbol>
+    <symbol id="i-car" viewBox="0 0 24 24"><path d="M4.5 15.5v-2.6l1.9-5A1.5 1.5 0 0 1 7.8 7h8.4a1.5 1.5 0 0 1 1.4.9l1.9 5v2.6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 15.5h16M6 18.5v1M18 18.5v1M5.5 11.5h13" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><circle cx="8" cy="15.5" r="1.4" fill="currentColor"/><circle cx="16" cy="15.5" r="1.4" fill="currentColor"/></symbol>
+    <symbol id="i-house" viewBox="0 0 24 24"><path d="M4 11.5 12 4.5l8 7V19a1.5 1.5 0 0 1-1.5 1.5H14v-5.5h-4V20.5H5.5A1.5 1.5 0 0 1 4 19v-7.5z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></symbol>
+    <symbol id="i-cup" viewBox="0 0 24 24"><path d="M5 8.5h11v5.5a4 4 0 0 1-4 4H9a4 4 0 0 1-4-4V8.5z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M16 10h1.5a3 3 0 0 1 0 6H16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M8.5 5.5h.01M12 4.5h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+    <symbol id="i-game" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="11" rx="4" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M8 12.5h4M10 10.5v4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><circle cx="16" cy="11.5" r="0.6" fill="currentColor"/><circle cx="17.6" cy="13.5" r="0.6" fill="currentColor"/></symbol>
+    <symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 20s-7.5-4.6-7.5-10A4.2 4.2 0 0 1 12 7a4.2 4.2 0 0 1 7.5 3c0 5.4-7.5 10-7.5 10z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></symbol>
+    <symbol id="i-bag" viewBox="0 0 24 24"><path d="M5.5 8h13l-1 12.5H6.5L5.5 8z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
+    <symbol id="i-brief" viewBox="0 0 24 24"><rect x="3" y="7.5" width="18" height="12.5" rx="2" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M9 7.5V5.5a1.5 1.5 0 0 1 1.5-1.5h3A1.5 1.5 0 0 1 15 5.5v2M3 13h18" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
+    <symbol id="i-swap" viewBox="0 0 24 24"><path d="M4 8.5h13l-3-3.5M20 15.5H7l3 3.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="12" r="4.5" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/></symbol>
+    <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8.5" r="3.2" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M3 19.5c1-3 3.2-4.6 6-4.6s5 1.6 6 4.6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M15.5 5.6a3.2 3.2 0 0 1 0 5.8M18 15c1.6.8 2.6 2.3 3 4.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6.5 9.5a5.5 5.5 0 0 1 11 0c0 4.5 2 5.5 2 5.5h-15s2-1 2-5.5z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M10 19.5a2.2 2.2 0 0 0 4 0" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 1 1 9.5 4a6 6 0 0 0 10.5 10.5z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10.5" width="14" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
+    <symbol id="i-mail" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="m3.5 7 8.5 6 8.5-6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-out" viewBox="0 0 24 24"><path d="M14.5 4H19a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-4.5M10 8l-4 4 4 4M6 12h11" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 13 4.5 4.5L19 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-in" viewBox="0 0 24 24"><path d="M7 17 17 7M8 7h9v9" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-out2" viewBox="0 0 24 24"><path d="M7 7l10 10M17 8v9H8" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-repeat" viewBox="0 0 24 24"><path d="M17 2.5 21 6.5l-4 4M3.5 11V9.5A3.5 3.5 0 0 1 7 6h14M7 21.5 3 17.5l4-4M20.5 13v1.5a3.5 3.5 0 0 1-3.5 3.5H3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M12 11v5M12 7.8h.01" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></symbol>
+    <symbol id="i-scale" viewBox="0 0 24 24"><path d="M12 4v16M8 20h8M6 7l-3 6a3.2 3.2 0 0 0 6 0L6 7zM18 7l-3 6a3.2 3.2 0 0 0 6 0l-3-6z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-flag" viewBox="0 0 24 24"><path d="M5 21V4m0 1h11l-2.5 4L16 13H5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-wallet" viewBox="0 0 24 24"><path d="M4 7.5A2.5 2.5 0 0 1 6.5 5H18a1 1 0 0 1 1 1v1" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M4 7.5V17a2 2 0 0 0 2 2h13a1 1 0 0 0 1-1v-7a1 1 0 0 0-1-1H6.5A2.5 2.5 0 0 1 4 7.5z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M15 13.5h4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
+    <symbol id="i-doc" viewBox="0 0 24 24"><path d="M7 3h7l4 4v14H7V3z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M14 3v4h4M9.5 12h5M9.5 16h5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
+  </defs>
+</svg>
+
+<div class="stage">
+  <div class="phone" id="phone">
+
+    <!-- status bar -->
+    <div class="statusbar">
+      <span class="sb-time">9:41</span>
+      <span class="sb-icons">
+        <svg viewBox="0 0 18 12" fill="currentColor"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5" width="3" height="7" rx="1"/><rect x="10" y="2.5" width="3" height="9.5" rx="1"/></svg>
+        <svg viewBox="0 0 16 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1.5 4.5a10 10 0 0 1 13 0M4 7a6.5 6.5 0 0 1 8 0" stroke-linecap="round"/><circle cx="8" cy="9.5" r="1.4" fill="currentColor" stroke="none"/></svg>
+        <svg viewBox="0 0 26 12" fill="none"><rect x="0.5" y="0.5" width="21" height="11" rx="3" stroke="currentColor" opacity="0.5"/><rect x="2" y="2" width="15" height="8" rx="2" fill="currentColor"/><path d="M23.5 4v4a1.8 1.8 0 0 0 0-4z" fill="currentColor" opacity="0.5"/></svg>
+      </span>
+    </div>
+
+    <!-- ══════════ SPLASH ══════════ -->
+    <section class="screen active auth-screen" id="screen-splash" data-od-id="screen-splash">
+      <div class="auth-wrap splash">
+        <div class="logo-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v16M8 20h8M6 7l-3 6a3.2 3.2 0 0 0 6 0L6 7zM18 7l-3 6a3.2 3.2 0 0 0 6 0l-3-6z"/></svg></div>
+        <h1 class="wordmark" style="font-size:30px;">SpendyHolik</h1>
+        <p class="muted" style="font-size:14px;">Учёт личных финансов</p>
+        <div style="margin-top:26px;" class="spinner" aria-label="Загрузка"></div>
+        <p class="muted" style="font-size:13px; margin-top:14px;">Проверка сессии…</p>
+      </div>
+    </section>
+
+    <!-- ══════════ ONBOARDING ══════════ -->
+    <section class="screen auth-screen" id="screen-onboarding" data-od-id="screen-onboarding">
+      <div class="auth-wrap" style="padding-top:6px;">
+        <div class="ob-slide active">
+          <div class="ob-illu" style="background:var(--accent-soft); color:var(--accent);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M3 9.5h18M6 14h5"/><circle cx="16" cy="14" r="1.4" fill="currentColor" stroke="none"/></svg>
+          </div>
+          <h2 style="font-size:26px; font-weight:700; letter-spacing:-0.02em;">Все счета в одном месте</h2>
+          <p class="muted" style="margin-top:12px; max-width:26ch;">Карты, наличные и накопительные счета. Общий баланс обновляется автоматически.</p>
+        </div>
+        <div class="ob-slide">
+          <div class="ob-illu" style="background:var(--positive-soft); color:var(--positive);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V11M11 20V4M18 20v-6"/><path d="M4 20h16"/></svg>
+          </div>
+          <h2 style="font-size:26px; font-weight:700; letter-spacing:-0.02em;">Видно, куда уходят деньги</h2>
+          <p class="muted" style="margin-top:12px; max-width:26ch;">Категории, аналитика и сравнение периодов — без таблиц и ручного ввода.</p>
+        </div>
+        <div class="ob-slide">
+          <div class="ob-illu" style="background:var(--warning-soft); color:var(--warning);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1.2" fill="currentColor" stroke="none"/></svg>
+          </div>
+          <h2 style="font-size:26px; font-weight:700; letter-spacing:-0.02em;">Цели, которые достигаются</h2>
+          <p class="muted" style="margin-top:12px; max-width:26ch;">Бюджеты и цели накоплений помогут откладывать без стресса.</p>
+        </div>
+
+        <div class="ob-dots" data-od-id="onboarding-dots">
+          <span class="ob-dot active"></span><span class="ob-dot"></span><span class="ob-dot"></span>
+        </div>
+        <button class="btn btn-primary btn-block" id="ob-next" onclick="nextOnboard()" data-od-id="onboarding-next">Далее</button>
+        <button class="btn btn-ghost btn-block" style="margin-top:8px;" onclick="go('currency')">Пропустить</button>
+      </div>
+    </section>
+
+    <!-- ══════════ CURRENCY ══════════ -->
+    <section class="screen auth-screen" id="screen-currency" data-od-id="screen-currency">
+      <header class="appbar">
+        <button class="iconbtn" onclick="back()" aria-label="Назад"><svg class="ic"><use href="#i-back"/></svg></button>
+        <h1 class="appbar-title">Базовая валюта</h1>
+      </header>
+      <div class="screen-scroll">
+        <div class="screen-pad">
+          <p class="muted small" style="margin-bottom:6px;">Все суммы будут показываться в этой валюте. Её можно изменить позже в настройках.</p>
+          <div id="currency-list">
+            <button class="currency-row selected" onclick="selectCurrency(this)"><span class="code">RUB</span><span>Российский рубль · ₽</span><span class="radio"></span></button>
+            <button class="currency-row" onclick="selectCurrency(this)"><span class="code">USD</span><span>Доллар США · $</span><span class="radio"></span></button>
+            <button class="currency-row" onclick="selectCurrency(this)"><span class="code">EUR</span><span>Евро · €</span><span class="radio"></span></button>
+            <button class="currency-row" onclick="selectCurrency(this)"><span class="code">KZT</span><span>Казахстанский тенге · ₸</span><span class="radio"></span></button>
+            <button class="currency-row" onclick="selectCurrency(this)"><span class="code">BYN</span><span>Белорусский рубль · Br</span><span class="radio"></span></button>
+            <button class="currency-row" onclick="selectCurrency(this)"><span class="code">GEL</span><span>Грузинский лари · ₾</span><span class="radio"></span></button>
+            <button class="currency-row" onclick="selectCurrency(this)"><span class="code">UAH</span><span>Украинская гривна · ₴</span><span class="radio"></span></button>
+            <button class="currency-row" onclick="selectCurrency(this)"><span class="code">CNY</span><span>Китайский юань · ¥</span><span class="radio"></span></button>
+          </div>
+        </div>
+      </div>
+      <div class="screen-foot">
+        <button class="btn btn-primary btn-block" onclick="currencyDone()" data-od-id="currency-continue">Продолжить</button>
+      </div>
+    </section>
+
+    <!-- ══════════ LOGIN ══════════ -->
+    <section class="screen auth-screen" id="screen-login" data-od-id="screen-login">
+      <div class="auth-wrap" style="justify-content:center;">
+        <div class="logo-mark" style="width:58px;height:58px;border-radius:18px;background:linear-gradient(150deg,var(--accent),var(--accent-strong));display:grid;place-items:center;color:var(--on-accent);"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v16M8 20h8M6 7l-3 6a3.2 3.2 0 0 0 6 0L6 7zM18 7l-3 6a3.2 3.2 0 0 0 6 0l-3-6z"/></svg></div>
+        <h1 style="font-size:27px; font-weight:700; letter-spacing:-0.02em; margin:18px 0 4px;">С возвращением</h1>
+        <p class="muted" style="margin-bottom:26px;">Войдите, чтобы продолжить</p>
+        <form onsubmit="login(event)" style="display:flex; flex-direction:column; gap:14px;">
+          <div class="field"><label for="login-email">Email</label><input class="input" id="login-email" type="email" value="maria@example.com" autocomplete="email"></div>
+          <div class="field"><label for="login-pass">Пароль</label><input class="input" id="login-pass" type="password" value="••••••••" autocomplete="current-password"></div>
+          <button type="submit" class="btn btn-primary btn-block" data-od-id="login-submit">Войти</button>
+        </form>
+        <button class="btn btn-ghost" style="margin-top:6px; align-self:center;" onclick="toast('Ссылка для сброса отправлена на почту')">Забыли пароль?</button>
+        <div class="divider" style="margin:20px 0;"></div>
+        <div style="display:flex; gap:12px;">
+          <button class="btn btn-secondary btn-block" onclick="toast('Вход через Apple')"> Apple</button>
+          <button class="btn btn-secondary btn-block" onclick="toast('Вход через Google')"> Google</button>
+        </div>
+        <p class="muted small" style="text-align:center; margin-top:24px;">Нет аккаунта? <button class="link" style="font-weight:600;" onclick="go('register')">Создать</button></p>
+      </div>
+    </section>
+
+    <!-- ══════════ REGISTER ══════════ -->
+    <section class="screen auth-screen" id="screen-register" data-od-id="screen-register">
+      <div class="auth-wrap" style="justify-content:center;">
+        <button class="iconbtn" style="align-self:flex-start; margin-left:-6px;" onclick="go('login')" aria-label="Назад"><svg class="ic"><use href="#i-back"/></svg></button>
+        <h1 style="font-size:27px; font-weight:700; letter-spacing:-0.02em; margin:10px 0 4px;">Создать аккаунт</h1>
+        <p class="muted" style="margin-bottom:24px;">Бесплатно, без карты</p>
+        <form onsubmit="register(event)" style="display:flex; flex-direction:column; gap:13px;">
+          <div class="field"><label for="reg-name">Имя</label><input class="input" id="reg-name" type="text" placeholder="Мария" autocomplete="given-name"></div>
+          <div class="field"><label for="reg-email">Email</label><input class="input" id="reg-email" type="email" placeholder="you@example.com" autocomplete="email"></div>
+          <div class="field"><label for="reg-pass">Пароль</label><input class="input" id="reg-pass" type="password" placeholder="Минимум 8 символов" autocomplete="new-password"></div>
+          <button type="submit" class="btn btn-primary btn-block" data-od-id="register-submit">Создать аккаунт</button>
+        </form>
+        <p class="muted small" style="text-align:center; margin-top:22px;">Создавая аккаунт, вы принимаете <span class="link">условия</span> и <span class="link">политику конфиденциальности</span>.</p>
+      </div>
+    </section>
+
+    <!-- ══════════ DASHBOARD ══════════ -->
+    <section class="screen tab-screen" id="screen-dashboard" data-od-id="screen-dashboard">
+      <header class="appbar">
+        <span class="wordmark">Бал<b>анс</b></span>
+        <h1 class="dash-title">Главная</h1>
+        <span style="flex:1;"></span>
+        <button class="iconbtn" onclick="go('notifications')" aria-label="Уведомления" data-od-id="dashboard-bell"><svg class="ic"><use href="#i-bell"/></svg></button>
+        <div class="avatar" aria-label="Профиль">МС</div>
+      </header>
+      <div class="screen-scroll">
+        <div class="screen-pad">
+          <div class="balance-card" data-od-id="balance-card">
+            <div class="balance-label">Общий баланс</div>
+            <div class="balance-value">230 050 ₽</div>
+            <div class="balance-delta"><svg class="ic" style="display:inline"><use href="#i-in"/></svg> +44 400 ₽ за март</div>
+          </div>
+
+          <div class="section-head">
+            <h2>Счета</h2>
+            <button class="link" onclick="go('accounts')" data-od-id="accounts-link">Все счета</button>
+          </div>
+          <div class="acc-scroll">
+            <button class="acc-card" onclick="go('account-detail')" data-od-id="account-card-tinkoff">
+              <span class="acc-top"><span class="icon xs" style="--c:var(--accent)"><svg class="ic"><use href="#i-card"/></svg></span><span class="acc-type">Дебетовая карта</span><span class="chev"><svg class="ic"><use href="#i-chev"/></svg></span></span>
+              <span><span class="acc-name">Карта Тинькофф</span><br><span class="acc-balance">84 250 ₽</span></span>
+            </button>
+            <button class="acc-card" onclick="go('account-detail')" data-od-id="account-card-savings">
+              <span class="acc-top"><span class="icon xs" style="--c:var(--positive)"><svg class="ic"><use href="#i-bank"/></svg></span><span class="acc-type">Накопительный</span><span class="chev"><svg class="ic"><use href="#i-chev"/></svg></span></span>
+              <span><span class="acc-name">Накопительный счёт</span><br><span class="acc-balance">156 400 ₽</span></span>
+            </button>
+            <button class="acc-card" onclick="go('account-detail')" data-od-id="account-card-cash">
+              <span class="acc-top"><span class="icon xs" style="--c:var(--warning)"><svg class="ic"><use href="#i-cash"/></svg></span><span class="acc-type">Наличные</span><span class="chev"><svg class="ic"><use href="#i-chev"/></svg></span></span>
+              <span><span class="acc-name">Наличные</span><br><span class="acc-balance">12 800 ₽</span></span>
+            </button>
+            <button class="acc-card" onclick="go('account-detail')" data-od-id="account-card-credit">
+              <span class="acc-top"><span class="icon xs" style="--c:var(--negative)"><svg class="ic"><use href="#i-credit"/></svg></span><span class="acc-type">Кредитная карта</span><span class="chev"><svg class="ic"><use href="#i-chev"/></svg></span></span>
+              <span><span class="acc-name">Кредитка</span><br><span class="acc-balance neg">−23 400 ₽</span></span>
+            </button>
+          </div>
+
+          <div class="section-head">
+            <h2>Последние операции</h2>
+            <button class="link" onclick="goTab('transactions')" data-od-id="tx-link">Все</button>
+          </div>
+          <div>
+            <button class="tx-row" onclick="go('txn-detail')" data-od-id="tx-row-1">
+              <span class="icon xs" style="--c:var(--cat-food)"><svg class="ic"><use href="#i-cart"/></svg></span>
+              <span class="tx-main"><span class="tx-title">Пятёрочка</span><span class="tx-sub">Сегодня · Карта Тинькофф</span></span>
+              <span class="tx-amt neg">−1 240 ₽</span>
+            </button>
+            <button class="tx-row" onclick="go('txn-detail')" data-od-id="tx-row-2">
+              <span class="icon xs" style="--c:var(--cat-salary)"><svg class="ic"><use href="#i-brief"/></svg></span>
+              <span class="tx-main"><span class="tx-title">Зарплата · Яндекс</span><span class="tx-sub">Вчера · Накопительный счёт</span></span>
+              <span class="tx-amt pos">+118 500 ₽</span>
+            </button>
+            <button class="tx-row" onclick="go('txn-detail')" data-od-id="tx-row-3">
+              <span class="icon xs" style="--c:var(--cat-dining)"><svg class="ic"><use href="#i-cup"/></svg></span>
+              <span class="tx-main"><span class="tx-title">Даблби</span><span class="tx-sub">Вчера · Карта Тинькофф</span></span>
+              <span class="tx-amt neg">−420 ₽</span>
+            </button>
+            <button class="tx-row" onclick="go('txn-detail')" data-od-id="tx-row-4">
+              <span class="icon xs" style="--c:var(--cat-housing)"><svg class="ic"><use href="#i-house"/></svg></span>
+              <span class="tx-main"><span class="tx-title">Аренда квартиры</span><span class="tx-sub">12 марта · Накопительный счёт</span></span>
+              <span class="tx-amt neg">−45 000 ₽</span>
+            </button>
+            <button class="tx-row" onclick="go('txn-detail')" data-od-id="tx-row-5">
+              <span class="icon xs" style="--c:var(--cat-transfer)"><svg class="ic"><use href="#i-swap"/></svg></span>
+              <span class="tx-main"><span class="tx-title">Возврат долга · Анна</span><span class="tx-sub">10 марта · Карта Тинькофф</span></span>
+              <span class="tx-amt pos">+8 500 ₽</span>
+            </button>
+          </div>
+
+          <div class="section-head">
+            <h2>Бюджеты</h2>
+            <button class="link" onclick="goTab('budgets')">Все</button>
+          </div>
+          <div class="card card-pad" style="display:flex; flex-direction:column; gap:14px;">
+            <button class="mini-row" style="width:100%; text-align:left;" onclick="go('budget-detail')" data-od-id="budget-row-food">
+              <span class="icon xs" style="--c:var(--cat-food)"><svg class="ic"><use href="#i-cart"/></svg></span>
+              <span style="flex:1;">
+                <span style="display:flex; justify-content:space-between; font-size:14px;"><b>Продукты</b><span class="num muted">14 230 / 20 000 ₽</span></span>
+                <span class="progress" style="margin-top:6px; display:block;"><span class="progress-fill" style="width:71%; --c:var(--cat-food);"></span></span>
+              </span>
+            </button>
+            <button class="mini-row" style="width:100%; text-align:left;" onclick="go('budget-detail')" data-od-id="budget-row-fun">
+              <span class="icon xs" style="--c:var(--cat-fun)"><svg class="ic"><use href="#i-game"/></svg></span>
+              <span style="flex:1;">
+                <span style="display:flex; justify-content:space-between; font-size:14px;"><b>Развлечения</b><span class="num muted">6 890 / 8 000 ₽</span></span>
+                <span class="progress" style="margin-top:6px; display:block;"><span class="progress-fill warn" style="width:86%;"></span></span>
+              </span>
+            </button>
+          </div>
+
+          <div class="goal-widget" style="margin-top:20px;" data-od-id="goal-widget">
+            <div class="mini-row" style="cursor:pointer;" onclick="go('goal-detail')">
+              <span class="icon lg" style="--c:var(--accent)"><svg class="ic"><use href="#i-target"/></svg></span>
+              <span style="flex:1;">
+                <span class="muted small">Ближайшая цель · Подушка безопасности</span>
+                <span style="font-size:17px; font-weight:650;">Осталось 80 000 ₽</span>
+              </span>
+              <svg class="ic" style="color:var(--muted);"><use href="#i-chev"/></svg>
+            </div>
+            <span class="progress" style="margin-top:12px; display:block;"><span class="progress-fill" style="width:60%;"></span></span>
+            <span class="muted small" style="display:flex; justify-content:space-between; margin-top:7px;"><span class="num">120 000 ₽</span><span class="num">200 000 ₽</span></span>
+          </div>
+        </div>
+      </div>
+      <button class="fab" onclick="openSheet('sheet-quick')" aria-label="Добавить транзакцию" data-od-id="fab-add"><svg class="ic"><use href="#i-plus"/></svg></button>
+    </section>
+
+    <!-- ══════════ TRANSACTIONS ══════════ -->
+    <section class="screen tab-screen" id="screen-transactions" data-od-id="screen-transactions">
+      <header class="appbar">
+        <h1 class="appbar-title">Транзакции</h1>
+        <button class="iconbtn" onclick="openSheet('sheet-filters')" aria-label="Фильтры" data-od-id="tx-filter"><svg class="ic"><use href="#i-filter"/></svg></button>
+        <button class="iconbtn" onclick="go('txn-add')" aria-label="Добавить" data-od-id="tx-add"><svg class="ic"><use href="#i-plus"/></svg></button>
+      </header>
+      <div class="screen-scroll">
+        <div class="screen-pad">
+          <div class="field" style="margin-bottom:12px;">
+            <div style="position:relative;">
+              <svg class="ic" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); width:18px; height:18px; color:var(--muted);"><use href="#i-search"/></svg>
+              <input class="input" style="padding-left:40px;" placeholder="Поиск по операциям">
+            </div>
+          </div>
+          <div class="chips" data-od-id="tx-chips">
+            <button class="chip active">Все</button>
+            <button class="chip">Расходы</button>
+            <button class="chip">Доходы</button>
+            <button class="chip">Переводы</button>
+          </div>
+
+          <p class="date-label">Сегодня · 15 марта</p>
+          <button class="tx-row" onclick="go('txn-detail')" data-od-id="tx-list-1">
+            <span class="icon xs" style="--c:var(--cat-food)"><svg class="ic"><use href="#i-cart"/></svg></span>
+            <span class="tx-main"><span class="tx-title">Пятёрочка</span><span class="tx-sub">Продукты · Карта Тинькофф</span></span>
+            <span class="tx-amt neg">−1 240 ₽</span>
+          </button>
+          <button class="tx-row" onclick="go('txn-detail')" data-od-id="tx-list-2">
+            <span class="icon xs" style="--c:var(--cat-dining)"><svg class="ic"><use href="#i-cup"/></svg></span>
+            <span class="tx-main"><span class="tx-title">Даблби</span><span class="tx-sub">Кафе и рестораны · Карта Тинькофф</span></span>
+            <span class="tx-amt neg">−420 ₽</span>
+          </button>
+
+          <p class="date-label">Вчера · 14 марта</p>
+          <button class="tx-row" onclick="go('txn-detail')" data-od-id="tx-list-3">
+            <span class="icon xs" style="--c:var(--cat-salary)"><svg class="ic"><use href="#i-brief"/></svg></span>
+            <span class="tx-main"><span class="tx-title">Зарплата · Яндекс</span><span class="tx-sub">Доход · Накопительный счёт</span></span>
+            <span class="tx-amt pos">+118 500 ₽</span>
+          </button>
+          <button class="tx-row" onclick="go('txn-detail')" data-od-id="tx-list-4">
+            <span class="icon xs" style="--c:var(--cat-subs)"><svg class="ic"><use href="#i-repeat"/></svg></span>
+            <span class="tx-main"><span class="tx-title">Яндекс Плюс</span><span class="tx-sub">Подписки · Карта Тинькофф</span></span>
+            <span class="tx-amt neg">−299 ₽</span>
+          </button>
+          <button class="tx-row" onclick="go('txn-detail')" data-od-id="tx-list-5">
+            <span class="icon xs" style="--c:var(--cat-transport)"><svg class="ic"><use href="#i-car"/></svg></span>
+            <span class="tx-main"><span class="tx-title">Метро</span><span class="tx-sub">Транспорт · Карта Тинькофф</span></span>
+            <span class="tx-amt neg">−62 ₽</span>
+          </button>
+
+          <p class="date-label">12 марта</p>
+          <button class="tx-row" onclick="go('txn-detail')" data-od-id="tx-list-6">
+            <span class="icon xs" style="--c:var(--cat-housing)"><svg class="ic"><use href="#i-house"/></svg></span>
+            <span class="tx-main"><span class="tx-title">Аренда квартиры</span><span class="tx-sub">Жильё · Накопительный счёт</span></span>
+            <span class="tx-amt neg">−45 000 ₽</span>
+          </button>
+
+          <p class="date-label">11 марта</p>
+          <button class="tx-row" onclick="go('txn-detail')" data-od-id="tx-list-7">
+            <span class="icon xs" style="--c:var(--cat-dining)"><svg class="ic"><use href="#i-cup"/></svg></span>
+            <span class="tx-main"><span class="tx-title">Upside</span><span class="tx-sub">Кафе и рестораны · Карта Тинькофф</span></span>
+            <span class="tx-amt neg">−2 380 ₽</span>
+          </button>
+          <button class="tx-row" onclick="go('txn-detail')" data-od-id="tx-list-8">
+            <span class="icon xs" style="--c:var(--cat-fun)"><svg class="ic"><use href="#i-game"/></svg></span>
+            <span class="tx-main"><span class="tx-title">Кино · Афиша</span><span class="tx-sub">Развлечения · Карта Тинькофф</span></span>
+            <span class="tx-amt neg">−700 ₽</span>
+          </button>
+
+          <p class="date-label">10 марта</p>
+          <button class="tx-row" onclick="go('txn-detail')" data-od-id="tx-list-9">
+            <span class="icon xs" style="--c:var(--cat-transfer)"><svg class="ic"><use href="#i-swap"/></svg></span>
+            <span class="tx-main"><span class="tx-title">Возврат долга · Анна</span><span class="tx-sub">Перевод · Карта Тинькофф</span></span>
+            <span class="tx-amt pos">+8 500 ₽</span>
+          </button>
+          <button class="tx-row" onclick="go('txn-detail')" data-od-id="tx-list-10">
+            <span class="icon xs" style="--c:var(--cat-health)"><svg class="ic"><use href="#i-heart"/></svg></span>
+            <span class="tx-main"><span class="tx-title">Аптека</span><span class="tx-sub">Здоровье · Наличные</span></span>
+            <span class="tx-amt neg">−1 150 ₽</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════ ANALYTICS ══════════ -->
+    <section class="screen tab-screen" id="screen-analytics" data-od-id="screen-analytics">
+      <header class="appbar">
+        <h1 class="appbar-title">Аналитика</h1>
+      </header>
+      <div class="screen-scroll">
+        <div class="screen-pad">
+          <div class="segmented" data-od-id="analytics-period">
+            <button class="seg" onclick="seg(this)">Неделя</button>
+            <button class="seg active" onclick="seg(this)">Месяц</button>
+            <button class="seg" onclick="seg(this)">Год</button>
+          </div>
+
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:16px;">
+            <div class="stat-tile"><div class="v pos">+118 500 ₽</div><div class="l">Доходы · март</div></div>
+            <div class="stat-tile"><div class="v neg">−74 100 ₽</div><div class="l">Расходы · март</div></div>
+          </div>
+          <p class="muted small" style="margin-top:10px;">Итого за март: <b class="pos">+44 400 ₽</b> · <span class="neg">на 12% больше расходов</span>, чем в феврале</p>
+
+          <div class="section-head"><h2>Расходы по категориям</h2></div>
+          <div class="card card-pad" style="padding-top:20px;">
+            <div class="donut-wrap">
+              <svg viewBox="0 0 176 176" width="176" height="176">
+                <circle cx="88" cy="88" r="56" fill="none" stroke="var(--fg-soft)" stroke-width="24"/>
+                <circle cx="88" cy="88" r="56" fill="none" stroke="var(--cat-housing)" stroke-width="24" stroke-dasharray="213.7 351.86" stroke-dashoffset="0" transform="rotate(-90 88 88)"/>
+                <circle cx="88" cy="88" r="56" fill="none" stroke="var(--cat-food)" stroke-width="24" stroke-dasharray="67.6 351.86" stroke-dashoffset="-213.7" transform="rotate(-90 88 88)"/>
+                <circle cx="88" cy="88" r="56" fill="none" stroke="var(--cat-fun)" stroke-width="24" stroke-dasharray="32.7 351.86" stroke-dashoffset="-281.3" transform="rotate(-90 88 88)"/>
+                <circle cx="88" cy="88" r="56" fill="none" stroke="var(--cat-dining)" stroke-width="24" stroke-dasharray="26.6 351.86" stroke-dashoffset="-314" transform="rotate(-90 88 88)"/>
+                <circle cx="88" cy="88" r="56" fill="none" stroke="var(--cat-transport)" stroke-width="24" stroke-dasharray="11.3 351.86" stroke-dashoffset="-340.6" transform="rotate(-90 88 88)"/>
+              </svg>
+              <div class="donut-center"><div><div class="v">74 100 ₽</div><div class="l">расходы</div></div></div>
+            </div>
+            <div class="legend" style="margin-top:18px;">
+              <div class="legend-item"><span class="legend-dot" style="--c:var(--cat-housing)"></span>Жильё<span class="pull">45 000 ₽ · 61%</span></div>
+              <div class="legend-item"><span class="legend-dot" style="--c:var(--cat-food)"></span>Продукты<span class="pull">14 230 ₽ · 19%</span></div>
+              <div class="legend-item"><span class="legend-dot" style="--c:var(--cat-fun)"></span>Развлечения<span class="pull">6 890 ₽ · 9%</span></div>
+              <div class="legend-item"><span class="legend-dot" style="--c:var(--cat-dining)"></span>Кафе и рестораны<span class="pull">5 600 ₽ · 8%</span></div>
+              <div class="legend-item"><span class="legend-dot" style="--c:var(--cat-transport)"></span>Транспорт<span class="pull">2 380 ₽ · 3%</span></div>
+            </div>
+          </div>
+
+          <div class="section-head"><h2>Динамика по месяцам</h2></div>
+          <div class="card card-pad">
+            <div class="chart-legend" style="margin-bottom:14px;">
+              <span><i style="background:var(--positive)"></i>Доходы</span>
+              <span><i style="background:var(--negative)"></i>Расходы</span>
+            </div>
+            <svg viewBox="0 0 340 156" width="100%" height="150" aria-label="Доходы и расходы по месяцам">
+              <line x1="8" y1="132" x2="334" y2="132" stroke="var(--border)"/>
+              <line x1="8" y1="92" x2="334" y2="92" stroke="var(--border)" stroke-dasharray="3 4"/>
+              <line x1="8" y1="52" x2="334" y2="52" stroke="var(--border)" stroke-dasharray="3 4"/>
+              <line x1="8" y1="12" x2="334" y2="12" stroke="var(--border)" stroke-dasharray="3 4"/>
+              <text x="4" y="135" font-size="8" fill="var(--muted)" font-family="var(--font-mono)">0</text>
+              <text x="4" y="55" font-size="8" fill="var(--muted)" font-family="var(--font-mono)">60к</text>
+              <text x="4" y="15" font-size="8" fill="var(--muted)" font-family="var(--font-mono)">120к</text>
+              <!-- Окт -->
+              <rect x="18" y="49" width="13" height="83" rx="3" fill="var(--positive)"/><rect x="34" y="57" width="13" height="75" rx="3" fill="var(--negative)"/>
+              <text x="26" y="146" font-size="9" fill="var(--muted)" text-anchor="middle">Окт</text>
+              <!-- Ноя -->
+              <rect x="74" y="41" width="13" height="91" rx="3" fill="var(--positive)"/><rect x="90" y="65" width="13" height="67" rx="3" fill="var(--negative)"/>
+              <text x="82" y="146" font-size="9" fill="var(--muted)" text-anchor="middle">Ноя</text>
+              <!-- Дек -->
+              <rect x="130" y="34" width="13" height="98" rx="3" fill="var(--positive)"/><rect x="146" y="54" width="13" height="78" rx="3" fill="var(--negative)"/>
+              <text x="138" y="146" font-size="9" fill="var(--muted)" text-anchor="middle">Дек</text>
+              <!-- Янв -->
+              <rect x="186" y="41" width="13" height="91" rx="3" fill="var(--positive)"/><rect x="202" y="65" width="13" height="67" rx="3" fill="var(--negative)"/>
+              <text x="194" y="146" font-size="9" fill="var(--muted)" text-anchor="middle">Янв</text>
+              <!-- Фев -->
+              <rect x="242" y="36" width="13" height="96" rx="3" fill="var(--positive)"/><rect x="258" y="68" width="13" height="64" rx="3" fill="var(--negative)"/>
+              <text x="250" y="146" font-size="9" fill="var(--muted)" text-anchor="middle">Фев</text>
+              <!-- Мар -->
+              <rect x="298" y="20" width="13" height="112" rx="3" fill="var(--positive)"/><rect x="314" y="62" width="13" height="70" rx="3" fill="var(--negative)"/>
+              <text x="306" y="146" font-size="9" fill="var(--muted)" text-anchor="middle">Мар</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════ BUDGETS / GOALS ══════════ -->
+    <section class="screen tab-screen" id="screen-budgets" data-od-id="screen-budgets">
+      <header class="appbar">
+        <h1 class="appbar-title">Бюджеты и цели</h1>
+        <button class="iconbtn" onclick="go('budget-edit')" aria-label="Добавить" data-od-id="budget-add"><svg class="ic"><use href="#i-plus"/></svg></button>
+      </header>
+      <div class="screen-scroll">
+        <div class="screen-pad">
+          <div class="segmented" data-od-id="budgets-seg">
+            <button class="seg active" onclick="budgetSeg(this, 'budgets')">Бюджеты</button>
+            <button class="seg" onclick="budgetSeg(this, 'goals')">Цели</button>
+          </div>
+
+          <div id="budgets-list" style="display:flex; flex-direction:column; gap:12px; margin-top:18px;">
+            <button class="card card-pad" style="text-align:left;" onclick="go('budget-detail')" data-od-id="budget-card-food">
+              <span style="display:flex; align-items:center; gap:12px;">
+                <span class="icon" style="--c:var(--cat-food)"><svg class="ic"><use href="#i-cart"/></svg></span>
+                <span style="flex:1;"><span style="font-weight:650;">Продукты</span><span class="muted small" style="display:block;">Март · осталось 5 770 ₽</span></span>
+                <svg class="ic" style="color:var(--muted);"><use href="#i-chev"/></svg>
+              </span>
+              <span class="progress" style="display:block; margin-top:14px;"><span class="progress-fill" style="width:71%; --c:var(--cat-food);"></span></span>
+              <span class="muted small num" style="display:flex; justify-content:space-between; margin-top:8px;"><span>14 230 ₽</span><span>из 20 000 ₽</span></span>
+            </button>
+            <button class="card card-pad" style="text-align:left;" onclick="go('budget-detail')" data-od-id="budget-card-fun">
+              <span style="display:flex; align-items:center; gap:12px;">
+                <span class="icon" style="--c:var(--cat-fun)"><svg class="ic"><use href="#i-game"/></svg></span>
+                <span style="flex:1;"><span style="font-weight:650;">Развлечения</span><span class="muted small" style="display:block;">Март · осталось 1 110 ₽</span></span>
+                <svg class="ic" style="color:var(--muted);"><use href="#i-chev"/></svg>
+              </span>
+              <span class="progress" style="display:block; margin-top:14px;"><span class="progress-fill warn" style="width:86%;"></span></span>
+              <span class="muted small num" style="display:flex; justify-content:space-between; margin-top:8px;"><span>6 890 ₽</span><span>из 8 000 ₽</span></span>
+            </button>
+            <button class="card card-pad" style="text-align:left;" onclick="go('budget-detail')" data-od-id="budget-card-transport">
+              <span style="display:flex; align-items:center; gap:12px;">
+                <span class="icon" style="--c:var(--cat-transport)"><svg class="ic"><use href="#i-car"/></svg></span>
+                <span style="flex:1;"><span style="font-weight:650;">Транспорт</span><span class="muted small" style="display:block;">Март · осталось 2 590 ₽</span></span>
+                <svg class="ic" style="color:var(--muted);"><use href="#i-chev"/></svg>
+              </span>
+              <span class="progress" style="display:block; margin-top:14px;"><span class="progress-fill" style="width:48%; --c:var(--cat-transport);"></span></span>
+              <span class="muted small num" style="display:flex; justify-content:space-between; margin-top:8px;"><span>2 410 ₽</span><span>из 5 000 ₽</span></span>
+            </button>
+            <button class="card card-pad" style="text-align:left;" onclick="go('budget-detail')" data-od-id="budget-card-dining">
+              <span style="display:flex; align-items:center; gap:12px;">
+                <span class="icon" style="--c:var(--cat-dining)"><svg class="ic"><use href="#i-cup"/></svg></span>
+                <span style="flex:1;"><span style="font-weight:650;">Кафе и рестораны</span><span class="muted small" style="display:block;">Март · осталось 400 ₽</span></span>
+                <svg class="ic" style="color:var(--muted);"><use href="#i-chev"/></svg>
+              </span>
+              <span class="progress" style="display:block; margin-top:14px;"><span class="progress-fill over" style="width:93%;"></span></span>
+              <span class="muted small num" style="display:flex; justify-content:space-between; margin-top:8px;"><span>5 600 ₽</span><span>из 6 000 ₽</span></span>
+            </button>
+          </div>
+
+          <div id="goals-list" style="display:none; flex-direction:column; gap:12px; margin-top:18px;">
+            <button class="card card-pad" style="text-align:left;" onclick="go('goal-detail')" data-od-id="goal-card-buffer">
+              <span style="display:flex; align-items:center; gap:12px;">
+                <span class="icon lg" style="--c:var(--accent)"><svg class="ic"><use href="#i-target"/></svg></span>
+                <span style="flex:1;"><span style="font-weight:650;">Подушка безопасности</span><span class="muted small" style="display:block;">120 000 из 200 000 ₽</span></span>
+                <span class="pill" style="background:var(--accent-soft); color:var(--accent);">60%</span>
+              </span>
+              <span class="progress" style="display:block; margin-top:14px;"><span class="progress-fill" style="width:60%;"></span></span>
+            </button>
+            <button class="card card-pad" style="text-align:left;" onclick="go('goal-detail')" data-od-id="goal-card-travel">
+              <span style="display:flex; align-items:center; gap:12px;">
+                <span class="icon lg" style="--c:var(--warning)"><svg class="ic"><use href="#i-flag"/></svg></span>
+                <span style="flex:1;"><span style="font-weight:650;">Отпуск в Грузии</span><span class="muted small" style="display:block;">45 000 из 90 000 ₽ · до июля</span></span>
+                <span class="pill" style="background:var(--warning-soft); color:var(--warning);">50%</span>
+              </span>
+              <span class="progress" style="display:block; margin-top:14px;"><span class="progress-fill" style="width:50%; --c:var(--warning);"></span></span>
+            </button>
+            <button class="card card-pad" style="text-align:left;" onclick="go('goal-detail')" data-od-id="goal-card-mac">
+              <span style="display:flex; align-items:center; gap:12px;">
+                <span class="icon lg" style="--c:var(--cat-shopping)"><svg class="ic"><use href="#i-bag"/></svg></span>
+                <span style="flex:1;"><span style="font-weight:650;">MacBook Air</span><span class="muted small" style="display:block;">30 000 из 180 000 ₽</span></span>
+                <span class="pill" style="background:var(--fg-soft); color:var(--muted);">17%</span>
+              </span>
+              <span class="progress" style="display:block; margin-top:14px;"><span class="progress-fill" style="width:17%; --c:var(--cat-shopping);"></span></span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════ PROFILE ══════════ -->
+    <section class="screen tab-screen" id="screen-profile" data-od-id="screen-profile">
+      <header class="appbar">
+        <h1 class="appbar-title">Профиль</h1>
+      </header>
+      <div class="screen-scroll">
+        <div class="screen-pad">
+          <button class="mini-row" style="width:100%; text-align:left; padding:8px 0 16px;" onclick="go('profile-edit')">
+            <div class="avatar" style="width:52px; height:52px; border-radius:17px; font-size:18px;">МС</div>
+            <span style="flex:1;"><span style="font-size:17px; font-weight:650;">Мария Соколова</span><span class="muted small" style="display:block;">maria@example.com</span></span>
+            <svg class="ic" style="color:var(--muted);"><use href="#i-chev"/></svg>
+          </button>
+
+          <div class="card" style="overflow:hidden;">
+            <button class="list-row" style="border-radius:0; padding:14px 16px;" onclick="go('settings')" data-od-id="prof-settings">
+              <span class="icon xs" style="--c:var(--accent)"><svg class="ic"><use href="#i-moon"/></svg></span>
+              <span class="list-main"><span class="list-title">Настройки</span></span>
+              <span class="trailing">Тема и уведомления<svg class="ic"><use href="#i-chev"/></svg></span>
+            </button>
+            <div class="divider" style="margin:0 16px;"></div>
+            <button class="list-row" style="border-radius:0; padding:14px 16px;" onclick="go('categories')" data-od-id="prof-categories">
+              <span class="icon xs" style="--c:var(--cat-shopping)"><svg class="ic"><use href="#i-bag"/></svg></span>
+              <span class="list-main"><span class="list-title">Категории</span></span>
+              <span class="trailing"><svg class="ic"><use href="#i-chev"/></svg></span>
+            </button>
+            <div class="divider" style="margin:0 16px;"></div>
+            <button class="list-row" style="border-radius:0; padding:14px 16px;" onclick="go('recurring')" data-od-id="prof-recurring">
+              <span class="icon xs" style="--c:var(--cat-subs)"><svg class="ic"><use href="#i-repeat"/></svg></span>
+              <span class="list-main"><span class="list-title">Регулярные операции</span></span>
+              <span class="trailing"><svg class="ic"><use href="#i-chev"/></svg></span>
+            </button>
+            <div class="divider" style="margin:0 16px;"></div>
+            <button class="list-row" style="border-radius:0; padding:14px 16px;" onclick="go('debts')" data-od-id="prof-debts">
+              <span class="icon xs" style="--c:var(--warning)"><svg class="ic"><use href="#i-users"/></svg></span>
+              <span class="list-main"><span class="list-title">Долги и займы</span></span>
+              <span class="trailing"><svg class="ic"><use href="#i-chev"/></svg></span>
+            </button>
+            <div class="divider" style="margin:0 16px;"></div>
+            <button class="list-row" style="border-radius:0; padding:14px 16px;" onclick="go('notifications')" data-od-id="prof-notifications">
+              <span class="icon xs" style="--c:var(--cat-fun)"><svg class="ic"><use href="#i-bell"/></svg></span>
+              <span class="list-main"><span class="list-title">Уведомления</span></span>
+              <span class="trailing"><span class="badge"></span><svg class="ic"><use href="#i-chev"/></svg></span>
+            </button>
+            <div class="divider" style="margin:0 16px;"></div>
+            <button class="list-row" style="border-radius:0; padding:14px 16px;" onclick="go('about')" data-od-id="prof-about">
+              <span class="icon xs" style="--c:var(--cat-transfer)"><svg class="ic"><use href="#i-info"/></svg></span>
+              <span class="list-main"><span class="list-title">О приложении</span></span>
+              <span class="trailing">v2.4.1<svg class="ic"><use href="#i-chev"/></svg></span>
+            </button>
+          </div>
+
+          <button class="btn btn-danger btn-block" style="margin-top:22px;" onclick="logout()" data-od-id="logout">Выйти</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════ ACCOUNTS ══════════ -->
+    <section class="screen" id="screen-accounts" data-od-id="screen-accounts">
+      <header class="appbar">
+        <button class="iconbtn" onclick="back()" aria-label="Назад"><svg class="ic"><use href="#i-back"/></svg></button>
+        <h1 class="appbar-title">Счета</h1>
+        <button class="iconbtn" onclick="go('account-edit')" aria-label="Добавить" data-od-id="accounts-add"><svg class="ic"><use href="#i-plus"/></svg></button>
+      </header>
+      <div class="screen-scroll">
+        <div class="screen-pad">
+          <div class="chips" data-od-id="accounts-chips">
+            <button class="chip active">Все</button>
+            <button class="chip">Активные</button>
+            <button class="chip">Архив</button>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:12px; margin-top:16px;">
+            <button class="card card-pad" style="text-align:left;" onclick="go('account-detail')" data-od-id="account-row-tinkoff">
+              <span style="display:flex; align-items:center; gap:13px;">
+                <span class="icon" style="--c:var(--accent)"><svg class="ic"><use href="#i-card"/></svg></span>
+                <span style="flex:1;"><span style="font-weight:650;">Карта Тинькофф</span><span class="muted small" style="display:block;">Дебетовая · RUB · •• 4831</span></span>
+                <span class="num" style="font-weight:640;">84 250 ₽</span>
+              </span>
+            </button>
+            <button class="card card-pad" style="text-align:left;" onclick="go('account-detail')" data-od-id="account-row-savings">
+              <span style="display:flex; align-items:center; gap:13px;">
+                <span class="icon" style="--c:var(--positive)"><svg class="ic"><use href="#i-bank"/></svg></span>
+                <span style="flex:1;"><span style="font-weight:650;">Накопительный счёт</span><span class="muted small" style="display:block;">Вклад · RUB · 6,2% годовых</span></span>
+                <span class="num" style="font-weight:640;">156 400 ₽</span>
+              </span>
+            </button>
+            <button class="card card-pad" style="text-align:left;" onclick="go('account-detail')" data-od-id="account-row-cash">
+              <span style="display:flex; align-items:center; gap:13px;">
+                <span class="icon" style="--c:var(--warning)"><svg class="ic"><use href="#i-cash"/></svg></span>
+                <span style="flex:1;"><span style="font-weight:650;">Наличные</span><span class="muted small" style="display:block;">Наличные · RUB</span></span>
+                <span class="num" style="font-weight:640;">12 800 ₽</span>
+              </span>
+            </button>
+            <button class="card card-pad" style="text-align:left;" onclick="go('account-detail')" data-od-id="account-row-credit">
+              <span style="display:flex; align-items:center; gap:13px;">
+                <span class="icon" style="--c:var(--negative)"><svg class="ic"><use href="#i-credit"/></svg></span>
+                <span style="flex:1;"><span style="font-weight:650;">Кредитная карта</span><span class="muted small" style="display:block;">Кредитная · RUB · лимит 150 000 ₽</span></span>
+                <span class="num neg" style="font-weight:640;">−23 400 ₽</span>
+              </span>
+            </button>
+          </div>
+          <p class="date-label">Архив</p>
+          <button class="card card-pad" style="text-align:left; opacity:0.65;" onclick="go('account-detail')" data-od-id="account-row-archived">
+            <span style="display:flex; align-items:center; gap:13px;">
+              <span class="icon" style="--c:var(--cat-transfer)"><svg class="ic"><use href="#i-card"/></svg></span>
+              <span style="flex:1;"><span style="font-weight:650;">Зарплатная карта Сбера</span><span class="muted small" style="display:block;">Архив · закрыта</span></span>
+              <span class="num muted">0 ₽</span>
+            </span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════ ACCOUNT DETAIL ══════════ -->
+    <section class="screen" id="screen-account-detail" data-od-id="screen-account-detail">
+      <header class="appbar">
+        <button class="iconbtn" onclick="back()" aria-label="Назад"><svg class="ic"><use href="#i-back"/></svg></button>
+        <h1 class="appbar-title">Карта Тинькофф</h1>
+        <button class="iconbtn" onclick="go('account-edit')" aria-label="Редактировать" data-od-id="account-edit-btn"><svg class="ic"><use href="#i-edit"/></svg></button>
+      </header>
+      <div class="screen-scroll">
+        <div class="screen-pad">
+          <div class="balance-card" style="background:linear-gradient(150deg, oklch(38% 0.13 255), oklch(26% 0.1 255));">
+            <div class="balance-label">Текущий баланс</div>
+            <div class="balance-value">84 250 ₽</div>
+            <div class="balance-delta">Дебетовая карта · •• 4831</div>
+          </div>
+          <div class="section-head"><h2>Динамика за 6 недель</h2></div>
+          <div class="card card-pad">
+            <svg viewBox="0 0 320 120" width="100%" height="118" aria-label="Динамика баланса">
+              <path d="M20,47 L72,39 L124,43 L176,28 L228,21 L300,28 L300,100 L20,100 Z" fill="var(--accent-soft)"/>
+              <path d="M20,47 L72,39 L124,43 L176,28 L228,21 L300,28" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle cx="20" cy="47" r="3" fill="var(--accent)"/><circle cx="72" cy="39" r="3" fill="var(--accent)"/><circle cx="124" cy="43" r="3" fill="var(--accent)"/><circle cx="176" cy="28" r="3" fill="var(--accent)"/><circle cx="228" cy="21" r="3" fill="var(--accent)"/><circle cx="300" cy="28" r="3" fill="var(--accent)"/>
+            </svg>
+            <span class="muted small num" style="display:flex; justify-content:space-between; margin-top:4px;"><span>1 фев</span><span>15 мар</span></span>
+          </div>
+          <div class="section-head"><h2>Операции по счёту</h2></div>
+          <div>
+            <button class="tx-row" onclick="go('txn-detail')"><span class="icon xs" style="--c:var(--cat-food)"><svg class="ic"><use href="#i-cart"/></svg></span><span class="tx-main"><span class="tx-title">Пятёрочка</span><span class="tx-sub">Сегодня</span></span><span class="tx-amt neg">−1 240 ₽</span></button>
+            <button class="tx-row" onclick="go('txn-detail')"><span class="icon xs" style="--c:var(--cat-dining)"><svg class="ic"><use href="#i-cup"/></svg></span><span class="tx-main"><span class="tx-title">Даблби</span><span class="tx-sub">Вчера</span></span><span class="tx-amt neg">−420 ₽</span></button>
+            <button class="tx-row" onclick="go('txn-detail')"><span class="icon xs" style="--c:var(--cat-subs)"><svg class="ic"><use href="#i-repeat"/></svg></span><span class="tx-main"><span class="tx-title">Яндекс Плюс</span><span class="tx-sub">Вчера</span></span><span class="tx-amt neg">−299 ₽</span></button>
+            <button class="tx-row" onclick="go('txn-detail')"><span class="icon xs" style="--c:var(--cat-transfer)"><svg class="ic"><use href="#i-swap"/></svg></span><span class="tx-main"><span class="tx-title">Возврат долга · Анна</span><span class="tx-sub">10 марта</span></span><span class="tx-amt pos">+8 500 ₽</span></button>
+          </div>
+          <button class="btn btn-secondary btn-block" style="margin-top:18px;" onclick="toast('Счёт архивирован')" data-od-id="account-archive">Архивировать счёт</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════ ACCOUNT EDIT ══════════ -->
+    <section class="screen" id="screen-account-edit" data-od-id="screen-account-edit">
+      <header class="appbar">
+        <button class="iconbtn" onclick="back()" aria-label="Назад"><svg class="ic"><use href="#i-back"/></svg></button>
+        <h1 class="appbar-title">Новый счёт</h1>
+      </header>
+      <div class="screen-scroll">
+        <div class="screen-pad" style="display:flex; flex-direction:column; gap:16px;">
+          <div class="field"><label>Название</label><input class="input" placeholder="Например, Карта Тинькофф"></div>
+          <div class="field"><label>Тип счёта</label>
+            <div class="chips">
+              <button class="chip active">Дебетовая карта</button>
+              <button class="chip">Наличные</button>
+              <button class="chip">Накопительный</button>
+              <button class="chip">Кредитная</button>
+            </div>
+          </div>
+          <div class="field"><label>Валюта</label>
+            <select class="select"><option>RUB — Российский рубль</option><option>USD — Доллар США</option><option>EUR — Евро</option></select>
+          </div>
+          <div class="field"><label>Начальный баланс</label><input class="input num" value="0 ₽"></div>
+          <div class="field"><label>Цвет</label>
+            <div class="color-row">
+              <button class="swatch active" style="--c:var(--accent)"></button>
+              <button class="swatch" style="--c:var(--positive)"></button>
+              <button class="swatch" style="--c:var(--warning)"></button>
+              <button class="swatch" style="--c:var(--negative)"></button>
+              <button class="swatch" style="--c:var(--cat-shopping)"></button>
+              <button class="swatch" style="--c:var(--cat-fun)"></button>
+            </div>
+          </div>
+          <button class="btn btn-primary btn-block" style="margin-top:6px;" onclick="saveAndBack('Счёт сохранён')" data-od-id="account-save">Сохранить</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════ TRANSACTION DETAIL ══════════ -->
+    <section class="screen" id="screen-txn-detail" data-od-id="screen-txn-detail">
+      <header class="appbar">
+        <button class="iconbtn" onclick="back()" aria-label="Назад"><svg class="ic"><use href="#i-back"/></svg></button>
+        <h1 class="appbar-title">Операция</h1>
+        <button class="iconbtn" onclick="go('txn-add')" aria-label="Редактировать"><svg class="ic"><use href="#i-edit"/></svg></button>
+      </header>
+      <div class="screen-scroll">
+        <div class="screen-pad">
+          <div style="text-align:center; padding:10px 0 20px;">
+            <span class="icon lg" style="--c:var(--cat-food); margin:0 auto 12px;"><svg class="ic"><use href="#i-cart"/></svg></span>
+            <h2 style="font-size:34px; font-weight:700; letter-spacing:-0.02em;" class="neg num">−1 240 ₽</h2>
+            <p style="font-size:18px; font-weight:650; margin-top:4px;">Пятёрочка</p>
+            <p class="muted small">Сегодня, 15 марта · 18:42</p>
+          </div>
+          <div class="card" style="overflow:hidden;">
+            <div class="kv-row" style="padding:13px 16px;"><span class="k">Категория</span><span class="v" style="color:var(--cat-food);">Продукты</span></div>
+            <div class="divider" style="margin:0 16px;"></div>
+            <div class="kv-row" style="padding:13px 16px;"><span class="k">Счёт</span><span class="v">Карта Тинькофф</span></div>
+            <div class="divider" style="margin:0 16px;"></div>
+            <div class="kv-row" style="padding:13px 16px;"><span class="k">Тип</span><span class="v neg">Расход</span></div>
+            <div class="divider" style="margin:0 16px;"></div>
+            <div class="kv-row" style="padding:13px 16px;"><span class="k">Заметка</span><span class="v muted">Продукты на неделю</span></div>
+          </div>
+
+          <div class="section-head"><h2>Чек</h2></div>
+          <button class="card card-pad" style="width:100%; text-align:left; display:flex; align-items:center; gap:12px;" onclick="toast('Чек открыт')" data-od-id="receipt-attachment">
+            <span class="icon" style="--c:var(--cat-transfer)"><svg class="ic"><use href="#i-doc"/></svg></span>
+            <span style="flex:1;"><span style="font-weight:600;">чек_пятёрочка.jpg</span><span class="muted small" style="display:block;">240 КБ · 15 марта 2026</span></span>
+            <svg class="ic" style="color:var(--muted);"><use href="#i-chev"/></svg>
+          </button>
+
+          <div style="display:flex; gap:12px; margin-top:22px;">
+            <button class="btn btn-secondary" style="flex:1;" onclick="go('txn-add')">Редактировать</button>
+            <button class="btn btn-danger" style="flex:1;" onclick="deleteTxn()" data-od-id="txn-delete">Удалить</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════ ADD TRANSACTION ══════════ -->
+    <section class="screen" id="screen-txn-add" data-od-id="screen-txn-add">
+      <header class="appbar">
+        <button class="iconbtn" onclick="back()" aria-label="Назад"><svg class="ic"><use href="#i-back"/></svg></button>
+        <h1 class="appbar-title">Новая операция</h1>
+      </header>
+      <div class="screen-scroll">
+        <div class="screen-pad">
+          <div class="segmented" style="margin-bottom:16px;">
+            <button class="seg active" onclick="seg(this)">Расход</button>
+            <button class="seg" onclick="seg(this)">Доход</button>
+            <button class="seg" onclick="seg(this)">Перевод</button>
+          </div>
+          <div class="field" style="align-items:center;">
+            <input class="amount-input" inputmode="decimal" value="0" data-od-id="txn-amount-input">
+            <label>₽ · RUB</label>
+          </div>
+          <div class="section-head"><h2>Категория</h2></div>
+          <div class="grid-icons" data-od-id="txn-cat-grid">
+            <button class="gi active" style="--c:var(--cat-food)"><svg class="ic" style="color:var(--cat-food);"><use href="#i-cart"/></svg></button>
+            <button class="gi" style="--c:var(--cat-transport)"><svg class="ic" style="color:var(--cat-transport);"><use href="#i-car"/></svg></button>
+            <button class="gi" style="--c:var(--cat-housing)"><svg class="ic" style="color:var(--cat-housing);"><use href="#i-house"/></svg></button>
+            <button class="gi" style="--c:var(--cat-dining)"><svg class="ic" style="color:var(--cat-dining);"><use href="#i-cup"/></svg></button>
+            <button class="gi" style="--c:var(--cat-fun)"><svg class="ic" style="color:var(--cat-fun);"><use href="#i-game"/></svg></button>
+            <button class="gi" style="--c:var(--cat-health)"><svg class="ic" style="color:var(--cat-health);"><use href="#i-heart"/></svg></button>
+            <button class="gi" style="--c:var(--cat-shopping)"><svg class="ic" style="color:var(--cat-shopping);"><use href="#i-bag"/></svg></button>
+            <button class="gi" style="--c:var(--cat-subs)"><svg class="ic" style="color:var(--cat-subs);"><use href="#i-repeat"/></svg></button>
+            <button class="gi" style="--c:var(--cat-salary)"><svg class="ic" style="color:var(--cat-salary);"><use href="#i-brief"/></svg></button>
+            <button class="gi" style="--c:var(--cat-transfer)"><svg class="ic" style="color:var(--cat-transfer);"><use href="#i-swap"/></svg></button>
+            <button class="gi" style="--c:var(--cat-housing)"><svg class="ic" style="color:var(--cat-housing);"><use href="#i-house"/></svg></button>
+            <button class="gi" style="--c:var(--cat-fun)"><svg class="ic" style="color:var(--cat-fun);"><use href="#i-game"/></svg></button>
+          </div>
+          <div class="field" style="margin-top:16px;"><label>Счёт</label>
+            <select class="select"><option>Карта Тинькофф</option><option>Накопительный счёт</option><option>Наличные</option><option>Кредитная карта</option></select>
+          </div>
+          <div class="field" style="margin-top:14px;"><label>Дата</label><input class="input" type="date" value="2026-03-15"></div>
+          <div class="field" style="margin-top:14px;"><label>Заметка</label><input class="input" placeholder="Необязательно"></div>
+          <button class="btn btn-secondary btn-block" style="margin-top:14px;" onclick="toast('Фото чека добавлено')"><svg class="ic" style="width:18px;height:18px;"><use href="#i-camera"/></svg> Прикрепить чек</button>
+          <button class="btn btn-primary btn-block" style="margin-top:18px;" onclick="saveAndBack('Операция добавлена')" data-od-id="txn-save">Сохранить</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════ BUDGET DETAIL ══════════ -->
+    <section class="screen" id="screen-budget-detail" data-od-id="screen-budget-detail">
+      <header class="appbar">
+        <button class="iconbtn" onclick="back()" aria-label="Назад"><svg class="ic"><use href="#i-back"/></svg></button>
+        <h1 class="appbar-title">Бюджет</h1>
+        <button class="iconbtn" onclick="go('budget-edit')" aria-label="Редактировать"><svg class="ic"><use href="#i-edit"/></svg></button>
+      </header>
+      <div class="screen-scroll">
+        <div class="screen-pad">
+          <div class="card card-pad" style="text-align:center; padding:24px 18px;">
+            <span class="icon lg" style="--c:var(--cat-food); margin:0 auto 12px;"><svg class="ic"><use href="#i-cart"/></svg></span>
+            <h2 style="font-size:22px; font-weight:700;">Продукты</h2>
+            <p class="muted small">Март 2026</p>
+            <div style="font-size:34px; font-weight:700; letter-spacing:-0.02em; margin-top:14px;" class="num">14 230 ₽</div>
+            <p class="muted small">из 20 000 ₽</p>
+            <span class="progress" style="display:block; margin-top:14px;"><span class="progress-fill" style="width:71%; --c:var(--cat-food);"></span></span>
+            <p style="margin-top:10px; font-size:14px; font-weight:600;">Осталось <span class="pos">5 770 ₽</span> до конца месяца</p>
+          </div>
+          <div class="section-head"><h2>Операции в бюджете</h2></div>
+          <div>
+            <button class="tx-row" onclick="go('txn-detail')"><span class="icon xs" style="--c:var(--cat-food)"><svg class="ic"><use href="#i-cart"/></svg></span><span class="tx-main"><span class="tx-title">Пятёрочка</span><span class="tx-sub">15 марта</span></span><span class="tx-amt neg">−1 240 ₽</span></button>
+            <button class="tx-row" onclick="go('txn-detail')"><span class="icon xs" style="--c:var(--cat-food)"><svg class="ic"><use href="#i-cart"/></svg></span><span class="tx-main"><span class="tx-title">ВкусВилл</span><span class="tx-sub">12 марта</span></span><span class="tx-amt neg">−3 480 ₽</span></button>
+            <button class="tx-row" onclick="go('txn-detail')"><span class="icon xs" style="--c:var(--cat-food)"><svg class="ic"><use href="#i-cart"/></svg></span><span class="tx-main"><span class="tx-title">Магнит</span><span class="tx-sub">8 марта</span></span><span class="tx-amt neg">−2 150 ₽</span></button>
+            <button class="tx-row" onclick="go('txn-detail')"><span class="icon xs" style="--c:var(--cat-food)"><svg class="ic"><use href="#i-cart"/></svg></span><span class="tx-main"><span class="tx-title">Лента</span><span class="tx-sub">4 марта</span></span><span class="tx-amt neg">−7 360 ₽</span></button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════ BUDGET EDIT ══════════ -->
+    <section class="screen" id="screen-budget-edit" data-od-id="screen-budget-edit">
+      <header class="appbar">
+        <button class="iconbtn" onclick="back()" aria-label="Назад"><svg class="ic"><use href="#i-back"/></svg></button>
+        <h1 class="appbar-title">Новый бюджет</h1>
+      </header>
+      <div class="screen-scroll">
+        <div class="screen-pad" style="display:flex; flex-direction:column; gap:16px;">
+          <div class="field"><label>Категория</label>
+            <select class="select"><option>Продукты</option><option>Транспорт</option><option>Развлечения</option><option>Кафе и рестораны</option></select>
+          </div>
+          <div class="field"><label>Лимит на месяц</label><input class="input num" value="20 000 ₽"></div>
+          <div class="field"><label>Период</label>
+            <div class="chips">
+              <button class="chip active">Ежемесячно</button>
+              <button class="chip">Еженедельно</button>
+              <button class="chip">Разово</button>
+            </div>
+          </div>
+          <button class="btn btn-primary btn-block" style="margin-top:6px;" onclick="saveAndBack('Бюджет сохранён')" data-od-id="budget-save">Сохранить</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════ GOAL DETAIL ══════════ -->
+    <section class="screen" id="screen-goal-detail" data-od-id="screen-goal-detail">
+      <header class="appbar">
+        <button class="iconbtn" onclick="back()" aria-label="Назад"><svg class="ic"><use href="#i-back"/></svg></button>
+        <h1 class="appbar-title">Цель</h1>
+        <button class="iconbtn" onclick="go('goal-edit')" aria-label="Редактировать"><svg class="ic"><use href="#i-edit"/></svg></button>
+      </header>
+      <div class="screen-scroll">
+        <div class="screen-pad">
+          <div class="balance-card" style="background:linear-gradient(150deg, oklch(60% 0.15 155), oklch(42% 0.13 155));">
+            <div class="balance-label">Подушка безопасности</div>
+            <div class="balance-value">120 000 ₽</div>
+            <div class="balance-delta">из 200 000 ₽ · 60%</div>
+          </div>
+          <span class="progress" style="display:block; margin-top:-10px; height:8px;"><span class="progress-fill" style="width:60%; background:oklch(99% 0.002 250);"></span></span>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:18px;">
+            <div class="stat-tile"><div class="v">80 000 ₽</div><div class="l">Осталось накопить</div></div>
+            <div class="stat-tile"><div class="v">6 мес</div><div class="l">Прогноз достижения</div></div>
+          </div>
+          <div class="section-head"><h2>История пополнений</h2></div>
+          <div>
+            <button class="tx-row" onclick="go('txn-detail')"><span class="icon xs" style="--c:var(--positive)"><svg class="ic"><use href="#i-in"/></svg></span><span class="tx-main"><span class="tx-title">Пополнение цели</span><span class="tx-sub">14 марта · Накопительный счёт</span></span><span class="tx-amt pos">+20 000 ₽</span></button>
+            <button class="tx-row" onclick="go('txn-detail')"><span class="icon xs" style="--c:var(--positive)"><svg class="ic"><use href="#i-in"/></svg></span><span class="tx-main"><span class="tx-title">Пополнение цели</span><span class="tx-sub">1 марта · Накопительный счёт</span></span><span class="tx-amt pos">+20 000 ₽</span></button>
+            <button class="tx-row" onclick="go('txn-detail')"><span class="icon xs" style="--c:var(--positive)"><svg class="ic"><use href="#i-in"/></svg></span><span class="tx-main"><span class="tx-title">Пополнение цели</span><span class="tx-sub">14 февраля · Накопительный счёт</span></span><span class="tx-amt pos">+20 000 ₽</span></button>
+          </div>
+          <button class="btn btn-primary btn-block" style="margin-top:20px;" onclick="openSheet('sheet-topup')" data-od-id="goal-topup">Пополнить</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════ GOAL EDIT ══════════ -->
+    <section class="screen" id="screen-goal-edit" data-od-id="screen-goal-edit">
+      <header class="appbar">
+        <button class="iconbtn" onclick="back()" aria-label="Назад"><svg class="ic"><use href="#i-back"/></svg></button>
+        <h1 class="appbar-title">Новая цель</h1>
+      </header>
+      <div class="screen-scroll">
+        <div class="screen-pad" style="display:flex; flex-direction:column; gap:16px;">
+          <div class="field"><label>Название</label><input class="input" placeholder="Например, Отпуск"></div>
+          <div class="field"><label>Целевая сумма</label><input class="input num" value="100 000 ₽"></div>
+          <div class="field"><label>Начальный взнос</label><input class="input num" value="0 ₽"></div>
+          <div class="field"><label>Срок достижения</label><input class="input" type="date" value="2026-12-31"></div>
+          <button class="btn btn-primary btn-block" style="margin-top:6px;" onclick="saveAndBack('Цель сохранена')" data-od-id="goal-save">Сохранить</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════ CATEGORIES ══════════ -->
+    <section class="screen" id="screen-categories" data-od-id="screen-categories">
+      <header class="appbar">
+        <button class="iconbtn" onclick="back()" aria-label="Назад"><svg class="ic"><use href="#i-back"/></svg></button>
+        <h1 class="appbar-title">Категории</h1>
+        <button class="iconbtn" onclick="go('category-edit')" aria-label="Добавить" data-od-id="cat-add"><svg class="ic"><use href="#i-plus"/></svg></button>
+      </header>
+      <div class="screen-scroll">
+        <div class="screen-pad">
+          <div class="cat-group open" data-od-id="cat-group-expense">
+            <button class="cat-group-head" onclick="toggleGroup(this)">
+              <span style="font-weight:650;">Расходы</span>
+              <span class="muted small">8</span>
+              <span class="caret"><svg class="ic"><use href="#i-chev"/></svg></span>
+            </button>
+            <div class="cat-children">
+              <button class="cat-row" onclick="go('category-edit')"><span class="icon xs" style="--c:var(--cat-food)"><svg class="ic"><use href="#i-cart"/></svg></span><span class="name">Продукты</span><span class="muted small">32 операции</span></button>
+              <button class="cat-row" onclick="go('category-edit')"><span class="icon xs" style="--c:var(--cat-dining)"><svg class="ic"><use href="#i-cup"/></svg></span><span class="name">Кафе и рестораны</span><span class="muted small">14</span></button>
+              <button class="cat-row" onclick="go('category-edit')"><span class="icon xs" style="--c:var(--cat-transport)"><svg class="ic"><use href="#i-car"/></svg></span><span class="name">Транспорт</span><span class="muted small">21</span></button>
+              <button class="cat-row" onclick="go('category-edit')"><span class="icon xs" style="--c:var(--cat-housing)"><svg class="ic"><use href="#i-house"/></svg></span><span class="name">Жильё</span><span class="muted small">3</span></button>
+              <button class="cat-row" onclick="go('category-edit')"><span class="icon xs" style="--c:var(--cat-fun)"><svg class="ic"><use href="#i-game"/></svg></span><span class="name">Развлечения</span><span class="muted small">9</span></button>
+              <button class="cat-row" onclick="go('category-edit')"><span class="icon xs" style="--c:var(--cat-health)"><svg class="ic"><use href="#i-heart"/></svg></span><span class="name">Здоровье</span><span class="muted small">5</span></button>
+              <button class="cat-row" onclick="go('category-edit')"><span class="icon xs" style="--c:var(--cat-shopping)"><svg class="ic"><use href="#i-bag"/></svg></span><span class="name">Покупки</span><span class="muted small">7</span></button>
+              <button class="cat-row" onclick="go('category-edit')"><span class="icon xs" style="--c:var(--cat-subs)"><svg class="ic"><use href="#i-repeat"/></svg></span><span class="name">Подписки</span><span class="muted small">4</span></button>
+            </div>
+          </div>
+          <div class="cat-group" data-od-id="cat-group-income">
+            <button class="cat-group-head" onclick="toggleGroup(this)">
+              <span style="font-weight:650;">Доходы</span>
+              <span class="muted small">3</span>
+              <span class="caret"><svg class="ic"><use href="#i-chev"/></svg></span>
+            </button>
+            <div class="cat-children">
+              <button class="cat-row" onclick="go('category-edit')"><span class="icon xs" style="--c:var(--cat-salary)"><svg class="ic"><use href="#i-brief"/></svg></span><span class="name">Зарплата</span><span class="muted small">3</span></button>
+              <button class="cat-row" onclick="go('category-edit')"><span class="icon xs" style="--c:var(--cat-salary)"><svg class="ic"><use href="#i-brief"/></svg></span><span class="name">Фриланс</span><span class="muted small">1</span></button>
+              <button class="cat-row" onclick="go('category-edit')"><span class="icon xs" style="--c:var(--positive)"><svg class="ic"><use href="#i-bank"/></svg></span><span class="name">Проценты по вкладу</span><span class="muted small">1</span></button>
+            </div>
+          </div>
+          <div class="cat-group" data-od-id="cat-group-transfer">
+            <button class="cat-group-head" onclick="toggleGroup(this)">
+              <span style="font-weight:650;">Переводы</span>
+              <span class="muted small">1</span>
+              <span class="caret"><svg class="ic"><use href="#i-chev"/></svg></span>
+            </button>
+            <div class="cat-children">
+              <button class="cat-row" onclick="go('category-edit')"><span class="icon xs" style="--c:var(--cat-transfer)"><svg class="ic"><use href="#i-swap"/></svg></span><span class="name">Между счетами</span><span class="muted small">6</span></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════ CATEGORY EDIT ══════════ -->
+    <section class="screen" id="screen-category-edit" data-od-id="screen-category-edit">
+      <header class="appbar">
+        <button class="iconbtn" onclick="back()" aria-label="Назад"><svg class="ic"><use href="#i-back"/></svg></button>
+        <h1 class="appbar-title">Категория</h1>
+      </header>
+      <div class="screen-scroll">
+        <div class="screen-pad" style="display:flex; flex-direction:column; gap:16px;">
+          <div class="field"><label>Название</label><input class="input" placeholder="Название категории"></div>
+          <div class="field"><label>Тип</label>
+            <div class="segmented">
+              <button class="seg active" onclick="seg(this)">Расход</button>
+              <button class="seg" onclick="seg(this)">Доход</button>
+            </div>
+          </div>
+          <div class="field"><label>Иконка</label>
+            <div class="grid-icons">
+              <button class="gi active"><svg class="ic"><use href="#i-cart"/></svg></button>
+              <button class="gi"><svg class="ic"><use href="#i-car"/></svg></button>
+              <button class="gi"><svg class="ic"><use href="#i-house"/></svg></button>
+              <button class="gi"><svg class="ic"><use href="#i-cup"/></svg></button>
+              <button class="gi"><svg class="ic"><use href="#i-game"/></svg></button>
+              <button class="gi"><svg class="ic"><use href="#i-heart"/></svg></button>
+              <button class="gi"><svg class="ic"><use href="#i-bag"/></svg></button>
+              <button class="gi"><svg class="ic"><use href="#i-repeat"/></svg></button>
+              <button class="gi"><svg class="ic"><use href="#i-brief"/></svg></button>
+              <button class="gi"><svg class="ic"><use href="#i-swap"/></svg></button>
+              <button class="gi"><svg class="ic"><use href="#i-camera"/></svg></button>
+              <button class="gi"><svg class="ic"><use href="#i-doc"/></svg></button>
+            </div>
+          </div>
+          <div class="field"><label>Цвет</label>
+            <div class="color-row">
+              <button class="swatch active" style="--c:var(--cat-food)"></button>
+              <button class="swatch" style="--c:var(--cat-transport)"></button>
+              <button class="swatch" style="--c:var(--cat-housing)"></button>
+              <button class="swatch" style="--c:var(--cat-dining)"></button>
+              <button class="swatch" style="--c:var(--cat-fun)"></button>
+              <button class="swatch" style="--c:var(--cat-health)"></button>
+              <button class="swatch" style="--c:var(--cat-shopping)"></button>
+              <button class="swatch" style="--c:var(--cat-subs)"></button>
+            </div>
+          </div>
+          <div class="field"><label>Родительская категория</label>
+            <select class="select"><option>Расходы</option><option>Доходы</option><option>Переводы</option><option>Без родителя</option></select>
+          </div>
+          <button class="btn btn-primary btn-block" style="margin-top:6px;" onclick="saveAndBack('Категория сохранена')" data-od-id="cat-save">Сохранить</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════ RECURRING ══════════ -->
+    <section class="screen" id="screen-recurring" data-od-id="screen-recurring">
+      <header class="appbar">
+        <button class="iconbtn" onclick="back()" aria-label="Назад"><svg class="ic"><use href="#i-back"/></svg></button>
+        <h1 class="appbar-title">Регулярные операции</h1>
+        <button class="iconbtn" onclick="go('recurring-edit')" aria-label="Добавить" data-od-id="recurring-add"><svg class="ic"><use href="#i-plus"/></svg></button>
+      </header>
+      <div class="screen-scroll">
+        <div class="screen-pad" style="display:flex; flex-direction:column; gap:12px;">
+          <div class="card card-pad" data-od-id="recurring-rent">
+            <div class="mini-row">
+              <span class="icon" style="--c:var(--cat-housing)"><svg class="ic"><use href="#i-house"/></svg></span>
+              <span style="flex:1;"><span style="font-weight:650;">Аренда квартиры</span><span class="muted small" style="display:block;">1-е число каждого месяца</span></span>
+              <span class="num neg" style="font-weight:640;">−45 000 ₽</span>
+            </div>
+            <div class="mini-row" style="margin-top:12px; justify-content:space-between;"><span class="muted small">Следующее: 1 апреля</span><button class="switch on" onclick="toggleSwitch(this)" aria-label="Активна"></button></div>
+          </div>
+          <div class="card card-pad" data-od-id="recurring-salary">
+            <div class="mini-row">
+              <span class="icon" style="--c:var(--cat-salary)"><svg class="ic"><use href="#i-brief"/></svg></span>
+              <span style="flex:1;"><span style="font-weight:650;">Зарплата · Яндекс</span><span class="muted small" style="display:block;">5-е число каждого месяца</span></span>
+              <span class="num pos" style="font-weight:640;">+118 500 ₽</span>
+            </div>
+            <div class="mini-row" style="margin-top:12px; justify-content:space-between;"><span class="muted small">Следующее: 5 апреля</span><button class="switch on" onclick="toggleSwitch(this)" aria-label="Активна"></button></div>
+          </div>
+          <div class="card card-pad" data-od-id="recurring-plus">
+            <div class="mini-row">
+              <span class="icon" style="--c:var(--cat-subs)"><svg class="ic"><use href="#i-repeat"/></svg></span>
+              <span style="flex:1;"><span style="font-weight:650;">Яндекс Плюс</span><span class="muted small" style="display:block;">15-е число каждого месяца</span></span>
+              <span class="num neg" style="font-weight:640;">−299 ₽</span>
+            </div>
+            <div class="mini-row" style="margin-top:12px; justify-content:space-between;"><span class="muted small">Следующее: 15 апреля</span><button class="switch on" onclick="toggleSwitch(this)" aria-label="Активна"></button></div>
+          </div>
+          <div class="card card-pad" data-od-id="recurring-gym" style="opacity:0.7;">
+            <div class="mini-row">
+              <span class="icon" style="--c:var(--cat-health)"><svg class="ic"><use href="#i-heart"/></svg></span>
+              <span style="flex:1;"><span style="font-weight:650;">Спортзал</span><span class="muted small" style="display:block;">10-е число · на паузе</span></span>
+              <span class="num neg" style="font-weight:640;">−2 490 ₽</span>
+            </div>
+            <div class="mini-row" style="margin-top:12px; justify-content:space-between;"><span class="muted small">Приостановлено</span><button class="switch" onclick="toggleSwitch(this)" aria-label="На паузе"></button></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════ RECURRING EDIT ══════════ -->
+    <section class="screen" id="screen-recurring-edit" data-od-id="screen-recurring-edit">
+      <header class="appbar">
+        <button class="iconbtn" onclick="back()" aria-label="Назад"><svg class="ic"><use href="#i-back"/></svg></button>
+        <h1 class="appbar-title">Шаблон операции</h1>
+      </header>
+      <div class="screen-scroll">
+        <div class="screen-pad" style="display:flex; flex-direction:column; gap:16px;">
+          <div class="field"><label>Название</label><input class="input" placeholder="Например, Интернет"></div>
+          <div class="field"><label>Сумма</label><input class="input num" value="0 ₽"></div>
+          <div class="field"><label>Тип</label>
+            <div class="segmented">
+              <button class="seg active" onclick="seg(this)">Расход</button>
+              <button class="seg" onclick="seg(this)">Доход</button>
+            </div>
+          </div>
+          <div class="field"><label>Категория</label>
+            <select class="select"><option>Подписки</option><option>Жильё</option><option>Зарплата</option></select>
+          </div>
+          <div class="field"><label>Счёт</label>
+            <select class="select"><option>Карта Тинькофф</option><option>Накопительный счёт</option></select>
+          </div>
+          <div class="field"><label>Повтор</label>
+            <div class="chips">
+              <button class="chip active">Ежемесячно</button>
+              <button class="chip">Еженедельно</button>
+              <button class="chip">Ежегодно</button>
+            </div>
+          </div>
+          <div class="field"><label>Следующее выполнение</label><input class="input" type="date" value="2026-04-01"></div>
+          <button class="btn btn-primary btn-block" style="margin-top:6px;" onclick="saveAndBack('Шаблон сохранён')" data-od-id="recurring-save">Сохранить</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════ DEBTS ══════════ -->
+    <section class="screen" id="screen-debts" data-od-id="screen-debts">
+      <header class="appbar">
+        <button class="iconbtn" onclick="back()" aria-label="Назад"><svg class="ic"><use href="#i-back"/></svg></button>
+        <h1 class="appbar-title">Долги и займы</h1>
+        <button class="iconbtn" onclick="go('debt-edit')" aria-label="Добавить" data-od-id="debt-add"><svg class="ic"><use href="#i-plus"/></svg></button>
+      </header>
+      <div class="screen-scroll">
+        <div class="screen-pad">
+          <div class="segmented" style="margin-bottom:16px;">
+            <button class="seg active" onclick="seg(this)">Я должен</button>
+            <button class="seg" onclick="seg(this)">Мне должны</button>
+          </div>
+          <div class="card card-pad" data-od-id="debt-dmitry" onclick="go('debt-detail')" style="cursor:pointer;">
+            <div class="mini-row">
+              <span class="icon" style="--c:var(--negative)"><svg class="ic"><use href="#i-users"/></svg></span>
+              <span style="flex:1;"><span style="font-weight:650;">Дмитрий</span><span class="muted small" style="display:block;">Заём до зарплаты · до 20 марта</span></span>
+              <span class="num neg" style="font-weight:640;">−12 000 ₽</span>
+            </div>
+          </div>
+          <div class="card card-pad" data-od-id="debt-anna" onclick="go('debt-detail')" style="cursor:pointer; margin-top:12px;">
+            <div class="mini-row">
+              <span class="icon" style="--c:var(--positive)"><svg class="ic"><use href="#i-users"/></svg></span>
+              <span style="flex:1;"><span style="font-weight:650;">Анна</span><span class="muted small" style="display:block;">Возврат за концерт</span></span>
+              <span class="num pos" style="font-weight:640;">+8 500 ₽</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════ DEBT DETAIL ══════════ -->
+    <section class="screen" id="screen-debt-detail" data-od-id="screen-debt-detail">
+      <header class="appbar">
+        <button class="iconbtn" onclick="back()" aria-label="Назад"><svg class="ic"><use href="#i-back"/></svg></button>
+        <h1 class="appbar-title">Долг</h1>
+        <button class="iconbtn" onclick="go('debt-edit')" aria-label="Редактировать"><svg class="ic"><use href="#i-edit"/></svg></button>
+      </header>
+      <div class="screen-scroll">
+        <div class="screen-pad">
+          <div style="text-align:center; padding:12px 0 20px;">
+            <span class="icon lg" style="--c:var(--negative); margin:0 auto 12px;"><svg class="ic"><use href="#i-users"/></svg></span>
+            <h2 style="font-size:34px; font-weight:700; letter-spacing:-0.02em;" class="neg num">−12 000 ₽</h2>
+            <p style="font-size:18px; font-weight:650; margin-top:4px;">Дмитрий</p>
+            <p class="muted small">Я должен · до 20 марта</p>
+          </div>
+          <div class="card" style="overflow:hidden;">
+            <div class="kv-row" style="padding:13px 16px;"><span class="k">Тип</span><span class="v">Заём</span></div>
+            <div class="divider" style="margin:0 16px;"></div>
+            <div class="kv-row" style="padding:13px 16px;"><span class="k">Осталось</span><span class="v neg">12 000 ₽</span></div>
+            <div class="divider" style="margin:0 16px;"></div>
+            <div class="kv-row" style="padding:13px 16px;"><span class="k">Заметка</span><span class="v muted">Занял до зарплаты</span></div>
+          </div>
+          <div class="section-head"><h2>История</h2></div>
+          <button class="tx-row" onclick="go('txn-detail')"><span class="icon xs" style="--c:var(--cat-transfer)"><svg class="ic"><use href="#i-swap"/></svg></span><span class="tx-main"><span class="tx-title">Получение займа</span><span class="tx-sub">2 марта</span></span><span class="tx-amt pos">+12 000 ₽</span></button>
+          <div style="display:flex; gap:12px; margin-top:20px;">
+            <button class="btn btn-primary" style="flex:1;" onclick="openSheet('sheet-repay')" data-od-id="debt-repay">Погасить</button>
+            <button class="btn btn-secondary" style="flex:1;" onclick="openSheet('sheet-repay')">Частично</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════ DEBT EDIT ══════════ -->
+    <section class="screen" id="screen-debt-edit" data-od-id="screen-debt-edit">
+      <header class="appbar">
+        <button class="iconbtn" onclick="back()" aria-label="Назад"><svg class="ic"><use href="#i-back"/></svg></button>
+        <h1 class="appbar-title">Новый долг</h1>
+      </header>
+      <div class="screen-scroll">
+        <div class="screen-pad" style="display:flex; flex-direction:column; gap:16px;">
+          <div class="field"><label>Кому / от кого</label><input class="input" placeholder="Имя человека"></div>
+          <div class="field"><label>Тип</label>
+            <div class="segmented">
+              <button class="seg active" onclick="seg(this)">Я должен</button>
+              <button class="seg" onclick="seg(this)">Мне должны</button>
+            </div>
+          </div>
+          <div class="field"><label>Сумма</label><input class="input num" value="0 ₽"></div>
+          <div class="field"><label>Дата возврата</label><input class="input" type="date" value="2026-04-01"></div>
+          <div class="field"><label>Заметка</label><input class="input" placeholder="Необязательно"></div>
+          <button class="btn btn-primary btn-block" style="margin-top:6px;" onclick="saveAndBack('Долг сохранён')" data-od-id="debt-save">Сохранить</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════ NOTIFICATIONS ══════════ -->
+    <section class="screen" id="screen-notifications" data-od-id="screen-notifications">
+      <header class="appbar">
+        <button class="iconbtn" onclick="back()" aria-label="Назад"><svg class="ic"><use href="#i-back"/></svg></button>
+        <h1 class="appbar-title">Уведомления</h1>
+      </header>
+      <div class="screen-scroll">
+        <div class="screen-pad" style="display:flex; flex-direction:column; gap:12px;">
+          <div class="card card-pad" style="border-left:3px solid var(--accent);" data-od-id="notif-1">
+            <div class="mini-row"><span style="flex:1; font-weight:600;">Бюджет «Развлечения» почти исчерпан</span><span class="badge"></span></div>
+            <p class="muted small" style="margin-top:4px;">Потрачено 86% лимита · 2 часа назад</p>
+          </div>
+          <div class="card card-pad" style="border-left:3px solid var(--accent);" data-od-id="notif-2">
+            <div class="mini-row"><span style="flex:1; font-weight:600;">Поступила зарплата</span><span class="badge"></span></div>
+            <p class="muted small" style="margin-top:4px;">+118 500 ₽ · Яндекс · вчера</p>
+          </div>
+          <div class="card card-pad" data-od-id="notif-3">
+            <div class="mini-row"><span style="flex:1; font-weight:600;">Регулярный платёж завтра</span></div>
+            <p class="muted small" style="margin-top:4px;">Яндекс Плюс · −299 ₽ · 14 марта</p>
+          </div>
+          <div class="card card-pad" data-od-id="notif-4">
+            <div class="mini-row"><span style="flex:1; font-weight:600;">Цель достигнута на 60%</span></div>
+            <p class="muted small" style="margin-top:4px;">Подушка безопасности · 10 марта</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════ PROFILE EDIT ══════════ -->
+    <section class="screen" id="screen-profile-edit" data-od-id="screen-profile-edit">
+      <header class="appbar">
+        <button class="iconbtn" onclick="back()" aria-label="Назад"><svg class="ic"><use href="#i-back"/></svg></button>
+        <h1 class="appbar-title">Профиль</h1>
+      </header>
+      <div class="screen-scroll">
+        <div class="screen-pad" style="display:flex; flex-direction:column; gap:16px;">
+          <div class="field"><label>Имя</label><input class="input" value="Мария Соколова"></div>
+          <div class="field"><label>Email</label><input class="input" type="email" value="maria@example.com"></div>
+          <div class="field"><label>Базовая валюта</label>
+            <select class="select"><option>RUB — Российский рубль</option><option>USD — Доллар США</option><option>EUR — Евро</option></select>
+          </div>
+          <div class="section-head" style="margin:0;"><h2>Смена пароля</h2></div>
+          <div class="field"><label>Текущий пароль</label><input class="input" type="password" placeholder="••••••••"></div>
+          <div class="field"><label>Новый пароль</label><input class="input" type="password" placeholder="Минимум 8 символов"></div>
+          <button class="btn btn-primary btn-block" style="margin-top:6px;" onclick="saveAndBack('Профиль сохранён')" data-od-id="profile-save">Сохранить</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════ SETTINGS ══════════ -->
+    <section class="screen" id="screen-settings" data-od-id="screen-settings">
+      <header class="appbar">
+        <button class="iconbtn" onclick="back()" aria-label="Назад"><svg class="ic"><use href="#i-back"/></svg></button>
+        <h1 class="appbar-title">Настройки</h1>
+      </header>
+      <div class="screen-scroll">
+        <div class="screen-pad">
+          <div class="section-head" style="margin-top:6px;"><h2>Внешний вид</h2></div>
+          <div class="card" style="overflow:hidden;">
+            <div class="list-row" style="border-radius:0; padding:14px 16px;">
+              <span class="icon xs" style="--c:var(--accent)"><svg class="ic"><use href="#i-moon"/></svg></span>
+              <span class="list-main"><span class="list-title">Тёмная тема</span></span>
+              <button class="switch" id="theme-switch" onclick="toggleTheme(this)" aria-label="Тёмная тема"></button>
+            </div>
+          </div>
+          <div class="section-head"><h2>Уведомления</h2></div>
+          <div class="card" style="overflow:hidden;">
+            <div class="list-row" style="border-radius:0; padding:14px 16px;">
+              <span class="list-main"><span class="list-title">Push-уведомления</span><span class="list-sub">Крупные операции и отчёты</span></span>
+              <button class="switch on" onclick="toggleSwitch(this)" aria-label="Push-уведомления"></button>
+            </div>
+            <div class="divider" style="margin:0 16px;"></div>
+            <div class="list-row" style="border-radius:0; padding:14px 16px;">
+              <span class="list-main"><span class="list-title">Напоминания о бюджете</span><span class="list-sub">Когда лимит превышает 80%</span></span>
+              <button class="switch on" onclick="toggleSwitch(this)" aria-label="Напоминания о бюджете"></button>
+            </div>
+            <div class="divider" style="margin:0 16px;"></div>
+            <div class="list-row" style="border-radius:0; padding:14px 16px;">
+              <span class="list-main"><span class="list-title">Еженедельный отчёт</span><span class="list-sub">Сводка по расходам каждое воскресенье</span></span>
+              <button class="switch" onclick="toggleSwitch(this)" aria-label="Еженедельный отчёт"></button>
+            </div>
+          </div>
+          <div class="section-head"><h2>Данные</h2></div>
+          <button class="btn btn-secondary btn-block" onclick="toast('Экспорт подготовлен')">Экспортировать данные (CSV)</button>
+          <button class="btn btn-danger btn-block" style="margin-top:10px;" onclick="toast('Это действие недоступно в прототипе')">Удалить все данные</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════ ABOUT ══════════ -->
+    <section class="screen" id="screen-about" data-od-id="screen-about">
+      <header class="appbar">
+        <button class="iconbtn" onclick="back()" aria-label="Назад"><svg class="ic"><use href="#i-back"/></svg></button>
+        <h1 class="appbar-title">О приложении</h1>
+      </header>
+      <div class="screen-scroll">
+        <div class="screen-pad" style="text-align:center; padding-top:36px;">
+          <div class="logo-mark" style="width:72px;height:72px;border-radius:22px;background:linear-gradient(150deg,var(--accent),var(--accent-strong));display:grid;place-items:center;color:var(--on-accent);margin:0 auto 16px;"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v16M8 20h8M6 7l-3 6a3.2 3.2 0 0 0 6 0L6 7zM18 7l-3 6a3.2 3.2 0 0 0 6 0l-3-6z"/></svg></div>
+          <h2 style="font-size:22px; font-weight:700;">SpendyHolik</h2>
+          <p class="muted">Версия 2.4.1 (build 208)</p>
+          <div class="card card-pad" style="text-align:left; margin-top:24px;">
+            <div class="kv-row" style="padding:10px 0;"><span class="k">Лицензия</span><span class="v">Personal</span></div>
+            <div class="divider"></div>
+            <div class="kv-row" style="padding:10px 0;"><span class="k">Последнее обновление</span><span class="v">12 марта 2026</span></div>
+            <div class="divider"></div>
+            <div class="kv-row" style="padding:10px 0;"><span class="k">Сделано с</span><span class="v">вниманием к деталям</span></div>
+          </div>
+          <div style="display:flex; justify-content:center; gap:20px; margin-top:22px;">
+            <button class="link" onclick="toast('Документы открыты')">Политика конфиденциальности</button>
+            <button class="link" onclick="toast('Документы открыты')">Условия</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════ SHEET: QUICK ADD ══════════ -->
+    <div class="sheet" id="sheet-quick">
+      <div class="sheet-backdrop" onclick="closeSheet('sheet-quick')"></div>
+      <div class="sheet-panel">
+        <div class="sheet-handle"></div>
+        <h2 style="font-size:18px; font-weight:700; margin-bottom:6px;">Быстрое добавление</h2>
+        <div class="segmented" style="margin-bottom:12px;">
+          <button class="seg active" onclick="seg(this)">Расход</button>
+          <button class="seg" onclick="seg(this)">Доход</button>
+        </div>
+        <div class="field" style="align-items:center;">
+          <input class="amount-input" inputmode="decimal" value="0" style="font-size:34px;">
+          <label>₽ · RUB</label>
+        </div>
+        <div class="section-head"><h2>Категория</h2></div>
+        <div class="chips">
+          <button class="chip active">Продукты</button>
+          <button class="chip">Транспорт</button>
+          <button class="chip">Кафе</button>
+          <button class="chip">Развлечения</button>
+          <button class="chip">Другое</button>
+        </div>
+        <button class="btn btn-primary btn-block" style="margin-top:20px;" onclick="quickAdd()" data-od-id="quick-add-save">Добавить</button>
+      </div>
+    </div>
+
+    <!-- ══════════ SHEET: FILTERS ══════════ -->
+    <div class="sheet" id="sheet-filters">
+      <div class="sheet-backdrop" onclick="closeSheet('sheet-filters')"></div>
+      <div class="sheet-panel">
+        <div class="sheet-handle"></div>
+        <h2 style="font-size:18px; font-weight:700; margin-bottom:16px;">Фильтры</h2>
+        <div class="field" style="margin-bottom:14px;"><label>Период</label>
+          <div class="chips">
+            <button class="chip">Неделя</button>
+            <button class="chip active">Месяц</button>
+            <button class="chip">Год</button>
+            <button class="chip">Произвольный</button>
+          </div>
+        </div>
+        <div class="field" style="margin-bottom:14px;"><label>Категория</label>
+          <div class="chips">
+            <button class="chip active">Все</button>
+            <button class="chip">Продукты</button>
+            <button class="chip">Транспорт</button>
+            <button class="chip">Жильё</button>
+          </div>
+        </div>
+        <div class="field" style="margin-bottom:14px;"><label>Счёт</label>
+          <div class="chips">
+            <button class="chip active">Все</button>
+            <button class="chip">Карта Тинькофф</button>
+            <button class="chip">Накопительный</button>
+          </div>
+        </div>
+        <div class="field" style="margin-bottom:20px;"><label>Тип</label>
+          <div class="chips">
+            <button class="chip active">Все</button>
+            <button class="chip">Расход</button>
+            <button class="chip">Доход</button>
+            <button class="chip">Перевод</button>
+          </div>
+        </div>
+        <button class="btn btn-primary btn-block" onclick="applyFilters()" data-od-id="filters-apply">Применить</button>
+      </div>
+    </div>
+
+    <!-- ══════════ SHEET: TOP UP GOAL ══════════ -->
+    <div class="sheet" id="sheet-topup">
+      <div class="sheet-backdrop" onclick="closeSheet('sheet-topup')"></div>
+      <div class="sheet-panel">
+        <div class="sheet-handle"></div>
+        <h2 style="font-size:18px; font-weight:700; margin-bottom:6px;">Пополнить цель</h2>
+        <p class="muted small" style="margin-bottom:14px;">Подушка безопасности · осталось 80 000 ₽</p>
+        <div class="field" style="align-items:center;"><input class="amount-input" inputmode="decimal" value="0" style="font-size:34px;"><label>₽</label></div>
+        <div class="field" style="margin-top:8px;"><label>Со счёта</label>
+          <select class="select"><option>Карта Тинькофф</option><option>Накопительный счёт</option><option>Наличные</option></select>
+        </div>
+        <button class="btn btn-primary btn-block" style="margin-top:20px;" onclick="closeAndToast('sheet-topup','Цель пополнена')" data-od-id="topup-save">Пополнить</button>
+      </div>
+    </div>
+
+    <!-- ══════════ SHEET: REPAY DEBT ══════════ -->
+    <div class="sheet" id="sheet-repay">
+      <div class="sheet-backdrop" onclick="closeSheet('sheet-repay')"></div>
+      <div class="sheet-panel">
+        <div class="sheet-handle"></div>
+        <h2 style="font-size:18px; font-weight:700; margin-bottom:6px;">Погасить долг</h2>
+        <p class="muted small" style="margin-bottom:14px;">Дмитрий · осталось 12 000 ₽</p>
+        <div class="field" style="align-items:center;"><input class="amount-input" inputmode="decimal" value="12 000" style="font-size:34px;"><label>₽</label></div>
+        <div style="display:flex; gap:10px; margin-top:12px;">
+          <button class="btn btn-secondary" style="flex:1;" onclick="setRepay(12000, this)">Полностью</button>
+          <button class="btn btn-secondary" style="flex:1;" onclick="setRepay(6000, this)">Половина</button>
+        </div>
+        <button class="btn btn-primary btn-block" style="margin-top:20px;" onclick="closeAndToast('sheet-repay','Долг погашен')" data-od-id="repay-save">Погасить</button>
+      </div>
+    </div>
+
+    <!-- toast -->
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <!-- tab bar -->
+    <nav class="tabbar" id="tabbar" aria-label="Основная навигация">
+      <button class="tab active" data-tab="dashboard" onclick="goTab('dashboard')" data-od-id="tab-dashboard">
+        <svg class="ic"><use href="#i-home"/></svg><span class="tab-label">Главная</span>
+      </button>
+      <button class="tab" data-tab="transactions" onclick="goTab('transactions')" data-od-id="tab-transactions">
+        <svg class="ic"><use href="#i-receipt"/></svg><span class="tab-label">Операции</span>
+      </button>
+      <button class="tab" data-tab="analytics" onclick="goTab('analytics')" data-od-id="tab-analytics">
+        <svg class="ic"><use href="#i-chart"/></svg><span class="tab-label">Аналитика</span>
+      </button>
+      <button class="tab" data-tab="budgets" onclick="goTab('budgets')" data-od-id="tab-budgets">
+        <svg class="ic"><use href="#i-pie"/></svg><span class="tab-label">Бюджеты</span>
+      </button>
+      <button class="tab" data-tab="profile" onclick="goTab('profile')" data-od-id="tab-profile">
+        <svg class="ic"><use href="#i-user"/></svg><span class="tab-label">Профиль</span>
+      </button>
+    </nav>
+
+    <!-- side navigation (tablet rail / desktop sidebar) -->
+    <aside class="sidenav" id="sidenav" aria-label="Основное меню">
+      <div class="snav-brand">
+        <span class="snav-mark">Б</span>
+        <span class="snav-word">Бал<b>анс</b></span>
+      </div>
+      <nav class="snav-nav">
+        <button class="snav-item active" data-tab="dashboard" onclick="goTab('dashboard')" title="Главная" data-od-id="snav-dashboard"><span class="snav-ico"><svg class="ic"><use href="#i-home"/></svg></span><span class="snav-label">Главная</span></button>
+        <button class="snav-item" data-tab="transactions" onclick="goTab('transactions')" title="Операции" data-od-id="snav-transactions"><span class="snav-ico"><svg class="ic"><use href="#i-receipt"/></svg></span><span class="snav-label">Операции</span></button>
+        <button class="snav-item" data-tab="analytics" onclick="goTab('analytics')" title="Аналитика" data-od-id="snav-analytics"><span class="snav-ico"><svg class="ic"><use href="#i-chart"/></svg></span><span class="snav-label">Аналитика</span></button>
+        <button class="snav-item" data-tab="budgets" onclick="goTab('budgets')" title="Бюджеты и цели" data-od-id="snav-budgets"><span class="snav-ico"><svg class="ic"><use href="#i-pie"/></svg></span><span class="snav-label">Бюджеты и цели</span></button>
+        <button class="snav-item" data-tab="profile" onclick="goTab('profile')" title="Профиль" data-od-id="snav-profile"><span class="snav-ico"><svg class="ic"><use href="#i-user"/></svg></span><span class="snav-label">Профиль</span></button>
+      </nav>
+      <div class="snav-links">
+        <button class="snav-item" onclick="go('categories')" title="Категории" data-od-id="snav-categories"><span class="snav-ico"><svg class="ic"><use href="#i-bag"/></svg></span><span class="snav-label">Категории</span></button>
+        <button class="snav-item" onclick="go('recurring')" title="Регулярные операции" data-od-id="snav-recurring"><span class="snav-ico"><svg class="ic"><use href="#i-repeat"/></svg></span><span class="snav-label">Регулярные операции</span></button>
+        <button class="snav-item" onclick="go('debts')" title="Долги и займы" data-od-id="snav-debts"><span class="snav-ico"><svg class="ic"><use href="#i-users"/></svg></span><span class="snav-label">Долги и займы</span></button>
+        <button class="snav-item" onclick="go('notifications')" title="Уведомления" data-od-id="snav-notifications"><span class="snav-ico"><svg class="ic"><use href="#i-bell"/></svg></span><span class="snav-label">Уведомления</span></button>
+      </div>
+      <div class="snav-user">
+        <div class="avatar">МС</div>
+        <div class="snav-user-meta"><b>Мария Соколова</b><span>maria@example.com</span></div>
+        <button class="iconbtn" onclick="logout()" title="Выйти" aria-label="Выйти"><svg class="ic"><use href="#i-out"/></svg></button>
+      </div>
+    </aside>
+  </div>
+  <p class="stage-note">«SpendyHolik» · интерактивный прототип · навигация и формы кликабельны</p>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  var TAB_SCREENS = ['dashboard', 'transactions', 'analytics', 'budgets', 'profile'];
+  var AUTH_SCREENS = ['splash', 'onboarding', 'currency', 'login', 'register'];
+  var stack = [];
+  var current = document.getElementById('screen-splash');
+  var obIndex = 0;
+  var sidenavEl = document.getElementById('sidenav');
+  if (sidenavEl) sidenavEl.style.display = 'none';
+
+  function qs(sel, root) { return (root || document).querySelector(sel); }
+  function qsa(sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); }
+
+  function show(id, opts) {
+    opts = opts || {};
+    var target = document.getElementById('screen-' + id);
+    if (!target) return;
+    if (current && opts.push !== false && current !== target && stack[stack.length - 1] !== id) {
+      stack.push(current.id.replace('screen-', ''));
+    }
+    if (opts.reset) stack = [];
+    qsa('.screen').forEach(function (s) { s.classList.remove('active'); });
+    target.classList.add('active');
+    current = target;
+    var body = target.querySelector('.screen-scroll');
+    if (body) body.scrollTop = 0;
+    var tabbar = document.getElementById('tabbar');
+    tabbar.style.display = TAB_SCREENS.indexOf(id) > -1 ? 'flex' : 'none';
+    qsa('.tab').forEach(function (t) {
+      t.classList.toggle('active', t.getAttribute('data-tab') === id);
+    });
+    qsa('.snav-item[data-tab]').forEach(function (t) {
+      t.classList.toggle('active', t.getAttribute('data-tab') === id);
+    });
+    if (sidenavEl) sidenavEl.style.display = AUTH_SCREENS.indexOf(id) > -1 ? 'none' : '';
+  }
+
+  window.go = function (id) { show(id, { push: true }); };
+  window.goTab = function (id) { show(id, { reset: true }); };
+  window.back = function () {
+    if (stack.length) { var prev = stack.pop(); show(prev, { push: false }); }
+    else { goTab('dashboard'); }
+  };
+
+  // onboarding
+  var nextBtn = document.getElementById('ob-next');
+  window.nextOnboard = function () {
+    var slides = qsa('.ob-slide');
+    var dots = qsa('.ob-dot');
+    if (obIndex < slides.length - 1) {
+      slides[obIndex].classList.remove('active');
+      obIndex++;
+      slides[obIndex].classList.add('active');
+      dots.forEach(function (d, i) { d.classList.toggle('active', i === obIndex); });
+      if (obIndex === slides.length - 1) nextBtn.textContent = 'Выбрать валюту';
+      else nextBtn.textContent = 'Далее';
+    } else {
+      show('currency', { reset: true });
+    }
+  };
+
+  // currency
+  window.selectCurrency = function (el) {
+    qsa('#currency-list .currency-row').forEach(function (r) { r.classList.remove('selected'); });
+    el.classList.add('selected');
+  };
+  window.currencyDone = function () {
+    try { localStorage.setItem('balans:onboarded', '1'); } catch (e) {}
+    toast('Валюта: RUB · Добро пожаловать!');
+    goTab('dashboard');
+  };
+
+  // auth
+  window.login = function (e) {
+    if (e) e.preventDefault();
+    toast('С возвращением, Мария');
+    goTab('dashboard');
+  };
+  window.register = function (e) {
+    if (e) e.preventDefault();
+    show('currency', { reset: true });
+  };
+  window.logout = function () {
+    try { localStorage.removeItem('balans:onboarded'); } catch (e) {}
+    toast('Вы вышли из аккаунта');
+    show('login', { reset: true });
+  };
+
+  // segments / chips
+  window.seg = function (el) {
+    var parent = el.parentElement;
+    qsa('.seg', parent).forEach(function (s) { s.classList.remove('active'); });
+    el.classList.add('active');
+  };
+  window.budgetSeg = function (el, which) {
+    seg(el);
+    document.getElementById('budgets-list').style.display = which === 'budgets' ? 'flex' : 'none';
+    document.getElementById('goals-list').style.display = which === 'goals' ? 'flex' : 'none';
+  };
+
+  // category groups
+  window.toggleGroup = function (head) {
+    head.closest('.cat-group').classList.toggle('open');
+  };
+
+  // sheets
+  window.openSheet = function (id) { document.getElementById(id).classList.add('open'); };
+  window.closeSheet = function (id) { document.getElementById(id).classList.remove('open'); };
+  window.closeAndToast = function (id, msg) { closeSheet(id); toast(msg); };
+
+  window.applyFilters = function () { closeSheet('sheet-filters'); toast('Фильтры применены'); };
+  window.quickAdd = function () { closeSheet('sheet-quick'); toast('Операция добавлена'); };
+  window.setRepay = function (val, el) {
+    var sheet = el.closest('.sheet');
+    var input = sheet.querySelector('.amount-input');
+    if (input) input.value = val.toLocaleString('ru-RU');
+    qsa('.btn', el.parentElement).forEach(function (b) { b.classList.remove('active'); });
+    el.classList.add('active');
+  };
+
+  // switches
+  window.toggleSwitch = function (el) { el.classList.toggle('on'); };
+  window.toggleTheme = function (el) {
+    var dark = document.documentElement.getAttribute('data-theme') !== 'dark';
+    document.documentElement.setAttribute('data-theme', dark ? 'dark' : '');
+    el.classList.toggle('on', dark);
+    try { localStorage.setItem('balans:theme', dark ? 'dark' : 'light'); } catch (e) {}
+  };
+
+  // misc actions
+  window.saveAndBack = function (msg) { toast(msg); back(); };
+  window.deleteTxn = function () { toast('Операция удалена'); back(); };
+
+  // toast
+  var toastTimer;
+  window.toast = function (msg) {
+    var t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { t.classList.remove('show'); }, 2200);
+  };
+
+  // chip toggling (single-select within its own container)
+  document.addEventListener('click', function (e) {
+    var chip = e.target.closest('.chip');
+    if (chip) {
+      var group = chip.parentElement;
+      qsa('.chip', group).forEach(function (c) { c.classList.remove('active'); });
+      chip.classList.add('active');
+    }
+    var gi = e.target.closest('.gi');
+    if (gi) {
+      var g = gi.parentElement;
+      qsa('.gi', g).forEach(function (x) { x.classList.remove('active'); });
+      gi.classList.add('active');
+    }
+    var sw = e.target.closest('.swatch');
+    if (sw) {
+      var s = sw.parentElement;
+      qsa('.swatch', s).forEach(function (x) { x.classList.remove('active'); });
+      sw.classList.add('active');
+    }
+  });
+
+  // restore theme
+  try {
+    if (localStorage.getItem('balans:theme') === 'dark') {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      var ts = document.getElementById('theme-switch');
+      if (ts) ts.classList.add('on');
+    }
+  } catch (e) {}
+
+  // splash → first-run flow
+  setTimeout(function () {
+    var onboarded = false;
+    try { onboarded = localStorage.getItem('balans:onboarded') === '1'; } catch (e) {}
+    if (onboarded) { goTab('dashboard'); }
+    else { show('onboarding', { reset: true }); }
+  }, 1500);
+})();
+</script>
+</body>
+</html>
