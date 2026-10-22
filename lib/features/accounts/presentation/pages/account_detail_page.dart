@@ -7,6 +7,7 @@ import 'package:spendyholik/core/models/models.dart';
 import 'package:spendyholik/core/widgets/widgets.dart';
 import 'package:spendyholik/features/accounts/presentation/cubit/account_detail_cubit.dart';
 import 'package:spendyholik/features/accounts/presentation/widgets/widgets.dart';
+import 'package:spendyholik/l10n/l10n.dart';
 
 @RoutePage()
 class AccountDetailPage extends StatelessWidget {
@@ -50,6 +51,16 @@ class AccountDetailView extends StatelessWidget {
           leading: const AppBackButton(fallback: AccountsRoute()),
           title: account?.name,
           largeTitle: account != null,
+          actions: [
+            if (account != null)
+              AppGlassIconButton(
+                icon: Icons.edit_outlined,
+                tooltip: context.l10n.accountEditAction,
+                onPressed: () => context.router.push(
+                  AccountEditRoute(accountId: account.id),
+                ),
+              ),
+          ],
           body: BaseLayout.slivers(
             largeTitle: account?.name,
             slivers: [

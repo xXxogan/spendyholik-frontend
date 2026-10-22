@@ -73,4 +73,33 @@ void main() {
     });
     test('отрицательное → null', () => expect(parseAmountInput('-5'), isNull));
   });
+
+  group('parseSignedAmountInput', () {
+    test('ноль допустим', () => expect(parseSignedAmountInput('0'), 0));
+    test('минус — дефис и типографский', () {
+      expect(parseSignedAmountInput('-1 200,5'), -120050);
+      expect(parseSignedAmountInput('\u22121200'), -120000);
+    });
+    test('положительное', () => expect(parseSignedAmountInput('5000'), 500000));
+    test('пусто и мусор → null', () {
+      expect(parseSignedAmountInput(''), isNull);
+      expect(parseSignedAmountInput('-'), isNull);
+      expect(parseSignedAmountInput('1-2'), isNull);
+    });
+  });
+
+  group('formatAmountInput', () {
+    test('целое — без дробной части', () {
+      expect(formatAmountInput(8425000), '84250');
+    });
+    test(
+      'копейки через точку',
+      () => expect(formatAmountInput(124050), '1240.50'),
+    );
+    test('отрицательное', () => expect(formatAmountInput(-120000), '-1200'));
+    test(
+      'туда и обратно',
+      () => expect(parseSignedAmountInput(formatAmountInput(-124005)), -124005),
+    );
+  });
 }

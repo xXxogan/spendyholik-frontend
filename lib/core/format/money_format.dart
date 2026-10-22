@@ -43,3 +43,26 @@ int? parseAmountInput(String input) {
   final minor = int.parse(parts[0]) * 100 + int.parse(fraction);
   return minor > 0 ? minor : null;
 }
+
+/// Для балансов счёта: как [parseAmountInput], но ноль и минус допустимы.
+int? parseSignedAmountInput(String input) {
+  final trimmed = input.trim();
+  final negative = trimmed.startsWith('-') || trimmed.startsWith(_minusSign);
+  final body = negative ? trimmed.substring(1) : trimmed;
+  final minor = parseAmountInput(body) ?? _zero(body);
+  if (minor == null) return null;
+  return negative ? -minor : minor;
+}
+
+int? _zero(String input) =>
+    RegExp(r'^0+([.,]0{0,2})?$').hasMatch(input.trim()) ? 0 : null;
+
+/// Сумма для поля ввода: без разрядов, копейки через точку, только если есть.
+String formatAmountInput(int minor) {
+  final sign = minor < 0 ? '-' : '';
+  final whole = minor.abs() ~/ 100;
+  final fraction = minor.abs() % 100;
+  return fraction == 0
+      ? '$sign$whole'
+      : '$sign$whole.${fraction.toString().padLeft(2, '0')}';
+}

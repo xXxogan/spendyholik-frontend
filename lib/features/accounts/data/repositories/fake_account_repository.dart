@@ -75,11 +75,22 @@ class FakeAccountRepository implements AccountRepository {
       });
 
   @override
-  Future<AccountModel> create(AccountDraft draft) => throw UnimplementedError();
+  Future<AccountModel> create(AccountDraft draft) async {
+    final created = await _backend(() => _backend.addAccount(draft));
+    _bus.emit({DataTopic.accounts});
+    return created;
+  }
 
   @override
-  Future<AccountModel> update(String id, AccountDraft draft) =>
-      throw UnimplementedError();
+  Future<AccountModel> update(String id, AccountDraft draft) async {
+    final updated = await _backend(() {
+      _find(id);
+      _backend.updateAccount(id, draft);
+      return _find(id);
+    });
+    _bus.emit({DataTopic.accounts});
+    return updated;
+  }
 
   @override
   Future<void> archive(String id) async {

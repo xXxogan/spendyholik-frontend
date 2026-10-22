@@ -10,16 +10,17 @@ import 'package:spendyholik/features/transactions/transactions.dart';
 @lazySingleton
 class FakeBackend {
   FakeBackend() {
-    _categories = FakeSeed.categories();
-    transactions = FakeSeed.transactions(
-      DateTime.now(),
-      _initialAccounts,
-      _categories,
+    _categories = List.of(FakeSeed.categories());
+    transactions = List.of(
+      FakeSeed.transactions(DateTime.now(), _initialAccounts, _categories),
     );
   }
 
   /// Начальные балансы; итоговые считаются из операций, как на сервере.
-  final List<AccountModel> _initialAccounts = FakeSeed.initialAccounts();
+  /// Копии: сид отдаёт const-списки, а «сервер» их меняет.
+  final List<AccountModel> _initialAccounts = List.of(
+    FakeSeed.initialAccounts(),
+  );
   late final List<CategoryModel> _categories;
   late final List<TransactionModel> transactions;
 
@@ -49,6 +50,39 @@ class FakeBackend {
     final index = _initialAccounts.indexWhere((a) => a.id == accountId);
     _initialAccounts[index] = _initialAccounts[index].copyWith(
       isArchived: archived,
+    );
+  }
+
+  AccountModel addAccount(AccountDraft draft) {
+    final account = AccountModel(
+      id: 'acc-${DateTime.now().microsecondsSinceEpoch}',
+      name: draft.name,
+      type: draft.type,
+      balance: draft.balance,
+      color: draft.color,
+      isArchived: false,
+      cardLast4: draft.cardLast4,
+      interestRate: draft.interestRate,
+      creditLimit: draft.creditLimit,
+    );
+    _initialAccounts.add(account);
+    return account;
+  }
+
+  /// [AccountDraft.balance] — желаемый текущий баланс: начальный сдвигается
+  /// на разницу, операции остаются как есть.
+  void updateAccount(String accountId, AccountDraft draft) {
+    final index = _initialAccounts.indexWhere((a) => a.id == accountId);
+    _initialAccounts[index] = AccountModel(
+      id: accountId,
+      name: draft.name,
+      type: draft.type,
+      balance: draft.balance - _delta(accountId),
+      color: draft.color,
+      isArchived: _initialAccounts[index].isArchived,
+      cardLast4: draft.cardLast4,
+      interestRate: draft.interestRate,
+      creditLimit: draft.creditLimit,
     );
   }
 

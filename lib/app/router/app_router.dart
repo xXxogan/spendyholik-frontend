@@ -29,7 +29,12 @@ class AppRouter extends RootStackRouter {
           ],
         ),
         AutoRoute(page: AccountsRoute.page, path: 'accounts'),
+        AutoRoute(page: AccountCreateRoute.page, path: 'accounts/new'),
         AutoRoute(page: AccountDetailRoute.page, path: 'accounts/:accountId'),
+        AutoRoute(
+          page: AccountEditRoute.page,
+          path: 'accounts/:accountId/edit',
+        ),
       ],
     ),
   ];

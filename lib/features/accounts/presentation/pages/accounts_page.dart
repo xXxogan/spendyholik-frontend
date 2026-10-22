@@ -43,6 +43,13 @@ class AccountsView extends StatelessWidget {
       ),
       title: context.l10n.accountsTitle,
       largeTitle: true,
+      actions: [
+        AppGlassIconButton(
+          icon: Icons.add,
+          tooltip: context.l10n.accountsAdd,
+          onPressed: () => context.router.push(const AccountCreateRoute()),
+        ),
+      ],
       body: BaseLayout.slivers(
         largeTitle: context.l10n.accountsTitle,
         slivers: [

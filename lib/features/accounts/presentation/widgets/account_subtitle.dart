@@ -3,6 +3,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:spendyholik/core/format/format.dart';
 import 'package:spendyholik/core/models/models.dart';
 import 'package:spendyholik/features/accounts/data/models/models.dart';
+import 'package:spendyholik/features/accounts/presentation/widgets/account_type_label.dart';
 import 'package:spendyholik/l10n/l10n.dart';
 
 String accountSubtitle(
@@ -12,12 +13,7 @@ String accountSubtitle(
 ) {
   final locale = Localizations.localeOf(context).toString();
   final l10n = context.l10n;
-  final type = switch (account.type) {
-    AccountType.debit => l10n.accountTypeDebit,
-    AccountType.cash => l10n.accountTypeCash,
-    AccountType.savings => l10n.accountTypeSavings,
-    AccountType.credit => l10n.accountTypeCredit,
-  };
+  final type = accountTypeLabel(l10n, account.type);
   final details = [
     if (account.isArchived) l10n.accountArchived,
     if (account.cardLast4 case final last4?) l10n.accountCardMask(last4),

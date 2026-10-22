@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:spendyholik/core/errors/failure.dart';
+import 'package:spendyholik/core/widgets/failure_message.dart';
 import 'package:spendyholik/l10n/l10n.dart';
 
 class FailureView extends StatelessWidget {
@@ -11,11 +12,7 @@ class FailureView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final message = switch (failure) {
-      NetworkFailure() => l10n.errorNetwork,
-      NotFoundFailure() => l10n.errorNotFound,
-      _ => l10n.errorUnknown,
-    };
+    final message = failureMessage(l10n, failure);
 
     return Padding(
       padding: const .all(24),

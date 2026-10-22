@@ -65,7 +65,7 @@ class AccountDraft {
   const AccountDraft({
     required this.name,
     required this.type,
-    required this.initialBalance,
+    required this.balance,
     required this.color,
     this.cardLast4,
     this.interestRate,
@@ -74,7 +74,10 @@ class AccountDraft {
 
   final String name;
   final AccountType type;
-  final int initialBalance;
+
+  /// При создании — начальный баланс, при правке — желаемый текущий:
+  /// сервер сдвигает начальный, операции не трогает.
+  final int balance;
   final EntityColor color;
   final String? cardLast4;
   final double? interestRate;

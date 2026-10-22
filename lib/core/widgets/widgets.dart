@@ -1,9 +1,12 @@
 export 'base_layout.dart';
+export 'color_swatch_picker.dart';
 export 'content_card.dart';
 export 'content_sliver_padding.dart';
 export 'entity_icon_data.dart';
 export 'entity_icon_view.dart';
+export 'failure_message.dart';
 export 'failure_view.dart';
+export 'field_error_text.dart';
 export 'glass/glass.dart';
 export 'section_header.dart';
 export 'skeleton_list.dart';

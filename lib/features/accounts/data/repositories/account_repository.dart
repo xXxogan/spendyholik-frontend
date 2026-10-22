@@ -14,6 +14,7 @@ abstract interface class AccountRepository {
 
   Future<AccountModel> create(AccountDraft draft);
 
+  /// [AccountDraft.balance] — желаемый текущий баланс, см. [AccountDraft].
   Future<AccountModel> update(String id, AccountDraft draft);
 
   Future<void> archive(String id);
