@@ -22,7 +22,9 @@ migrate_working_dir/
 
 # Local tooling
 .claude/
+docs/pipeline/
 pid
+design/
 
 # Flutter/Dart/Pub related
 **/doc/api/
@@ -40,7 +42,6 @@ app.*.symbols
 # Obfuscation related
 app.*.map.json
 
-docs/pipeline/
 
 # Android Studio will place build artifacts here
 /android/app/debug
