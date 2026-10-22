@@ -102,5 +102,16 @@
         "type": "int"
       }
     }
-  }
+  },
+  "categoriesAdd": "Добавить категорию",
+  "categoryFormNewTitle": "Новая категория",
+  "categoryFormEditTitle": "Изменить категорию",
+  "categoryFormName": "Название",
+  "categoryFormNameHint": "Например, Продукты",
+  "categoryFormKind": "Тип",
+  "categoryFormIcon": "Иконка",
+  "categoryFormColor": "Цвет",
+  "categoryFormParent": "Родительская категория",
+  "categoryFormNoParent": "Без родителя",
+  "categoryFormSaved": "Категория сохранена"
 }

@@ -11,11 +11,13 @@ class CategoryGroup extends StatefulWidget {
     required this.kind,
     required this.nodes,
     this.initiallyExpanded = false,
+    this.onCategoryTap,
   });
 
   final CategoryKind kind;
   final List<CategoryNode> nodes;
   final bool initiallyExpanded;
+  final ValueChanged<CategoryModel>? onCategoryTap;
 
   @override
   State<CategoryGroup> createState() => _CategoryGroupState();
@@ -23,6 +25,11 @@ class CategoryGroup extends StatefulWidget {
 
 class _CategoryGroupState extends State<CategoryGroup> {
   late var _expanded = widget.initiallyExpanded;
+
+  VoidCallback? _tapHandler(CategoryModel category) {
+    final onTap = widget.onCategoryTap;
+    return onTap == null ? null : () => onTap(category);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -86,9 +93,16 @@ class _CategoryGroupState extends State<CategoryGroup> {
                             crossAxisAlignment: .stretch,
                             children: [
                               for (final node in widget.nodes) ...[
-                                CategoryTile(category: node.category),
+                                CategoryTile(
+                                  category: node.category,
+                                  onTap: _tapHandler(node.category),
+                                ),
                                 for (final child in node.children)
-                                  CategoryTile(category: child, isChild: true),
+                                  CategoryTile(
+                                    category: child,
+                                    isChild: true,
+                                    onTap: _tapHandler(child),
+                                  ),
                               ],
                             ],
                           ),

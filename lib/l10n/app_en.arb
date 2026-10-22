@@ -67,5 +67,16 @@
   "categoryKindIncome": "Income",
   "categoryKindTransfer": "Transfers",
   "categoriesGroupEmpty": "No categories yet",
-  "categoryTransactionCount": "{count, plural, one{{count} transaction} other{{count} transactions}}"
+  "categoryTransactionCount": "{count, plural, one{{count} transaction} other{{count} transactions}}",
+  "categoriesAdd": "Add category",
+  "categoryFormNewTitle": "New category",
+  "categoryFormEditTitle": "Edit category",
+  "categoryFormName": "Name",
+  "categoryFormNameHint": "E.g. Groceries",
+  "categoryFormKind": "Type",
+  "categoryFormIcon": "Icon",
+  "categoryFormColor": "Color",
+  "categoryFormParent": "Parent category",
+  "categoryFormNoParent": "No parent",
+  "categoryFormSaved": "Category saved"
 }

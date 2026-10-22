@@ -39,6 +39,13 @@ class CategoriesView extends StatelessWidget {
       ),
       title: title,
       largeTitle: true,
+      actions: [
+        AppGlassIconButton(
+          icon: Icons.add,
+          tooltip: context.l10n.categoriesAdd,
+          onPressed: () => context.router.push(const CategoryCreateRoute()),
+        ),
+      ],
       body: BaseLayout.slivers(
         largeTitle: title,
         slivers: [
@@ -62,6 +69,9 @@ class CategoriesView extends StatelessWidget {
                               kind: kind,
                               nodes: nodes,
                               initiallyExpanded: kind == CategoryKind.expense,
+                              onCategoryTap: (category) => context.router.push(
+                                CategoryEditRoute(categoryId: category.id),
+                              ),
                             ),
                           ),
                       ],

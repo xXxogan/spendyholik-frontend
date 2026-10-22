@@ -86,6 +86,33 @@ class FakeBackend {
     );
   }
 
+  CategoryModel addCategory(CategoryDraft draft) {
+    final category = CategoryModel(
+      id: 'cat-${DateTime.now().microsecondsSinceEpoch}',
+      name: draft.name,
+      kind: draft.kind,
+      icon: draft.icon,
+      color: draft.color,
+      parentId: draft.parentId,
+      transactionCount: 0,
+    );
+    _categories.add(category);
+    return category;
+  }
+
+  void updateCategory(String categoryId, CategoryDraft draft) {
+    final index = _categories.indexWhere((c) => c.id == categoryId);
+    _categories[index] = CategoryModel(
+      id: categoryId,
+      name: draft.name,
+      kind: draft.kind,
+      icon: draft.icon,
+      color: draft.color,
+      parentId: draft.parentId,
+      transactionCount: 0,
+    );
+  }
+
   int _delta(String accountId, {DateTime? before}) {
     var delta = 0;
     for (final t in transactions) {
