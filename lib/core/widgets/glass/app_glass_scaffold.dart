@@ -1,6 +1,7 @@
+import 'package:spendyholik/core/widgets/glass/large_title_scope.dart';
 import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:spendyholik/core/widgets/glass/large_title.dart';
+import 'package:spendyholik/core/widgets/glass/large_title_controllers.dart';
 import 'package:spendyholik/core/widgets/glass/shell_scope.dart';
 
 /// [largeTitle] — iOS-заголовок: большой в контенте (`BaseLayout(largeTitle:)`
@@ -48,10 +49,12 @@ class _AppGlassScaffoldState extends State<AppGlassScaffold> {
     return GlassScaffold(
       backgroundColor: Theme.of(context).colorScheme.surfaceContainerHigh,
       appBar: Padding(
-        padding: EdgeInsets.only(left: leftInset),
+        padding: .only(left: leftInset),
         child: GlassAppBar(
           title: widget.titleWidget ?? (title == null ? null : Text(title)),
-          largeTitleController: widget.largeTitle && title != null ? _largeTitles.of(title) : null,
+          largeTitleController: widget.largeTitle && title != null
+              ? _largeTitles.of(title)
+              : null,
           leading: widget.leading,
           actions: widget.actions,
           centerTitle: widget.centerTitle,
@@ -59,7 +62,10 @@ class _AppGlassScaffoldState extends State<AppGlassScaffold> {
       ),
       body: LargeTitleScope(
         controllers: _largeTitles,
-        child: Padding(padding: EdgeInsets.only(left: leftInset), child: widget.body),
+        child: Padding(
+          padding: .only(left: leftInset),
+          child: widget.body,
+        ),
       ),
       bottomBar: widget.bottomBar,
     );

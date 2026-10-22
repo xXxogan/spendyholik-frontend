@@ -3,7 +3,11 @@ import 'package:spendyholik/features/accounts/presentation/cubit/accounts_cubit.
 import 'package:spendyholik/l10n/l10n.dart';
 
 class AccountsFilterChips extends StatelessWidget {
-  const AccountsFilterChips({super.key, required this.selected, required this.onSelected});
+  const AccountsFilterChips({
+    super.key,
+    required this.selected,
+    required this.onSelected,
+  });
 
   final AccountsFilter? selected;
   final ValueChanged<AccountsFilter> onSelected;

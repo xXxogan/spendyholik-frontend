@@ -18,11 +18,15 @@ class FailureView extends StatelessWidget {
     };
 
     return Padding(
-      padding: const EdgeInsets.all(24),
+      padding: const .all(24),
       child: Column(
-        mainAxisSize: MainAxisSize.min,
+        mainAxisSize: .min,
         children: [
-          Text(message, style: Theme.of(context).textTheme.titleMedium, textAlign: TextAlign.center),
+          Text(
+            message,
+            style: Theme.of(context).textTheme.titleMedium,
+            textAlign: .center,
+          ),
           const SizedBox(height: 16),
           FilledButton(onPressed: onRetry, child: Text(l10n.commonRetry)),
         ],

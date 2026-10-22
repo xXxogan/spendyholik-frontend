@@ -1,13 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/widgets.dart';
+import 'package:spendyholik/core/logger/app_route_log.dart';
 import 'package:talker/talker.dart';
-
-class AppRouteLog extends TalkerLog {
-  AppRouteLog(String super.message) : super(key: TalkerKey.route, title: TalkerKey.route);
-
-  @override
-  AnsiPen get pen => AnsiPen()..xterm(135);
-}
 
 /// TalkerRouteObserver из talker_flutter видит только push/pop: переключение
 /// вкладок auto_route шлёт через колбэки AutoRouterObserver, а replaceAll — через
@@ -23,8 +17,9 @@ class TalkerAutoRouteObserver extends AutoRouterObserver {
       _log('Open ${_name(route)}${_from(previousRoute)}');
 
   @override
-  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) =>
-      _log('Close ${_name(route)}${previousRoute == null ? '' : ' → ${_name(previousRoute)}'}');
+  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) => _log(
+    'Close ${_name(route)}${previousRoute == null ? '' : ' → ${_name(previousRoute)}'}',
+  );
 
   @override
   void didReplace({Route<dynamic>? newRoute, Route<dynamic>? oldRoute}) =>
@@ -35,8 +30,9 @@ class TalkerAutoRouteObserver extends AutoRouterObserver {
       _log('Remove ${_name(route)}');
 
   @override
-  void didInitTabRoute(TabPageRoute route, TabPageRoute? previousRoute) =>
-      _log('Open tab ${route.name}${previousRoute == null ? '' : ' (from ${previousRoute.name})'}');
+  void didInitTabRoute(TabPageRoute route, TabPageRoute? previousRoute) => _log(
+    'Open tab ${route.name}${previousRoute == null ? '' : ' (from ${previousRoute.name})'}',
+  );
 
   @override
   void didChangeTabRoute(TabPageRoute route, TabPageRoute previousRoute) =>
@@ -44,7 +40,9 @@ class TalkerAutoRouteObserver extends AutoRouterObserver {
 
   void _log(String message) => _talker.logCustom(AppRouteLog(message));
 
-  String _from(Route<dynamic>? previous) => previous == null ? '' : ' (from ${_name(previous)})';
+  String _from(Route<dynamic>? previous) =>
+      previous == null ? '' : ' (from ${_name(previous)})';
 
-  String _name(Route<dynamic>? route) => route?.settings.name ?? route?.runtimeType.toString() ?? '—';
+  String _name(Route<dynamic>? route) =>
+      route?.settings.name ?? route?.runtimeType.toString() ?? '—';
 }

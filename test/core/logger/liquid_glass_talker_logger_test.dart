@@ -1,7 +1,9 @@
+import 'package:spendyholik/core/logger/liquid_glass_log.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
-import 'package:liquid_glass_widgets/utils/glass_quality_adapter.dart' show AdaptivePhase;
+import 'package:liquid_glass_widgets/utils/glass_quality_adapter.dart'
+    show AdaptivePhase;
 import 'package:spendyholik/core/logger/liquid_glass_talker_logger.dart';
 import 'package:talker/talker.dart';
 
@@ -83,7 +85,9 @@ void main() {
   });
 
   test('чужие ошибки Flutter идут прежнему обработчику', () {
-    FlutterError.reportError(FlutterErrorDetails(exception: Exception('other')));
+    FlutterError.reportError(
+      FlutterErrorDetails(exception: Exception('other')),
+    );
 
     expect(presented, hasLength(1));
     expect(talker.history, isEmpty);

@@ -22,9 +22,12 @@ class ContentSliverPadding extends StatelessWidget {
 
     return SliverLayoutBuilder(
       builder: (context, constraints) {
-        final horizontal = max(edge, (constraints.crossAxisExtent - Breakpoints.contentMaxWidth) / 2);
+        final horizontal = max(
+          edge,
+          (constraints.crossAxisExtent - Breakpoints.contentMaxWidth) / 2,
+        );
         return SliverPadding(
-          padding: EdgeInsets.symmetric(horizontal: horizontal),
+          padding: .symmetric(horizontal: horizontal),
           sliver: sliver,
         );
       },

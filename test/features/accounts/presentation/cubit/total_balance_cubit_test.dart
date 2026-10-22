@@ -34,15 +34,22 @@ void main() {
 
   blocTest<TotalBalanceCubit, TotalBalanceState>(
     'загрузка: loading → loaded',
-    setUp: () => when(() => repository.getTotalBalance()).thenAnswer((_) async => balance),
+    setUp: () =>
+        when(() => repository.getTotalBalance())
+            .thenAnswer((_) async => balance),
     build: build,
     act: (cubit) => cubit.load(),
-    expect: () => [const TotalBalanceState.loading(), const TotalBalanceState.loaded(balance)],
+    expect: () => [
+      const TotalBalanceState.loading(),
+      const TotalBalanceState.loaded(balance),
+    ],
   );
 
   blocTest<TotalBalanceCubit, TotalBalanceState>(
     'ошибка репозитория — error',
-    setUp: () => when(() => repository.getTotalBalance()).thenThrow(const NetworkFailure()),
+    setUp: () =>
+        when(() => repository.getTotalBalance())
+            .thenThrow(const NetworkFailure()),
     build: build,
     act: (cubit) => cubit.load(),
     expect: () => [
@@ -55,9 +62,8 @@ void main() {
     'изменились операции или счета — тихая перезагрузка, чужие темы игнорируются',
     setUp: () {
       var calls = 0;
-      when(() => repository.getTotalBalance()).thenAnswer(
-        (_) async => ++calls == 1 ? balance : updated,
-      );
+      when(() => repository.getTotalBalance())
+          .thenAnswer((_) async => ++calls == 1 ? balance : updated);
     },
     build: build,
     act: (cubit) async {

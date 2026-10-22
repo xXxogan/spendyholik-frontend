@@ -38,7 +38,9 @@ class AccountsView extends StatelessWidget {
     };
 
     return AppGlassScaffold(
-      leading: const AppBackButton(fallback: TabsRoute(children: [DashboardRoute()])),
+      leading: const AppBackButton(
+        fallback: TabsRoute(children: [DashboardRoute()]),
+      ),
       title: context.l10n.accountsTitle,
       largeTitle: true,
       body: BaseLayout.slivers(
@@ -47,13 +49,18 @@ class AccountsView extends StatelessWidget {
           ContentSliverPadding(
             sliver: SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                child: AccountsFilterChips(selected: filter, onSelected: cubit.setFilter),
+                padding: const .symmetric(vertical: 12),
+                child: AccountsFilterChips(
+                  selected: filter,
+                  onSelected: cubit.setFilter,
+                ),
               ),
             ),
           ),
           switch (state) {
-            AccountsLoading() => const SliverToBoxAdapter(child: SkeletonList()),
+            AccountsLoading() => const SliverToBoxAdapter(
+              child: SkeletonList(),
+            ),
             AccountsLoaded(:final accounts) => ContentSliverPadding(
               sliver: SliverGrid.builder(
                 gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
@@ -63,7 +70,13 @@ class AccountsView extends StatelessWidget {
                   crossAxisSpacing: 12,
                 ),
                 itemCount: accounts.length,
-                itemBuilder: (_, index) => AccountTile(account: accounts[index], currency: _currency),
+                itemBuilder: (context, index) => AccountTile(
+                  account: accounts[index],
+                  currency: _currency,
+                  onTap: () => context.router.push(
+                    AccountDetailRoute(accountId: accounts[index].id),
+                  ),
+                ),
               ),
             ),
             AccountsEmpty() => SliverFillRemaining(
@@ -72,7 +85,9 @@ class AccountsView extends StatelessWidget {
             ),
             AccountsError(:final failure) => SliverFillRemaining(
               hasScrollBody: false,
-              child: Center(child: FailureView(failure: failure, onRetry: cubit.load)),
+              child: Center(
+                child: FailureView(failure: failure, onRetry: cubit.load),
+              ),
             ),
           },
           const SliverToBoxAdapter(child: SizedBox(height: 120)),

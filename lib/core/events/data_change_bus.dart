@@ -1,18 +1,9 @@
 import 'dart:async';
 
 import 'package:injectable/injectable.dart';
+import 'package:spendyholik/core/events/data_topic.dart';
 
-enum DataTopic {
-  accounts,
-  transactions,
-  categories,
-  budgets,
-  goals,
-  recurring,
-  debts,
-  notifications,
-  user,
-}
+export 'data_topic.dart';
 
 @lazySingleton
 class DataChangeBus {

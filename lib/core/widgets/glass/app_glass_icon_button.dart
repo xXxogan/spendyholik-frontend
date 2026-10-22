@@ -20,7 +20,10 @@ class AppGlassIconButton extends StatelessWidget {
     return Tooltip(
       message: tooltip,
       child: GlassButton(
-        icon: Icon(icon, color: color ?? Theme.of(context).colorScheme.onSurface),
+        icon: Icon(
+          icon,
+          color: color ?? Theme.of(context).colorScheme.onSurface,
+        ),
         onTap: onPressed,
         label: tooltip,
         width: 40,

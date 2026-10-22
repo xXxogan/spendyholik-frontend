@@ -4,11 +4,17 @@ import 'package:spendyholik/features/home/presentation/widgets/home_destinations
 
 /// [tabs] — null, когда вкладок нет в стеке: страницу деталей открыли
 /// по URL или обновили на Web.
-Future<void> selectHomeTab(StackRouter router, TabsRouter? tabs, int index) async {
+Future<void> selectHomeTab(
+  StackRouter router,
+  TabsRouter? tabs,
+  int index,
+) async {
   if (tabs != null) {
     router.popUntilRouteWithName(TabsRoute.name);
     tabs.setActiveIndex(index);
     return;
   }
-  await router.replaceAll([TabsRoute(children: [homeTabRoutes[index]])]);
+  await router.replaceAll([
+    TabsRoute(children: [homeTabRoutes[index]]),
+  ]);
 }

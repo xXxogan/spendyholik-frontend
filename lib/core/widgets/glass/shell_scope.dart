@@ -11,5 +11,6 @@ class ShellScope extends InheritedWidget {
       context.dependOnInheritedWidgetOfExactType<ShellScope>()?.leftInset ?? 0;
 
   @override
-  bool updateShouldNotify(ShellScope oldWidget) => leftInset != oldWidget.leftInset;
+  bool updateShouldNotify(ShellScope oldWidget) =>
+      leftInset != oldWidget.leftInset;
 }

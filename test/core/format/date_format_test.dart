@@ -10,7 +10,10 @@ void main() {
   final today = DateTime(2026, 10, 22, 14);
 
   test('сегодня', () {
-    expect(formatDayLabel(DateTime(2026, 10, 22, 8), today, l10n, 'ru'), 'Сегодня');
+    expect(
+      formatDayLabel(DateTime(2026, 10, 22, 8), today, l10n, 'ru'),
+      'Сегодня',
+    );
   });
 
   test('вчера', () {
@@ -18,14 +21,23 @@ void main() {
   });
 
   test('этот год — без года', () {
-    expect(formatDayLabel(DateTime(2026, 3, 12), today, l10n, 'ru'), '12 марта');
+    expect(
+      formatDayLabel(DateTime(2026, 3, 12), today, l10n, 'ru'),
+      '12 марта',
+    );
   });
 
   test('другой год — с годом', () {
-    expect(formatDayLabel(DateTime(2025, 3, 12), today, l10n, 'ru'), '12 марта 2025');
+    expect(
+      formatDayLabel(DateTime(2025, 3, 12), today, l10n, 'ru'),
+      '12 марта 2025',
+    );
   });
 
   test('вчера через границу года', () {
-    expect(formatDayLabel(DateTime(2025, 12, 31), DateTime(2026, 1, 1), l10n, 'ru'), 'Вчера');
+    expect(
+      formatDayLabel(DateTime(2025, 12, 31), DateTime(2026, 1, 1), l10n, 'ru'),
+      'Вчера',
+    );
   });
 }

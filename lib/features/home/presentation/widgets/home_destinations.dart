@@ -13,7 +13,11 @@ const homeTabRoutes = <PageRouteInfo>[
 ];
 
 List<AppNavDestination> homeDestinations(AppLocalizations l10n) => [
-  AppNavDestination(icon: Icons.home_outlined, selectedIcon: Icons.home, label: l10n.navDashboard),
+  AppNavDestination(
+    icon: Icons.home_outlined,
+    selectedIcon: Icons.home,
+    label: l10n.navDashboard,
+  ),
   AppNavDestination(
     icon: Icons.receipt_long_outlined,
     selectedIcon: Icons.receipt_long,
@@ -29,5 +33,9 @@ List<AppNavDestination> homeDestinations(AppLocalizations l10n) => [
     selectedIcon: Icons.account_balance_wallet,
     label: l10n.navBudgets,
   ),
-  AppNavDestination(icon: Icons.person_outline, selectedIcon: Icons.person, label: l10n.navProfile),
+  AppNavDestination(
+    icon: Icons.person_outline,
+    selectedIcon: Icons.person,
+    label: l10n.navProfile,
+  ),
 ];

@@ -1,10 +1,7 @@
 import 'package:material_ui/material_ui.dart';
+import 'package:spendyholik/core/layout/breakpoints.dart';
 
-abstract final class Breakpoints {
-  static const medium = 720.0;
-  static const expanded = 1080.0;
-  static const contentMaxWidth = 1200.0;
-}
+export 'breakpoints.dart';
 
 enum WindowSize {
   compact,
@@ -19,5 +16,6 @@ enum WindowSize {
 }
 
 extension WindowSizeX on BuildContext {
-  WindowSize get windowSize => WindowSize.fromWidth(MediaQuery.sizeOf(this).width);
+  WindowSize get windowSize =>
+      WindowSize.fromWidth(MediaQuery.sizeOf(this).width);
 }

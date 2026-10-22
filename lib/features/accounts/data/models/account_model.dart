@@ -54,9 +54,10 @@ class TotalBalance {
 }
 
 class BalancePoint {
-  const BalancePoint({required this.day, required this.balance});
+  const BalancePoint({required this.at, required this.balance});
 
-  final DateTime day;
+  /// Баланс сразу после этого момента.
+  final DateTime at;
   final int balance;
 }
 

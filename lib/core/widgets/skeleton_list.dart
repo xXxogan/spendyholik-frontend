@@ -19,10 +19,10 @@ class SkeletonList extends StatelessWidget {
           for (var i = 0; i < itemCount; i++)
             Container(
               height: itemHeight,
-              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+              margin: const .symmetric(horizontal: 16, vertical: 6),
               decoration: BoxDecoration(
                 color: colorScheme.surface,
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: .circular(16),
               ),
             ),
         ],

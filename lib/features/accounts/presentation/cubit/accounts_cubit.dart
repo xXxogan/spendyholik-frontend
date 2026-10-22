@@ -15,8 +15,11 @@ enum AccountsFilter { all, active, archived }
 
 @injectable
 class AccountsCubit extends Cubit<AccountsState> {
-  AccountsCubit(this._repository, DataChangeBus bus) : super(const AccountsState.loading()) {
-    _changes = bus.changes.where((topics) => topics.contains(DataTopic.accounts)).listen((_) => load());
+  AccountsCubit(this._repository, DataChangeBus bus)
+    : super(const AccountsState.loading()) {
+    _changes = bus.changes
+        .where((topics) => topics.contains(DataTopic.accounts))
+        .listen((_) => load());
   }
 
   final AccountRepository _repository;
@@ -51,7 +54,11 @@ class AccountsCubit extends Cubit<AccountsState> {
       AccountsFilter.archived => (account) => account.isArchived,
     }).toList();
 
-    emit(visible.isEmpty ? AccountsState.empty(_filter) : AccountsState.loaded(visible, _filter));
+    emit(
+      visible.isEmpty
+          ? AccountsState.empty(_filter)
+          : AccountsState.loaded(visible, _filter),
+    );
   }
 
   @override

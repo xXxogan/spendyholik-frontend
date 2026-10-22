@@ -7,8 +7,10 @@ import 'package:talker/talker.dart';
 
 class MockRouteMatch extends Mock implements RouteMatch {}
 
-Route<void> route(String name) =>
-    PageRouteBuilder<void>(settings: RouteSettings(name: name), pageBuilder: (_, _, _) => const SizedBox());
+Route<void> route(String name) => PageRouteBuilder<void>(
+  settings: RouteSettings(name: name),
+  pageBuilder: (_, _, _) => const SizedBox(),
+);
 
 TabPageRoute tab(String name, int index) {
   final match = MockRouteMatch();
@@ -33,21 +35,42 @@ void main() {
     expect(talker.history.last.key, TalkerKey.route);
 
     observer.didPop(route('AccountsRoute'), route('TabsRoute'));
-    expect(lastMessage(), allOf(contains('AccountsRoute'), contains('TabsRoute')));
+    expect(
+      lastMessage(),
+      allOf(contains('AccountsRoute'), contains('TabsRoute')),
+    );
   });
 
   test('replace (replaceAll после обновления страницы) пишет обе страницы', () {
-    observer.didReplace(newRoute: route('TabsRoute'), oldRoute: route('AccountsRoute'));
+    observer.didReplace(
+      newRoute: route('TabsRoute'),
+      oldRoute: route('AccountsRoute'),
+    );
 
-    expect(lastMessage(), allOf(contains('TabsRoute'), contains('AccountsRoute')));
+    expect(
+      lastMessage(),
+      allOf(contains('TabsRoute'), contains('AccountsRoute')),
+    );
   });
 
   test('первое открытие и переключение вкладок', () {
-    observer.didInitTabRoute(tab('AnalyticsRoute', 2), tab('DashboardRoute', 0));
-    expect(lastMessage(), allOf(contains('AnalyticsRoute'), contains('DashboardRoute')));
+    observer.didInitTabRoute(
+      tab('AnalyticsRoute', 2),
+      tab('DashboardRoute', 0),
+    );
+    expect(
+      lastMessage(),
+      allOf(contains('AnalyticsRoute'), contains('DashboardRoute')),
+    );
 
-    observer.didChangeTabRoute(tab('DashboardRoute', 0), tab('AnalyticsRoute', 2));
-    expect(lastMessage(), allOf(contains('DashboardRoute'), contains('AnalyticsRoute')));
+    observer.didChangeTabRoute(
+      tab('DashboardRoute', 0),
+      tab('AnalyticsRoute', 2),
+    );
+    expect(
+      lastMessage(),
+      allOf(contains('DashboardRoute'), contains('AnalyticsRoute')),
+    );
     expect(talker.history, hasLength(2));
   });
 }

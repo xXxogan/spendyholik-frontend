@@ -5,7 +5,12 @@ const _minusSign = '\u2212';
 const _nbsp = '\u00a0';
 
 /// [minor] — сумма в минорных единицах (копейки, центы).
-String formatMoney(int minor, Currency currency, String locale, {bool signed = false}) {
+String formatMoney(
+  int minor,
+  Currency currency,
+  String locale, {
+  bool signed = false,
+}) {
   final hasFraction = minor % 100 != 0;
   final number = NumberFormat.decimalPatternDigits(
     locale: locale,

@@ -45,7 +45,9 @@ void main() {
 
   blocTest<AccountsCubit, AccountsState>(
     'загрузка: loading → все счета, архивные в конце',
-    setUp: () => when(() => repository.getAccounts()).thenAnswer((_) async => [old, card, cash]),
+    setUp: () =>
+        when(() => repository.getAccounts())
+            .thenAnswer((_) async => [old, card, cash]),
     build: build,
     act: (cubit) => cubit.load(),
     expect: () => [
@@ -56,7 +58,8 @@ void main() {
 
   blocTest<AccountsCubit, AccountsState>(
     'счетов нет — empty',
-    setUp: () => when(() => repository.getAccounts()).thenAnswer((_) async => []),
+    setUp: () =>
+        when(() => repository.getAccounts()).thenAnswer((_) async => []),
     build: build,
     act: (cubit) => cubit.load(),
     expect: () => [
@@ -67,7 +70,8 @@ void main() {
 
   blocTest<AccountsCubit, AccountsState>(
     'ошибка репозитория — error с этой ошибкой',
-    setUp: () => when(() => repository.getAccounts()).thenThrow(const NetworkFailure()),
+    setUp: () =>
+        when(() => repository.getAccounts()).thenThrow(const NetworkFailure()),
     build: build,
     act: (cubit) => cubit.load(),
     expect: () => [
@@ -78,7 +82,9 @@ void main() {
 
   blocTest<AccountsCubit, AccountsState>(
     'фильтр: активные, затем архив, без повторной загрузки',
-    setUp: () => when(() => repository.getAccounts()).thenAnswer((_) async => [card, old]),
+    setUp: () =>
+        when(() => repository.getAccounts())
+            .thenAnswer((_) async => [card, old]),
     build: build,
     act: (cubit) async {
       await cubit.load();
@@ -96,7 +102,8 @@ void main() {
 
   blocTest<AccountsCubit, AccountsState>(
     'в выбранном фильтре пусто — empty с этим фильтром',
-    setUp: () => when(() => repository.getAccounts()).thenAnswer((_) async => [card]),
+    setUp: () =>
+        when(() => repository.getAccounts()).thenAnswer((_) async => [card]),
     build: build,
     act: (cubit) async {
       await cubit.load();
@@ -110,9 +117,8 @@ void main() {
     'изменение счетов в шине — тихая перезагрузка без loading',
     setUp: () {
       var calls = 0;
-      when(() => repository.getAccounts()).thenAnswer(
-        (_) async => ++calls == 1 ? [card] : [card, cash],
-      );
+      when(() => repository.getAccounts())
+          .thenAnswer((_) async => ++calls == 1 ? [card] : [card, cash]);
     },
     build: build,
     act: (cubit) async {
@@ -122,7 +128,9 @@ void main() {
       await Future<void>.delayed(Duration.zero);
     },
     skip: 2,
-    expect: () => [AccountsState.loaded([card, cash], AccountsFilter.all)],
+    expect: () => [
+      AccountsState.loaded([card, cash], AccountsFilter.all),
+    ],
     verify: (_) => verify(() => repository.getAccounts()).called(2),
   );
 }

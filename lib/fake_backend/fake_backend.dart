@@ -37,9 +37,25 @@ class FakeBackend {
       ),
   ];
 
-  int _delta(String accountId) {
+  /// Баланс счёта на момент [moment]: операции раньше него, не включая.
+  int balanceAt(String accountId, DateTime moment) {
+    final initial = _initialAccounts
+        .firstWhere((a) => a.id == accountId)
+        .balance;
+    return initial + _delta(accountId, before: moment);
+  }
+
+  void setAccountArchived(String accountId, {required bool archived}) {
+    final index = _initialAccounts.indexWhere((a) => a.id == accountId);
+    _initialAccounts[index] = _initialAccounts[index].copyWith(
+      isArchived: archived,
+    );
+  }
+
+  int _delta(String accountId, {DateTime? before}) {
     var delta = 0;
     for (final t in transactions) {
+      if (before != null && !t.occurredAt.isBefore(before)) continue;
       switch (t.type) {
         case TransactionType.expense:
           if (t.account.id == accountId) delta -= t.amount;

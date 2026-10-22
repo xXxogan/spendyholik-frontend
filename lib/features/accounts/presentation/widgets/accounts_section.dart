@@ -22,7 +22,7 @@ class AccountsSection extends StatelessWidget {
         ..setFilter(AccountsFilter.active)
         ..load(),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+        crossAxisAlignment: .stretch,
         children: [
           SectionHeader(
             title: context.l10n.accountsTitle,
@@ -36,10 +36,16 @@ class AccountsSection extends StatelessWidget {
                 children: [
                   for (final account in accounts)
                     Padding(
-                      padding: const EdgeInsets.only(bottom: 8),
+                      padding: const .only(bottom: 8),
                       child: SizedBox(
                         height: 72,
-                        child: AccountTile(account: account, currency: _currency),
+                        child: AccountTile(
+                          account: account,
+                          currency: _currency,
+                          onTap: () => context.router.push(
+                            AccountDetailRoute(accountId: account.id),
+                          ),
+                        ),
                       ),
                     ),
                 ],

@@ -19,7 +19,7 @@ class TabsPage extends StatelessWidget {
         final isDashboard = tabsRouter.activeIndex == 0;
 
         return AppGlassScaffold(
-          titleWidget: isDashboard ? const _BrandTitle() : null,
+          titleWidget: isDashboard ? const BrandTitle() : null,
           title: destinations[tabsRouter.activeIndex].label,
           largeTitle: !isDashboard,
           actions: isDashboard
@@ -28,7 +28,8 @@ class TabsPage extends StatelessWidget {
                     tooltip: destinations.last.label,
                     icon: Icons.person_2,
                     color: Theme.of(context).colorScheme.primary,
-                    onPressed: () => tabsRouter.setActiveIndex(destinations.length - 1),
+                    onPressed: () =>
+                        tabsRouter.setActiveIndex(destinations.length - 1),
                   ),
                 ]
               : null,
@@ -42,27 +43,6 @@ class TabsPage extends StatelessWidget {
               : null,
         );
       },
-    );
-  }
-}
-
-class _BrandTitle extends StatelessWidget {
-  const _BrandTitle();
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Text.rich(
-      TextSpan(
-        children: [
-          TextSpan(text: context.l10n.appTitlePrefix, style: theme.textTheme.titleLarge),
-          TextSpan(
-            text: context.l10n.appTitleSuffix,
-            style: theme.textTheme.titleLarge?.copyWith(color: theme.colorScheme.primary),
-          ),
-        ],
-      ),
     );
   }
 }

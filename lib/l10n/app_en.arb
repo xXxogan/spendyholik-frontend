@@ -31,5 +31,13 @@
   "accountInterest": "{rate}% per year",
   "accountCreditLimit": "limit {amount}",
   "dashboardTotalBalance": "Total balance",
-  "dashboardMonthDelta": "{amount} this month"
+  "dashboardMonthDelta": "{amount} this month",
+  "commonCancel": "Cancel",
+  "accountDetailCurrentBalance": "Current balance",
+  "accountDetailTrend": "Balance trend",
+  "accountArchiveAction": "Archive account",
+  "accountArchiveConfirmTitle": "Archive account?",
+  "accountArchiveConfirmMessage": "The account will leave the total balance and the active list. Transactions are kept.",
+  "accountArchiveConfirm": "Archive",
+  "accountUnarchiveAction": "Restore from archive"
 }

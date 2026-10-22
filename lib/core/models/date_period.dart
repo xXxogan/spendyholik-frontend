@@ -8,15 +8,29 @@ class DatePeriod {
     final day = DateTime(now.year, now.month, now.day);
     return switch (preset) {
       PeriodPreset.week => () {
-        final monday = DateTime(day.year, day.month, day.day - (day.weekday - DateTime.monday));
-        return DatePeriod(start: monday, end: DateTime(monday.year, monday.month, monday.day + 7));
+        final monday = DateTime(
+          day.year,
+          day.month,
+          day.day - (day.weekday - DateTime.monday),
+        );
+        return DatePeriod(
+          start: monday,
+          end: DateTime(monday.year, monday.month, monday.day + 7),
+        );
       }(),
       PeriodPreset.month => DatePeriod(
         start: DateTime(day.year, day.month),
         end: DateTime(day.year, day.month + 1),
       ),
-      PeriodPreset.year => DatePeriod(start: DateTime(day.year), end: DateTime(day.year + 1)),
-      PeriodPreset.custom => throw ArgumentError.value(preset, 'preset', 'custom has no current'),
+      PeriodPreset.year => DatePeriod(
+        start: DateTime(day.year),
+        end: DateTime(day.year + 1),
+      ),
+      PeriodPreset.custom => throw ArgumentError.value(
+        preset,
+        'preset',
+        'custom has no current',
+      ),
     };
   }
 
@@ -36,14 +50,17 @@ class DatePeriod {
         end: start,
       );
     }
-    final days = DateTime.utc(end.year, end.month, end.day)
-        .difference(DateTime.utc(start.year, start.month, start.day))
-        .inDays;
+    final days = DateTime.utc(
+      end.year,
+      end.month,
+      end.day,
+    ).difference(DateTime.utc(start.year, start.month, start.day)).inDays;
     return DatePeriod(
       start: DateTime(start.year, start.month, start.day - days),
       end: start,
     );
   }
 
-  bool contains(DateTime moment) => !moment.isBefore(start) && moment.isBefore(end);
+  bool contains(DateTime moment) =>
+      !moment.isBefore(start) && moment.isBefore(end);
 }

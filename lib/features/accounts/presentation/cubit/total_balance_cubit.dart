@@ -13,9 +13,14 @@ part 'total_balance_state.dart';
 
 @injectable
 class TotalBalanceCubit extends Cubit<TotalBalanceState> {
-  TotalBalanceCubit(this._repository, DataChangeBus bus) : super(const TotalBalanceState.loading()) {
+  TotalBalanceCubit(this._repository, DataChangeBus bus)
+    : super(const TotalBalanceState.loading()) {
     _changes = bus.changes
-        .where((topics) => topics.contains(DataTopic.accounts) || topics.contains(DataTopic.transactions))
+        .where(
+          (topics) =>
+              topics.contains(DataTopic.accounts) ||
+              topics.contains(DataTopic.transactions),
+        )
         .listen((_) => load());
   }
 

@@ -4,18 +4,23 @@ import 'package:spendyholik/core/models/entity_color.dart';
 abstract final class AppColors {
   static const seedColor = Color(0xFFFA6BCA);
 
-  static Color positive(Brightness brightness) =>
-      brightness == Brightness.light ? const Color(0xFF2E9E5B) : const Color(0xFF5FD38D);
+  static Color positive(Brightness brightness) => brightness == Brightness.light
+      ? const Color(0xFF2E9E5B)
+      : const Color(0xFF5FD38D);
 
-  static Color negative(Brightness brightness) =>
-      brightness == Brightness.light ? const Color(0xFFD93A3A) : const Color(0xFFFF7A70);
+  static Color negative(Brightness brightness) => brightness == Brightness.light
+      ? const Color(0xFFD93A3A)
+      : const Color(0xFFFF7A70);
 
-  static Color warning(Brightness brightness) =>
-      brightness == Brightness.light ? const Color(0xFFD99A00) : const Color(0xFFFFC94D);
+  static Color warning(Brightness brightness) => brightness == Brightness.light
+      ? const Color(0xFFD99A00)
+      : const Color(0xFFFFC94D);
 
   static Color entity(EntityColor color, Brightness brightness) {
     final base = _entity[color]!;
-    return brightness == Brightness.light ? base : Color.lerp(base, Colors.white, 0.25)!;
+    return brightness == Brightness.light
+        ? base
+        : Color.lerp(base, Colors.white, 0.25)!;
   }
 
   static const _entity = {

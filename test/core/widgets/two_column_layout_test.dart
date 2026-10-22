@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:spendyholik/features/dashboard/presentation/widgets/dashboard_layout.dart';
+import 'package:spendyholik/core/widgets/two_column_layout.dart';
 
-import '../../../../helpers/pump_app.dart';
+import '../../helpers/pump_app.dart';
 
 void main() {
   const primary = SizedBox(key: Key('primary'), height: 100);
@@ -11,7 +11,7 @@ void main() {
   Future<void> pump(WidgetTester tester, double width) => pumpPage(
     tester,
     const SingleChildScrollView(
-      child: DashboardLayout(primary: [primary], secondary: [secondary]),
+      child: TwoColumnLayout(primary: [primary], secondary: [secondary]),
     ),
     width: width,
   );

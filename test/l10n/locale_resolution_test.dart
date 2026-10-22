@@ -12,15 +12,18 @@ void main() {
     );
   });
 
-  test('первый предпочитаемый не поддерживается — берём следующий подходящий', () {
-    expect(
-      AppLocalizationsSetup.resolve(
-        [const Locale('de'), const Locale('en')],
-        supported,
-      ),
-      const Locale('en'),
-    );
-  });
+  test(
+    'первый предпочитаемый не поддерживается — берём следующий подходящий',
+    () {
+      expect(
+        AppLocalizationsSetup.resolve([
+          const Locale('de'),
+          const Locale('en'),
+        ], supported),
+        const Locale('en'),
+      );
+    },
+  );
 
   test('ни один язык не поддерживается — русский', () {
     expect(

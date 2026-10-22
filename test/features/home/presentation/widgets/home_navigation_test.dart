@@ -31,8 +31,13 @@ void main() {
   test('вкладок в стеке нет (после обновления на детали) — заменить стек вкладками', () async {
     await selectHomeTab(router, null, 2);
 
-    final routes = verify(() => router.replaceAll(captureAny())).captured.single as List<PageRouteInfo>;
+    final routes =
+        verify(() => router.replaceAll(captureAny())).captured.single
+            as List<PageRouteInfo>;
     expect(routes.single.routeName, TabsRoute.name);
-    expect(routes.single.initialChildren!.single.routeName, AnalyticsRoute.name);
+    expect(
+      routes.single.initialChildren!.single.routeName,
+      AnalyticsRoute.name,
+    );
   });
 }

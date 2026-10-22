@@ -9,7 +9,7 @@ abstract interface class AccountRepository {
 
   Future<TotalBalance> getTotalBalance();
 
-  /// По точке в неделю, по возрастанию даты.
+  /// Начало периода, точка на каждое изменение баланса и сейчас — по возрастанию.
   Future<List<BalancePoint>> getBalanceHistory(String id, {int weeks = 6});
 
   Future<AccountModel> create(AccountDraft draft);
@@ -17,4 +17,6 @@ abstract interface class AccountRepository {
   Future<AccountModel> update(String id, AccountDraft draft);
 
   Future<void> archive(String id);
+
+  Future<void> unarchive(String id);
 }

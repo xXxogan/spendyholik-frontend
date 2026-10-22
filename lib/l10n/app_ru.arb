@@ -59,5 +59,13 @@
         "type": "String"
       }
     }
-  }
+  },
+  "commonCancel": "Отмена",
+  "accountDetailCurrentBalance": "Текущий баланс",
+  "accountDetailTrend": "Динамика баланса",
+  "accountArchiveAction": "Архивировать счёт",
+  "accountArchiveConfirmTitle": "Архивировать счёт?",
+  "accountArchiveConfirmMessage": "Счёт пропадёт из общего баланса и списка активных. Операции сохранятся.",
+  "accountArchiveConfirm": "Архивировать",
+  "accountUnarchiveAction": "Вернуть из архива"
 }

@@ -1,14 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
+import 'package:spendyholik/core/logger/liquid_glass_log.dart';
 import 'package:talker/talker.dart';
-
-class LiquidGlassLog extends TalkerLog {
-  LiquidGlassLog(String super.message, {super.logLevel})
-    : super(key: logKey, title: logKey);
-
-  static const logKey = 'liquid_glass';
-}
 
 @lazySingleton
 class LiquidGlassTalkerLogger {

@@ -17,7 +17,11 @@ class AppRouter extends RootStackRouter {
           path: '',
           initial: true,
           children: [
-            AutoRoute(page: DashboardRoute.page, path: 'dashboard', initial: true),
+            AutoRoute(
+              page: DashboardRoute.page,
+              path: 'dashboard',
+              initial: true,
+            ),
             AutoRoute(page: TransactionsRoute.page, path: 'transactions'),
             AutoRoute(page: AnalyticsRoute.page, path: 'analytics'),
             AutoRoute(page: BudgetsRoute.page, path: 'budgets'),
@@ -25,6 +29,7 @@ class AppRouter extends RootStackRouter {
           ],
         ),
         AutoRoute(page: AccountsRoute.page, path: 'accounts'),
+        AutoRoute(page: AccountDetailRoute.page, path: 'accounts/:accountId'),
       ],
     ),
   ];

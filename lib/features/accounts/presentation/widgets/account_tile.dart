@@ -1,16 +1,21 @@
-import 'package:intl/intl.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:spendyholik/app/theme/app_colors.dart';
 import 'package:spendyholik/core/format/format.dart';
 import 'package:spendyholik/core/models/models.dart';
 import 'package:spendyholik/features/accounts/data/models/models.dart';
-import 'package:spendyholik/l10n/l10n.dart';
+import 'package:spendyholik/features/accounts/presentation/widgets/account_subtitle.dart';
 
 class AccountTile extends StatelessWidget {
-  const AccountTile({super.key, required this.account, required this.currency});
+  const AccountTile({
+    super.key,
+    required this.account,
+    required this.currency,
+    this.onTap,
+  });
 
   final AccountModel account;
   final Currency currency;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -20,64 +25,58 @@ class AccountTile extends StatelessWidget {
     final accentColor = AppColors.entity(account.color, brightness);
 
     return Card(
-      margin: EdgeInsets.zero,
+      margin: .zero,
       elevation: 0,
       color: theme.colorScheme.surface,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: Row(
-          children: [
-            CircleAvatar(
-              backgroundColor: accentColor.withValues(alpha: account.isArchived ? 0.08 : 0.16),
-              foregroundColor: accentColor,
-              child: Icon(_icons[account.type]),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(account.name, style: theme.textTheme.titleMedium, overflow: TextOverflow.ellipsis),
-                  Text(
-                    _subtitle(context, locale),
-                    style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
+      clipBehavior: .antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const .symmetric(horizontal: 16),
+          child: Row(
+            children: [
+              CircleAvatar(
+                backgroundColor: accentColor.withValues(
+                  alpha: account.isArchived ? 0.08 : 0.16,
+                ),
+                foregroundColor: accentColor,
+                child: Icon(_icons[account.type]),
               ),
-            ),
-            const SizedBox(width: 12),
-            Text(
-              formatMoney(account.balance, currency, locale),
-              style: theme.textTheme.titleMedium?.copyWith(
-                color: account.balance < 0 ? AppColors.negative(brightness) : null,
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: .center,
+                  crossAxisAlignment: .start,
+                  children: [
+                    Text(
+                      account.name,
+                      style: theme.textTheme.titleMedium,
+                      overflow: .ellipsis,
+                    ),
+                    Text(
+                      accountSubtitle(context, account, currency),
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                      overflow: .ellipsis,
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+              const SizedBox(width: 12),
+              Text(
+                formatMoney(account.balance, currency, locale),
+                style: theme.textTheme.titleMedium?.copyWith(
+                  color: account.balance < 0
+                      ? AppColors.negative(brightness)
+                      : null,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
-  }
-
-  String _subtitle(BuildContext context, String locale) {
-    final l10n = context.l10n;
-    final type = switch (account.type) {
-      AccountType.debit => l10n.accountTypeDebit,
-      AccountType.cash => l10n.accountTypeCash,
-      AccountType.savings => l10n.accountTypeSavings,
-      AccountType.credit => l10n.accountTypeCredit,
-    };
-    final details = [
-      if (account.isArchived) l10n.accountArchived,
-      if (account.cardLast4 case final last4?) l10n.accountCardMask(last4),
-      if (account.interestRate case final rate?)
-        l10n.accountInterest(NumberFormat.decimalPattern(locale).format(rate)),
-      if (account.creditLimit case final limit?)
-        l10n.accountCreditLimit(formatMoney(limit, currency, locale)),
-    ];
-
-    return [type, ...details].join(' · ');
   }
 
   static const _icons = {

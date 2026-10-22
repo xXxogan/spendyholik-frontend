@@ -16,11 +16,17 @@ void main() {
   });
 
   test('отрицательная сумма — с типографским минусом', () {
-    expect(formatMoney(-2340000, Currency.rub, 'ru'), '${minus}23${nbsp}400$nbsp₽');
+    expect(
+      formatMoney(-2340000, Currency.rub, 'ru'),
+      '${minus}23${nbsp}400$nbsp₽',
+    );
   });
 
   test('signed: плюс у положительной, ноль без знака', () {
-    expect(formatMoney(11850000, Currency.rub, 'ru', signed: true), '+118${nbsp}500$nbsp₽');
+    expect(
+      formatMoney(11850000, Currency.rub, 'ru', signed: true),
+      '+118${nbsp}500$nbsp₽',
+    );
     expect(formatMoney(0, Currency.rub, 'ru', signed: true), '0$nbsp₽');
   });
 
@@ -30,12 +36,18 @@ void main() {
   });
 
   test('compact ru: «120 тыс. ₽»', () {
-    expect(formatMoneyCompact(12000000, Currency.rub, 'ru'), '120$nbspтыс.$nbsp₽');
+    expect(
+      formatMoneyCompact(12000000, Currency.rub, 'ru'),
+      '120$nbspтыс.$nbsp₽',
+    );
   });
 
   test('compact ru: малые суммы и миллионы', () {
     expect(formatMoneyCompact(50000, Currency.rub, 'ru'), '500$nbsp₽');
-    expect(formatMoneyCompact(150000000, Currency.rub, 'ru'), '1,5$nbspмлн$nbsp₽');
+    expect(
+      formatMoneyCompact(150000000, Currency.rub, 'ru'),
+      '1,5$nbspмлн$nbsp₽',
+    );
   });
 
   test('compact en', () {
@@ -43,7 +55,10 @@ void main() {
   });
 
   group('parseAmountInput', () {
-    test('пробелы и запятая', () => expect(parseAmountInput('1 240,5'), 124050));
+    test(
+      'пробелы и запятая',
+      () => expect(parseAmountInput('1 240,5'), 124050),
+    );
     test('nbsp', () => expect(parseAmountInput('1${nbsp}240,50'), 124050));
     test('точка', () => expect(parseAmountInput('1240.50'), 124050));
     test('целое', () => expect(parseAmountInput('300'), 30000));
