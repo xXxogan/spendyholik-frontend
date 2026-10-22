@@ -2,8 +2,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:spendyholik/core/format/money_format.dart';
 import 'package:spendyholik/core/models/currency.dart';
 
-const nbsp = ' ';
-const minus = '−';
+const nbsp = '\u00a0';
+const minus = '\u2212';
 
 void main() {
   test('ru: разряды через неразрывный пробел, знак валюты после суммы', () {
@@ -27,5 +27,35 @@ void main() {
   test('en: знак валюты перед суммой, разряды через запятую', () {
     expect(formatMoney(23005000, Currency.usd, 'en'), r'$230,050');
     expect(formatMoney(-124050, Currency.usd, 'en'), '$minus\$1,240.50');
+  });
+
+  test('compact ru: «120 тыс. ₽»', () {
+    expect(formatMoneyCompact(12000000, Currency.rub, 'ru'), '120$nbspтыс.$nbsp₽');
+  });
+
+  test('compact ru: малые суммы и миллионы', () {
+    expect(formatMoneyCompact(50000, Currency.rub, 'ru'), '500$nbsp₽');
+    expect(formatMoneyCompact(150000000, Currency.rub, 'ru'), '1,5$nbspмлн$nbsp₽');
+  });
+
+  test('compact en', () {
+    expect(formatMoneyCompact(12000000, Currency.usd, 'en'), r'$120K');
+  });
+
+  group('parseAmountInput', () {
+    test('пробелы и запятая', () => expect(parseAmountInput('1 240,5'), 124050));
+    test('nbsp', () => expect(parseAmountInput('1${nbsp}240,50'), 124050));
+    test('точка', () => expect(parseAmountInput('1240.50'), 124050));
+    test('целое', () => expect(parseAmountInput('300'), 30000));
+    test('пусто, ноль, мусор', () {
+      expect(parseAmountInput(''), isNull);
+      expect(parseAmountInput('   '), isNull);
+      expect(parseAmountInput('0'), isNull);
+      expect(parseAmountInput('0,00'), isNull);
+      expect(parseAmountInput('abc'), isNull);
+      expect(parseAmountInput('12abc'), isNull);
+      expect(parseAmountInput('1,2,3'), isNull);
+    });
+    test('отрицательное → null', () => expect(parseAmountInput('-5'), isNull));
   });
 }
