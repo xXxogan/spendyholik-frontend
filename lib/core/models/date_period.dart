@@ -63,4 +63,11 @@ class DatePeriod {
 
   bool contains(DateTime moment) =>
       !moment.isBefore(start) && moment.isBefore(end);
+
+  @override
+  bool operator ==(Object other) =>
+      other is DatePeriod && other.start == start && other.end == end;
+
+  @override
+  int get hashCode => Object.hash(start, end);
 }

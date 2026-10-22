@@ -2,22 +2,37 @@ import 'package:auto_route/auto_route.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:spendyholik/core/widgets/widgets.dart';
 import 'package:spendyholik/features/accounts/accounts.dart';
+import 'package:spendyholik/features/transactions/transactions.dart';
+import 'package:spendyholik/l10n/l10n.dart';
 
 @RoutePage()
 class DashboardPage extends StatelessWidget {
   const DashboardPage({super.key});
 
+  static const _transactionsTab = 1;
+
   @override
   Widget build(BuildContext context) {
-    return const BaseLayout.slivers(
+    final l10n = context.l10n;
+
+    return BaseLayout.slivers(
       slivers: [
         ContentSliverPadding(
           sliver: SliverToBoxAdapter(
             child: Padding(
-              padding: .only(top: 12, bottom: 120),
+              padding: const .only(top: 12, bottom: 120),
               child: TwoColumnLayout(
-                primary: [TotalBalanceCard()],
-                secondary: [AccountsSection()],
+                primary: const [TotalBalanceCard(), AccountsSection()],
+                secondary: [
+                  TransactionsSection(
+                    filter: const TransactionFilter(limit: 5),
+                    title: l10n.dashboardRecentTransactions,
+                    actionLabel: l10n.dashboardAllTransactions,
+                    onSeeAll: () =>
+                        AutoTabsRouter.of(context)
+                            .setActiveIndex(_transactionsTab),
+                  ),
+                ],
               ),
             ),
           ),

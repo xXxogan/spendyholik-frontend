@@ -2,15 +2,24 @@ import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:spendyholik/app/di/injection.dart';
+import 'package:spendyholik/core/events/data_change_bus.dart';
 import 'package:spendyholik/core/models/entity_color.dart';
 import 'package:spendyholik/features/accounts/data/models/account_model.dart';
 import 'package:spendyholik/features/accounts/presentation/cubit/account_detail_cubit.dart';
 import 'package:spendyholik/features/accounts/presentation/pages/account_detail_page.dart';
+import 'package:spendyholik/features/transactions/data/models/models.dart';
+import 'package:spendyholik/features/transactions/data/repositories/repositories.dart';
+import 'package:spendyholik/features/transactions/presentation/cubit/transactions_cubit.dart';
 
 import '../../../../helpers/pump_app.dart';
 
 class MockAccountDetailCubit extends MockCubit<AccountDetailState>
     implements AccountDetailCubit {}
+
+class MockTransactionRepository extends Mock implements TransactionRepository {}
+
+class MockDataChangeBus extends Mock implements DataChangeBus {}
 
 void main() {
   late MockAccountDetailCubit cubit;
@@ -29,7 +38,19 @@ void main() {
     BalancePoint(at: DateTime(2026, 10, 19), balance: 8425000),
   ];
 
-  setUp(() => cubit = MockAccountDetailCubit());
+  setUpAll(() => registerFallbackValue(const TransactionFilter()));
+
+  // Секция операций берёт свой Cubit из DI — даём ей пустой список.
+  setUp(() {
+    cubit = MockAccountDetailCubit();
+    final transactions = MockTransactionRepository();
+    final bus = MockDataChangeBus();
+    when(() => bus.changes).thenAnswer((_) => const Stream.empty());
+    when(() => transactions.getTransactions(any())).thenAnswer((_) async => []);
+    getIt.registerFactory(() => TransactionsCubit(transactions, bus));
+  });
+
+  tearDown(getIt.reset);
 
   Future<void> pump(WidgetTester tester, AccountDetailState state) async {
     when(() => cubit.state).thenReturn(state);

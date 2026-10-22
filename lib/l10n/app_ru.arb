@@ -113,5 +113,15 @@
   "categoryFormColor": "Цвет",
   "categoryFormParent": "Родительская категория",
   "categoryFormNoParent": "Без родителя",
-  "categoryFormSaved": "Категория сохранена"
+  "categoryFormSaved": "Категория сохранена",
+  "transactionsFilterAll": "Все",
+  "transactionsFilterExpense": "Расходы",
+  "transactionsFilterIncome": "Доходы",
+  "transactionsFilterTransfer": "Переводы",
+  "transactionsNothingFound": "Ничего не найдено",
+  "transactionsReset": "Сбросить",
+  "transactionsNone": "Операций пока нет",
+  "dashboardRecentTransactions": "Последние операции",
+  "dashboardAllTransactions": "Все",
+  "accountDetailTransactions": "Операции по счёту"
 }

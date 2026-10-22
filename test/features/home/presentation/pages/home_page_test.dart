@@ -10,6 +10,9 @@ import 'package:spendyholik/features/accounts/data/models/models.dart';
 import 'package:spendyholik/features/accounts/data/repositories/repositories.dart';
 import 'package:spendyholik/features/accounts/presentation/cubit/accounts_cubit.dart';
 import 'package:spendyholik/features/accounts/presentation/cubit/total_balance_cubit.dart';
+import 'package:spendyholik/features/transactions/data/models/models.dart';
+import 'package:spendyholik/features/transactions/data/repositories/repositories.dart';
+import 'package:spendyholik/features/transactions/presentation/cubit/transactions_cubit.dart';
 import 'package:spendyholik/l10n/l10n.dart';
 
 import '../../../../helpers/pump_app.dart';
@@ -40,7 +43,11 @@ class MockAccountRepository extends Mock implements AccountRepository {}
 
 class MockDataChangeBus extends Mock implements DataChangeBus {}
 
+class MockTransactionRepository extends Mock implements TransactionRepository {}
+
 void main() {
+  setUpAll(() => registerFallbackValue(const TransactionFilter()));
+
   // Оболочке не важны данные вкладок — Главной хватает пустых счетов.
   setUp(() {
     final repository = MockAccountRepository();
@@ -49,9 +56,12 @@ void main() {
     when(() => repository.getAccounts()).thenAnswer((_) async => []);
     when(() => repository.getTotalBalance())
         .thenAnswer((_) async => const TotalBalance(total: 0, monthDelta: 0));
+    final transactions = MockTransactionRepository();
+    when(() => transactions.getTransactions(any())).thenAnswer((_) async => []);
     getIt
       ..registerFactory(() => AccountsCubit(repository, bus))
-      ..registerFactory(() => TotalBalanceCubit(repository, bus));
+      ..registerFactory(() => TotalBalanceCubit(repository, bus))
+      ..registerFactory(() => TransactionsCubit(transactions, bus));
   });
 
   tearDown(getIt.reset);

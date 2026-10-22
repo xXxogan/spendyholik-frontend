@@ -78,5 +78,15 @@
   "categoryFormColor": "Color",
   "categoryFormParent": "Parent category",
   "categoryFormNoParent": "No parent",
-  "categoryFormSaved": "Category saved"
+  "categoryFormSaved": "Category saved",
+  "transactionsFilterAll": "All",
+  "transactionsFilterExpense": "Expenses",
+  "transactionsFilterIncome": "Income",
+  "transactionsFilterTransfer": "Transfers",
+  "transactionsNothingFound": "Nothing found",
+  "transactionsReset": "Reset",
+  "transactionsNone": "No transactions yet",
+  "dashboardRecentTransactions": "Recent transactions",
+  "dashboardAllTransactions": "All",
+  "accountDetailTransactions": "Account transactions"
 }

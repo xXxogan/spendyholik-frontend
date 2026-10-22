@@ -26,3 +26,33 @@ class TransactionModel {
   final DateTime occurredAt;
   final String? note;
 }
+
+class TransactionDraft {
+  const TransactionDraft({
+    required this.type,
+    required this.amount,
+    required this.title,
+    required this.accountId,
+    required this.occurredAt,
+    this.categoryId,
+    this.toAccountId,
+    this.note,
+  });
+
+  final TransactionType type;
+  final int amount;
+  final String title;
+  final String? categoryId;
+  final String accountId;
+  final String? toAccountId;
+  final DateTime occurredAt;
+  final String? note;
+}
+
+class TransactionDayGroup {
+  const TransactionDayGroup({required this.day, required this.items});
+
+  /// Начало дня.
+  final DateTime day;
+  final List<TransactionModel> items;
+}
