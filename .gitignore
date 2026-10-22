@@ -46,3 +46,10 @@ docs/pipeline/
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Generated code
+*.g.dart
+*.gr.dart
+*.freezed.dart
+*.config.dart
+lib/l10n/app_localizations*.dart

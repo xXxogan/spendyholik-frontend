@@ -1,5 +1,6 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:flutter/widgets.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:spendyholik/core/widgets/widgets.dart';
 
 @RoutePage()
 class AnalyticsPage extends StatelessWidget {
@@ -7,6 +8,6 @@ class AnalyticsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    return const BaseLayout(children: [SkeletonList(itemCount: 12)]);
   }
 }

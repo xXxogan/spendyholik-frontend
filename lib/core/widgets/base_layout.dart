@@ -1,9 +1,12 @@
 import 'package:material_ui/material_ui.dart';
 
 class BaseLayout extends StatelessWidget {
-  const BaseLayout({super.key, required this.children});
+  const BaseLayout({super.key, required List<Widget> this.children}) : slivers = null;
 
-  final List<Widget> children;
+  const BaseLayout.slivers({super.key, required List<Widget> this.slivers}) : children = null;
+
+  final List<Widget>? children;
+  final List<Widget>? slivers;
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +20,8 @@ class BaseLayout extends StatelessWidget {
           ),
         ),
 
-        for (final child in children) SliverToBoxAdapter(child: child),
+        ...?slivers,
+        for (final child in children ?? const <Widget>[]) SliverToBoxAdapter(child: child),
       ],
     );
   }

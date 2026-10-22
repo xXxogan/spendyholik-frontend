@@ -1,0 +1,54 @@
+{
+  "@@locale": "ru",
+  "appTitle": "SpendyHolik",
+  "appTitlePrefix": "Spendy",
+  "appTitleSuffix": "Holik",
+  "navDashboard": "Главная",
+  "navTransactions": "Операции",
+  "navAnalytics": "Аналитика",
+  "navBudgets": "Бюджеты",
+  "navProfile": "Профиль",
+  "commonRetry": "Повторить",
+  "commonSave": "Сохранить",
+  "commonBack": "Назад",
+  "commonToday": "Сегодня",
+  "commonYesterday": "Вчера",
+  "errorNetwork": "Нет соединения",
+  "errorUnknown": "Что-то пошло не так",
+  "errorNotFound": "Не найдено",
+  "dashboardAllAccounts": "Все счета",
+  "accountsTitle": "Счета",
+  "accountsFilterAll": "Все",
+  "accountsFilterActive": "Активные",
+  "accountsFilterArchived": "Архив",
+  "accountsEmpty": "Нет счетов",
+  "accountTypeDebit": "Дебетовая",
+  "accountTypeCash": "Наличные",
+  "accountTypeSavings": "Вклад",
+  "accountTypeCredit": "Кредитная",
+  "accountArchived": "Архив",
+  "accountCardMask": "•• {last4}",
+  "@accountCardMask": {
+    "placeholders": {
+      "last4": {
+        "type": "String"
+      }
+    }
+  },
+  "accountInterest": "{rate}% годовых",
+  "@accountInterest": {
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "accountCreditLimit": "лимит {amount}",
+  "@accountCreditLimit": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  }
+}
