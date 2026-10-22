@@ -2,6 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:spendyholik/app/di/injection.dart';
+import 'package:spendyholik/app/router/app_router.gr.dart';
 import 'package:spendyholik/core/models/models.dart';
 import 'package:spendyholik/core/widgets/widgets.dart';
 import 'package:spendyholik/features/accounts/presentation/cubit/accounts_cubit.dart';
@@ -37,9 +38,11 @@ class AccountsView extends StatelessWidget {
     };
 
     return AppGlassScaffold(
-      leading: const BackButton(),
-      title: Text(context.l10n.accountsTitle),
+      leading: const AppBackButton(fallback: TabsRoute(children: [DashboardRoute()])),
+      title: context.l10n.accountsTitle,
+      largeTitle: true,
       body: BaseLayout.slivers(
+        largeTitle: context.l10n.accountsTitle,
         slivers: [
           ContentSliverPadding(
             sliver: SliverToBoxAdapter(

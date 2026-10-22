@@ -1,8 +1,15 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:mocktail/mocktail.dart';
+import 'package:spendyholik/app/di/injection.dart';
 import 'package:spendyholik/app/router/app_router.dart';
 import 'package:spendyholik/app/theme/app_theme.dart';
+import 'package:spendyholik/core/events/data_change_bus.dart';
 import 'package:spendyholik/core/widgets/glass/glass.dart';
+import 'package:spendyholik/features/accounts/data/models/models.dart';
+import 'package:spendyholik/features/accounts/data/repositories/repositories.dart';
+import 'package:spendyholik/features/accounts/presentation/cubit/accounts_cubit.dart';
+import 'package:spendyholik/features/accounts/presentation/cubit/total_balance_cubit.dart';
 import 'package:spendyholik/l10n/l10n.dart';
 
 import '../../../../helpers/pump_app.dart';
@@ -29,7 +36,26 @@ Future<void> pumpApp(
   await settle(tester);
 }
 
+class MockAccountRepository extends Mock implements AccountRepository {}
+
+class MockDataChangeBus extends Mock implements DataChangeBus {}
+
 void main() {
+  // Оболочке не важны данные вкладок — Главной хватает пустых счетов.
+  setUp(() {
+    final repository = MockAccountRepository();
+    final bus = MockDataChangeBus();
+    when(() => bus.changes).thenAnswer((_) => const Stream.empty());
+    when(() => repository.getAccounts()).thenAnswer((_) async => []);
+    when(() => repository.getTotalBalance())
+        .thenAnswer((_) async => const TotalBalance(total: 0, monthDelta: 0));
+    getIt
+      ..registerFactory(() => AccountsCubit(repository, bus))
+      ..registerFactory(() => TotalBalanceCubit(repository, bus));
+  });
+
+  tearDown(getIt.reset);
+
   testWidgets('узкий экран — нижняя навигация, без боковой', (tester) async {
     await pumpApp(tester, width: 400);
 

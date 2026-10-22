@@ -2,8 +2,9 @@ import 'package:material_ui/material_ui.dart';
 import 'package:spendyholik/app/di/injection.dart';
 import 'package:spendyholik/app/router/app_router.dart';
 import 'package:spendyholik/app/theme/app_theme.dart';
+import 'package:spendyholik/core/logger/talker_auto_route_observer.dart';
 import 'package:spendyholik/l10n/l10n.dart';
-import 'package:talker_flutter/talker_flutter.dart';
+import 'package:talker/talker.dart';
 
 class SpendyHolikApp extends StatefulWidget {
   const SpendyHolikApp({super.key});
@@ -14,7 +15,7 @@ class SpendyHolikApp extends StatefulWidget {
 
 class _SpendyHolikAppState extends State<SpendyHolikApp> {
   late final _routerConfig = getIt<AppRouter>().config(
-    navigatorObservers: () => [TalkerRouteObserver(getIt<Talker>())],
+    navigatorObservers: () => [TalkerAutoRouteObserver(getIt<Talker>())],
   );
 
   @override

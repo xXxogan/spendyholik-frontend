@@ -48,12 +48,9 @@ class _HomeShell extends StatelessWidget {
                 final tabs = router.innerRouterOf<TabsRouter>(TabsRoute.name);
                 return AppSideNav(
                   destinations: homeDestinations(context.l10n),
-                  selectedIndex: tabs?.activeIndex ?? 0,
+                  selectedIndex: tabs?.activeIndex ?? -1,
                   extended: extended,
-                  onSelected: (index) {
-                    router.popUntilRouteWithName(TabsRoute.name);
-                    tabs?.setActiveIndex(index);
-                  },
+                  onSelected: (index) => selectHomeTab(router, tabs, index),
                 );
               },
             ),

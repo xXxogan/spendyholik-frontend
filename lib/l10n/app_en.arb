@@ -29,5 +29,7 @@
   "accountArchived": "Archived",
   "accountCardMask": "•• {last4}",
   "accountInterest": "{rate}% per year",
-  "accountCreditLimit": "limit {amount}"
+  "accountCreditLimit": "limit {amount}",
+  "dashboardTotalBalance": "Total balance",
+  "dashboardMonthDelta": "{amount} this month"
 }

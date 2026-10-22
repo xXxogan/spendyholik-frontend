@@ -50,5 +50,14 @@
         "type": "String"
       }
     }
+  },
+  "dashboardTotalBalance": "Общий баланс",
+  "dashboardMonthDelta": "{amount} в этом месяце",
+  "@dashboardMonthDelta": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
   }
 }

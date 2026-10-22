@@ -19,14 +19,15 @@ class TabsPage extends StatelessWidget {
         final isDashboard = tabsRouter.activeIndex == 0;
 
         return AppGlassScaffold(
-          title: isDashboard
-              ? const _BrandTitle()
-              : Text(destinations[tabsRouter.activeIndex].label),
+          titleWidget: isDashboard ? const _BrandTitle() : null,
+          title: destinations[tabsRouter.activeIndex].label,
+          largeTitle: !isDashboard,
           actions: isDashboard
               ? [
-                  IconButton(
+                  AppGlassIconButton(
                     tooltip: destinations.last.label,
-                    icon: Icon(Icons.person_2, color: Theme.of(context).colorScheme.primary),
+                    icon: Icons.person_2,
+                    color: Theme.of(context).colorScheme.primary,
                     onPressed: () => tabsRouter.setActiveIndex(destinations.length - 1),
                   ),
                 ]
