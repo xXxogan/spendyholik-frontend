@@ -11,7 +11,10 @@ class MockTabsRouter extends Mock implements TabsRouter {}
 void main() {
   late MockStackRouter router;
 
-  setUpAll(() => registerFallbackValue(<PageRouteInfo>[]));
+  setUpAll(() {
+    registerFallbackValue(<PageRouteInfo>[]);
+    registerFallbackValue(const TabsRoute());
+  });
 
   setUp(() {
     router = MockStackRouter();
@@ -40,4 +43,32 @@ void main() {
       AnalyticsRoute.name,
     );
   });
+
+  test('ссылка панели при вкладках в стеке — закрыть детали и открыть поверх вкладок', () async {
+    when(() => router.push(any())).thenAnswer((_) async => null);
+    final tabs = MockTabsRouter();
+
+    await openHomeLink(router, tabs, const CategoriesRoute());
+
+    verify(() => router.popUntilRouteWithName(TabsRoute.name)).called(1);
+    final route =
+        verify(() => router.push(captureAny())).captured.single
+            as PageRouteInfo;
+    expect(route.routeName, CategoriesRoute.name);
+  });
+
+  test(
+    'ссылка панели без вкладок в стеке — стек из вкладок и страницы',
+    () async {
+      await openHomeLink(router, null, const CategoriesRoute());
+
+      final routes =
+          verify(() => router.replaceAll(captureAny())).captured.single
+              as List<PageRouteInfo>;
+      expect(routes.map((r) => r.routeName), [
+        TabsRoute.name,
+        CategoriesRoute.name,
+      ]);
+    },
+  );
 }

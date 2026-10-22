@@ -61,5 +61,11 @@
   "fieldErrorExceedsRemaining": "More than the remaining debt",
   "fieldErrorExceedsTarget": "More than the goal target",
   "fieldErrorSameAccount": "Choose a different account",
-  "fieldErrorWrongPassword": "Wrong password"
+  "fieldErrorWrongPassword": "Wrong password",
+  "categoriesTitle": "Categories",
+  "categoryKindExpense": "Expenses",
+  "categoryKindIncome": "Income",
+  "categoryKindTransfer": "Transfers",
+  "categoriesGroupEmpty": "No categories yet",
+  "categoryTransactionCount": "{count, plural, one{{count} transaction} other{{count} transactions}}"
 }

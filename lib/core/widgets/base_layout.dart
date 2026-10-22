@@ -2,6 +2,7 @@ import 'package:spendyholik/core/widgets/glass/large_title_sliver.dart';
 import 'package:spendyholik/core/widgets/glass/large_title_scope.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:spendyholik/core/widgets/content_sliver_padding.dart';
+import 'package:spendyholik/core/widgets/glass/shell_scope.dart';
 
 class BaseLayout extends StatelessWidget {
   const BaseLayout({
@@ -34,7 +35,10 @@ class BaseLayout extends StatelessWidget {
         SliverToBoxAdapter(
           child: Padding(
             padding: .only(
-              top: MediaQuery.of(context).padding.top + kToolbarHeight,
+              top:
+                  MediaQuery.of(context).padding.top +
+                  kToolbarHeight +
+                  ShellScope.appBarTopOf(context),
             ),
           ),
         ),

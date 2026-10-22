@@ -39,3 +39,13 @@ List<AppNavDestination> homeDestinations(AppLocalizations l10n) => [
     label: l10n.navProfile,
   ),
 ];
+
+const homeLinkRoutes = <PageRouteInfo>[CategoriesRoute()];
+
+List<AppNavDestination> homeLinks(AppLocalizations l10n) => [
+  AppNavDestination(
+    icon: Icons.category_outlined,
+    selectedIcon: Icons.category,
+    label: l10n.categoriesTitle,
+  ),
+];

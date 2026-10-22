@@ -13,12 +13,20 @@ class AppSideNav extends StatelessWidget {
     required this.selectedIndex,
     required this.onSelected,
     required this.extended,
+    this.links = const [],
+    this.selectedLink,
+    this.onLinkSelected,
   });
 
   final List<AppNavDestination> destinations;
   final int selectedIndex;
   final ValueChanged<int> onSelected;
   final bool extended;
+
+  /// Второй блок под разделителем — разделы вне вкладок (как в макете).
+  final List<AppNavDestination> links;
+  final int? selectedLink;
+  final ValueChanged<int>? onLinkSelected;
 
   @override
   Widget build(BuildContext context) {
@@ -37,6 +45,15 @@ class AppSideNav extends StatelessWidget {
                 selected: i == selectedIndex,
                 extended: extended,
                 onTap: () => onSelected(i),
+              ),
+            if (links.isNotEmpty)
+              const Divider(height: 17, indent: 8, endIndent: 8),
+            for (var i = 0; i < links.length; i++)
+              SideNavItem(
+                destination: links[i],
+                selected: i == selectedLink,
+                extended: extended,
+                onTap: () => onLinkSelected?.call(i),
               ),
           ],
         ),

@@ -33,6 +33,8 @@ class AppGlassScaffold extends StatefulWidget {
 }
 
 class _AppGlassScaffoldState extends State<AppGlassScaffold> {
+  static const _toolbarHeight = 44.0;
+
   final _largeTitles = LargeTitleControllers();
 
   @override
@@ -44,13 +46,17 @@ class _AppGlassScaffoldState extends State<AppGlassScaffold> {
   @override
   Widget build(BuildContext context) {
     final leftInset = ShellScope.leftInsetOf(context);
+    final barTop = ShellScope.appBarTopOf(context);
     final title = widget.title;
 
     return GlassScaffold(
       backgroundColor: Theme.of(context).colorScheme.surfaceContainerHigh,
+      appBarHeight: _toolbarHeight + barTop,
       appBar: Padding(
-        padding: .only(left: leftInset),
+        padding: .only(left: leftInset, top: barTop),
         child: GlassAppBar(
+          toolbarHeight: _toolbarHeight,
+          padding: const .only(left: 8, right: 16),
           title: widget.titleWidget ?? (title == null ? null : Text(title)),
           largeTitleController: widget.largeTitle && title != null
               ? _largeTitles.of(title)

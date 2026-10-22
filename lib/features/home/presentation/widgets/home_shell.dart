@@ -36,11 +36,20 @@ class HomeShell extends StatelessWidget {
               listenable: router.root,
               builder: (context, _) {
                 final tabs = router.innerRouterOf<TabsRouter>(TabsRoute.name);
+                final link = homeLinkRoutes.indexWhere(
+                  (route) => route.routeName == router.current.name,
+                );
                 return AppSideNav(
                   destinations: homeDestinations(context.l10n),
-                  selectedIndex: tabs?.activeIndex ?? -1,
+                  selectedIndex: link == -1 ? tabs?.activeIndex ?? -1 : -1,
                   extended: extended,
                   onSelected: (index) => selectHomeTab(router, tabs, index),
+                  links: homeLinks(context.l10n),
+                  selectedLink: link,
+                  onLinkSelected: (index) {
+                    if (index == link) return;
+                    openHomeLink(router, tabs, homeLinkRoutes[index]);
+                  },
                 );
               },
             ),

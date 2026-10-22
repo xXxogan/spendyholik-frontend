@@ -65,3 +65,10 @@ class CategoryDraft {
   final EntityColor color;
   final String? parentId;
 }
+
+class CategoryNode {
+  const CategoryNode({required this.category, required this.children});
+
+  final CategoryModel category;
+  final List<CategoryModel> children;
+}

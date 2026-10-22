@@ -89,5 +89,18 @@
   "fieldErrorExceedsRemaining": "Больше остатка долга",
   "fieldErrorExceedsTarget": "Больше суммы цели",
   "fieldErrorSameAccount": "Выберите другой счёт",
-  "fieldErrorWrongPassword": "Неверный пароль"
+  "fieldErrorWrongPassword": "Неверный пароль",
+  "categoriesTitle": "Категории",
+  "categoryKindExpense": "Расходы",
+  "categoryKindIncome": "Доходы",
+  "categoryKindTransfer": "Переводы",
+  "categoriesGroupEmpty": "Пока нет категорий",
+  "categoryTransactionCount": "{count, plural, one{{count} операция} few{{count} операции} many{{count} операций} other{{count} операции}}",
+  "@categoryTransactionCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

@@ -19,8 +19,15 @@ class AppBackButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Не Icons.adaptive: его arrow_back_ios сдвинут влево внутри глифа и в
+    // кружке стоит не по центру; arrow_back_ios_new — тот же шеврон по центру.
+    final icon = switch (Theme.of(context).platform) {
+      TargetPlatform.iOS || TargetPlatform.macOS => Icons.arrow_back_ios_new,
+      _ => Icons.arrow_back,
+    };
+
     return AppGlassIconButton(
-      icon: Icons.adaptive.arrow_back,
+      icon: icon,
       tooltip: MaterialLocalizations.of(context).backButtonTooltip,
       onPressed: () => navigateBack(context.router, fallback),
     );

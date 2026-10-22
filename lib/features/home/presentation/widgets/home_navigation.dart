@@ -18,3 +18,18 @@ Future<void> selectHomeTab(
     TabsRoute(children: [homeTabRoutes[index]]),
   ]);
 }
+
+/// Ссылки панели (Категории, Долги…) открываются поверх вкладок: «Назад»
+/// возвращает на вкладку, с которой пришли.
+Future<void> openHomeLink(
+  StackRouter router,
+  TabsRouter? tabs,
+  PageRouteInfo route,
+) async {
+  if (tabs != null) {
+    router.popUntilRouteWithName(TabsRoute.name);
+    await router.push(route);
+    return;
+  }
+  await router.replaceAll([const TabsRoute(), route]);
+}
