@@ -123,5 +123,17 @@
   "transactionsNone": "Операций пока нет",
   "dashboardRecentTransactions": "Последние операции",
   "dashboardAllTransactions": "Все",
-  "accountDetailTransactions": "Операции по счёту"
+  "accountDetailTransactions": "Операции по счёту",
+  "transactionFiltersTitle": "Фильтры",
+  "transactionFiltersPeriod": "Период",
+  "transactionFiltersCategory": "Категория",
+  "transactionFiltersAccount": "Счёт",
+  "transactionFiltersType": "Тип",
+  "transactionFiltersAny": "Все",
+  "transactionFiltersAllTime": "Всё время",
+  "transactionFiltersApply": "Применить",
+  "periodWeek": "Неделя",
+  "periodMonth": "Месяц",
+  "periodYear": "Год",
+  "periodCustom": "Произвольный"
 }

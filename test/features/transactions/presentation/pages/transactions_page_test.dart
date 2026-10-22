@@ -178,4 +178,28 @@ void main() {
 
     verify(() => cubit.load(any())).called(1);
   });
+
+  testWidgets('без фильтра сверх типа — кнопка «Фильтры» без точки', (
+    tester,
+  ) async {
+    await pump(
+      tester,
+      TransactionsState.loaded(groups, const TransactionFilter(type: .income)),
+    );
+
+    expect(find.byTooltip('Фильтры'), findsOneWidget);
+    expect(find.byType(Badge), findsNothing);
+  });
+
+  testWidgets('фильтр по счёту — точка на кнопке «Фильтры»', (tester) async {
+    await pump(
+      tester,
+      TransactionsState.loaded(
+        groups,
+        const TransactionFilter(accountId: 'card'),
+      ),
+    );
+
+    expect(find.byType(Badge), findsOneWidget);
+  });
 }

@@ -29,6 +29,30 @@ class TransactionFilter {
     limit: limit,
   );
 
+  TransactionFilter withPeriod(DatePeriod? period) => TransactionFilter(
+    type: type,
+    period: period,
+    categoryId: categoryId,
+    accountId: accountId,
+    limit: limit,
+  );
+
+  TransactionFilter withCategory(String? categoryId) => TransactionFilter(
+    type: type,
+    period: period,
+    categoryId: categoryId,
+    accountId: accountId,
+    limit: limit,
+  );
+
+  TransactionFilter withAccount(String? accountId) => TransactionFilter(
+    type: type,
+    period: period,
+    categoryId: categoryId,
+    accountId: accountId,
+    limit: limit,
+  );
+
   @override
   bool operator ==(Object other) =>
       other is TransactionFilter &&

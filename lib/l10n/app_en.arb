@@ -88,5 +88,17 @@
   "transactionsNone": "No transactions yet",
   "dashboardRecentTransactions": "Recent transactions",
   "dashboardAllTransactions": "All",
-  "accountDetailTransactions": "Account transactions"
+  "accountDetailTransactions": "Account transactions",
+  "transactionFiltersTitle": "Filters",
+  "transactionFiltersPeriod": "Period",
+  "transactionFiltersCategory": "Category",
+  "transactionFiltersAccount": "Account",
+  "transactionFiltersType": "Type",
+  "transactionFiltersAny": "All",
+  "transactionFiltersAllTime": "All time",
+  "transactionFiltersApply": "Apply",
+  "periodWeek": "Week",
+  "periodMonth": "Month",
+  "periodYear": "Year",
+  "periodCustom": "Custom"
 }

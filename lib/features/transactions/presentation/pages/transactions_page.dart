@@ -57,12 +57,30 @@ class TransactionsView extends StatelessWidget {
             child: constrained(
               Padding(
                 padding: const .symmetric(vertical: 12),
-                child: Align(
-                  alignment: .centerLeft,
-                  child: TransactionTypeChips(
-                    selected: filter.type,
-                    onSelected: cubit.setType,
-                  ),
+                child: Row(
+                  crossAxisAlignment: .start,
+                  spacing: 8,
+                  children: [
+                    Expanded(
+                      child: TransactionTypeChips(
+                        selected: filter.type,
+                        onSelected: cubit.setType,
+                      ),
+                    ),
+                    IconButton.filledTonal(
+                      tooltip: l10n.transactionFiltersTitle,
+                      icon: filter.withType(null) == const TransactionFilter()
+                          ? const Icon(Icons.tune)
+                          : const Badge(child: Icon(Icons.tune)),
+                      onPressed: () async {
+                        final applied = await showTransactionFiltersSheet(
+                          context,
+                          filter,
+                        );
+                        if (applied != null) await cubit.applyFilter(applied);
+                      },
+                    ),
+                  ],
                 ),
               ),
             ),

@@ -6,6 +6,7 @@ export 'app_glass_scaffold.dart';
 export 'app_nav_destination.dart';
 export 'app_side_nav.dart';
 export 'app_toast.dart';
+export 'glass_sheet.dart';
 export 'large_title_sliver.dart';
 export 'shell_scope.dart';
 export 'side_nav_metrics.dart';

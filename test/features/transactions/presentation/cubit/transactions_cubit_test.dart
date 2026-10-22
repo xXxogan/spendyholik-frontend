@@ -154,4 +154,30 @@ void main() {
       const TransactionsState.empty(TransactionFilter(categoryId: 'food')),
     ],
   );
+
+  blocTest<TransactionsCubit, TransactionsState>(
+    'applyFilter с комбинацией фильтров передаёт её в репозиторий целиком',
+    setUp: () =>
+        when(() => repository.getTransactions(any()))
+            .thenAnswer((_) async => [tx('a', DateTime(2026, 10, 22))]),
+    build: build,
+    act: (cubit) => cubit.applyFilter(
+      TransactionFilter(
+        type: .expense,
+        period: DatePeriod(start: DateTime(2026, 10), end: DateTime(2026, 11)),
+        categoryId: 'food',
+        accountId: 'card',
+      ),
+    ),
+    verify: (cubit) {
+      final passed =
+          verify(() => repository.getTransactions(captureAny())).captured.single
+              as TransactionFilter;
+      expect(passed.type, TransactionType.expense);
+      expect(passed.period?.start, DateTime(2026, 10));
+      expect(passed.categoryId, 'food');
+      expect(passed.accountId, 'card');
+      expect((cubit.state as TransactionsLoaded).filter, passed);
+    },
+  );
 }
