@@ -68,8 +68,8 @@ void main() {
 
     expect(find.text('Карта Тинькофф'), findsOneWidget);
     expect(find.textContaining('4831'), findsOneWidget);
-    expect(find.text('84 250 ₽'), findsOneWidget);
-    expect(find.text('−23 400 ₽'), findsOneWidget);
+    expect(find.text('84\u00a0250\u00a0₽'), findsOneWidget);
+    expect(find.text('\u221223\u00a0400\u00a0₽'), findsOneWidget);
   });
 
   testWidgets('нажатие на чип фильтра вызывает setFilter', (tester) async {
