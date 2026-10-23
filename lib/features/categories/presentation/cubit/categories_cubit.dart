@@ -3,16 +3,20 @@ import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
+import 'package:spendyholik/app/di/injection.dart';
+import 'package:spendyholik/core/bloc/cubit_logging.dart';
 import 'package:spendyholik/core/errors/failure.dart';
 import 'package:spendyholik/core/events/data_change_bus.dart';
 import 'package:spendyholik/features/categories/data/models/models.dart';
 import 'package:spendyholik/features/categories/data/repositories/repositories.dart';
+import 'package:talker_flutter/talker_flutter.dart';
 
 part 'categories_cubit.freezed.dart';
 part 'categories_state.dart';
 
 @injectable
-class CategoriesCubit extends Cubit<CategoriesState> {
+class CategoriesCubit extends Cubit<CategoriesState>
+    with CubitLogging<CategoriesState> {
   CategoriesCubit(this._repository, DataChangeBus bus)
     : super(const CategoriesState.loading()) {
     _changes = bus.changes
@@ -32,7 +36,8 @@ class CategoriesCubit extends Cubit<CategoriesState> {
     try {
       final categories = await _repository.getCategories();
       emit(CategoriesState.loaded(_group(categories)));
-    } on Failure catch (failure) {
+    } on Failure catch (failure, stackTrace) {
+      getIt<Talker>().handle(failure, stackTrace);
       emit(CategoriesState.error(failure));
     }
   }

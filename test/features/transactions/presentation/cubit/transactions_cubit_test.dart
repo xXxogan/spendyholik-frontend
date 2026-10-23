@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:spendyholik/app/di/injection.dart';
 import 'package:spendyholik/core/errors/failure.dart';
 import 'package:spendyholik/core/events/data_change_bus.dart';
 import 'package:spendyholik/core/models/models.dart';
@@ -10,6 +11,7 @@ import 'package:spendyholik/features/accounts/accounts.dart';
 import 'package:spendyholik/features/transactions/data/models/models.dart';
 import 'package:spendyholik/features/transactions/data/repositories/repositories.dart';
 import 'package:spendyholik/features/transactions/presentation/cubit/transactions_cubit.dart';
+import 'package:talker_flutter/talker_flutter.dart';
 
 class MockTransactionRepository extends Mock implements TransactionRepository {}
 
@@ -118,6 +120,10 @@ void main() {
       const TransactionsState.loading(),
       const TransactionsState.error(NetworkFailure()),
     ],
+    verify: (_) => expect(
+      getIt<Talker>().history.map((log) => log.exception ?? log.error),
+      contains(isA<NetworkFailure>()),
+    ),
   );
 
   blocTest<TransactionsCubit, TransactionsState>(

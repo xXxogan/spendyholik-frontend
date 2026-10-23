@@ -3,10 +3,13 @@ import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
+import 'package:spendyholik/app/di/injection.dart';
+import 'package:spendyholik/core/bloc/cubit_logging.dart';
 import 'package:spendyholik/core/errors/failure.dart';
 import 'package:spendyholik/core/events/data_change_bus.dart';
 import 'package:spendyholik/features/accounts/data/models/models.dart';
 import 'package:spendyholik/features/accounts/data/repositories/repositories.dart';
+import 'package:talker_flutter/talker_flutter.dart';
 
 part 'accounts_cubit.freezed.dart';
 part 'accounts_state.dart';
@@ -14,7 +17,8 @@ part 'accounts_state.dart';
 enum AccountsFilter { all, active, archived }
 
 @injectable
-class AccountsCubit extends Cubit<AccountsState> {
+class AccountsCubit extends Cubit<AccountsState>
+    with CubitLogging<AccountsState> {
   AccountsCubit(this._repository, DataChangeBus bus)
     : super(const AccountsState.loading()) {
     _changes = bus.changes
@@ -37,7 +41,8 @@ class AccountsCubit extends Cubit<AccountsState> {
         ...accounts.where((account) => account.isArchived),
       ];
       _emitVisible();
-    } on Failure catch (failure) {
+    } on Failure catch (failure, stackTrace) {
+      getIt<Talker>().handle(failure, stackTrace);
       emit(AccountsState.error(failure));
     }
   }

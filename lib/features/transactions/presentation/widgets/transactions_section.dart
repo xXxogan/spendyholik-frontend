@@ -1,6 +1,8 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:spendyholik/app/di/injection.dart';
+import 'package:spendyholik/app/router/app_router.gr.dart';
 import 'package:spendyholik/core/format/format.dart';
 import 'package:spendyholik/core/models/models.dart';
 import 'package:spendyholik/core/widgets/widgets.dart';
@@ -53,6 +55,11 @@ class TransactionsSection extends StatelessWidget {
                         TransactionTile(
                           transaction: transaction,
                           currency: _currency,
+                          onTap: () => context.router.push(
+                            TransactionDetailRoute(
+                              transactionId: transaction.id,
+                            ),
+                          ),
                           subtitle: [
                             formatDayLabel(
                               group.day,

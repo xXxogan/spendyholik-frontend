@@ -1,5 +1,6 @@
 import 'package:injectable/injectable.dart';
 import 'package:spendyholik/core/config/app_config.dart';
+import 'package:spendyholik/core/errors/failure.dart';
 import 'package:spendyholik/fake_backend/seed.dart';
 import 'package:spendyholik/features/accounts/accounts.dart';
 import 'package:spendyholik/features/categories/categories.dart';
@@ -111,6 +112,12 @@ class FakeBackend {
       parentId: draft.parentId,
       transactionCount: 0,
     );
+  }
+
+  void deleteTransaction(String id) {
+    final index = transactions.indexWhere((t) => t.id == id);
+    if (index == -1) throw const NotFoundFailure();
+    transactions.removeAt(index);
   }
 
   int _delta(String accountId, {DateTime? before}) {

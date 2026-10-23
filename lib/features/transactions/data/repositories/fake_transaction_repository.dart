@@ -1,14 +1,16 @@
 import 'package:injectable/injectable.dart';
 import 'package:spendyholik/core/errors/failure.dart';
+import 'package:spendyholik/core/events/data_change_bus.dart';
 import 'package:spendyholik/fake_backend/fake_backend.dart';
 import 'package:spendyholik/features/transactions/data/models/models.dart';
 import 'package:spendyholik/features/transactions/data/repositories/transaction_repository.dart';
 
 @LazySingleton(as: TransactionRepository)
 class FakeTransactionRepository implements TransactionRepository {
-  FakeTransactionRepository(this._backend);
+  FakeTransactionRepository(this._backend, this._bus);
 
   final FakeBackend _backend;
+  final DataChangeBus _bus;
 
   @override
   Future<List<TransactionModel>> getTransactions(TransactionFilter filter) =>
@@ -62,5 +64,8 @@ class FakeTransactionRepository implements TransactionRepository {
       throw UnimplementedError();
 
   @override
-  Future<void> delete(String id) => throw UnimplementedError();
+  Future<void> delete(String id) => _backend(() {
+    _backend.deleteTransaction(id);
+    _bus.emit({DataTopic.transactions, DataTopic.accounts, DataTopic.budgets});
+  });
 }

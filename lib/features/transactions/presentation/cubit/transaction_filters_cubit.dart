@@ -1,6 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
+import 'package:spendyholik/app/di/injection.dart';
+import 'package:spendyholik/core/bloc/cubit_logging.dart';
 import 'package:spendyholik/core/errors/failure.dart';
 import 'package:spendyholik/core/models/models.dart';
 import 'package:spendyholik/features/accounts/data/models/models.dart';
@@ -8,12 +10,14 @@ import 'package:spendyholik/features/accounts/data/repositories/repositories.dar
 import 'package:spendyholik/features/categories/data/models/models.dart';
 import 'package:spendyholik/features/categories/data/repositories/repositories.dart';
 import 'package:spendyholik/features/transactions/data/models/models.dart';
+import 'package:talker_flutter/talker_flutter.dart';
 
 part 'transaction_filters_cubit.freezed.dart';
 part 'transaction_filters_state.dart';
 
 @injectable
-class TransactionFiltersCubit extends Cubit<TransactionFiltersState> {
+class TransactionFiltersCubit extends Cubit<TransactionFiltersState>
+    with CubitLogging<TransactionFiltersState> {
   TransactionFiltersCubit(this._categories, this._accounts)
     : super(const TransactionFiltersState());
 
@@ -37,7 +41,8 @@ class TransactionFiltersCubit extends Cubit<TransactionFiltersState> {
           isLoading: false,
         ),
       );
-    } on Failure catch (failure) {
+    } on Failure catch (failure, stackTrace) {
+      getIt<Talker>().handle(failure, stackTrace);
       emit(TransactionFiltersState(isLoading: false, failure: failure));
     }
   }

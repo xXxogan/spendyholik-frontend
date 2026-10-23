@@ -1,17 +1,21 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
+import 'package:spendyholik/app/di/injection.dart';
+import 'package:spendyholik/core/bloc/cubit_logging.dart';
 import 'package:spendyholik/core/errors/failure.dart';
 import 'package:spendyholik/core/format/format.dart';
 import 'package:spendyholik/core/models/models.dart';
 import 'package:spendyholik/features/accounts/data/models/models.dart';
 import 'package:spendyholik/features/accounts/data/repositories/repositories.dart';
+import 'package:talker_flutter/talker_flutter.dart';
 
 part 'account_form_cubit.freezed.dart';
 part 'account_form_state.dart';
 
 @injectable
-class AccountFormCubit extends Cubit<AccountFormState> {
+class AccountFormCubit extends Cubit<AccountFormState>
+    with CubitLogging<AccountFormState> {
   AccountFormCubit(this._repository) : super(const AccountFormState());
 
   final AccountRepository _repository;
@@ -36,7 +40,8 @@ class AccountFormCubit extends Cubit<AccountFormState> {
           },
         ),
       );
-    } on Failure catch (failure) {
+    } on Failure catch (failure, stackTrace) {
+      getIt<Talker>().handle(failure, stackTrace);
       emit(AccountFormState(accountId: accountId, failure: failure));
     }
   }
@@ -121,7 +126,8 @@ class AccountFormCubit extends Cubit<AccountFormState> {
         await _repository.update(accountId, draft);
       }
       emit(state.copyWith(status: .success));
-    } on ValidationFailure catch (failure) {
+    } on ValidationFailure catch (failure, stackTrace) {
+      getIt<Talker>().handle(failure, stackTrace);
       emit(
         state.copyWith(
           status: .failure,
@@ -130,7 +136,8 @@ class AccountFormCubit extends Cubit<AccountFormState> {
           },
         ),
       );
-    } on Failure catch (failure) {
+    } on Failure catch (failure, stackTrace) {
+      getIt<Talker>().handle(failure, stackTrace);
       emit(state.copyWith(status: .failure, failure: failure));
     }
   }

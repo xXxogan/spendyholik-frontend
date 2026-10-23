@@ -3,16 +3,20 @@ import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
+import 'package:spendyholik/app/di/injection.dart';
+import 'package:spendyholik/core/bloc/cubit_logging.dart';
 import 'package:spendyholik/core/errors/failure.dart';
 import 'package:spendyholik/core/events/data_change_bus.dart';
 import 'package:spendyholik/features/transactions/data/models/models.dart';
 import 'package:spendyholik/features/transactions/data/repositories/repositories.dart';
+import 'package:talker_flutter/talker_flutter.dart';
 
 part 'transactions_cubit.freezed.dart';
 part 'transactions_state.dart';
 
 @injectable
-class TransactionsCubit extends Cubit<TransactionsState> {
+class TransactionsCubit extends Cubit<TransactionsState>
+    with CubitLogging<TransactionsState> {
   TransactionsCubit(this._repository, DataChangeBus bus)
     : super(const TransactionsState.loading()) {
     _changes = bus.changes
@@ -44,7 +48,8 @@ class TransactionsCubit extends Cubit<TransactionsState> {
             ? TransactionsState.empty(filter)
             : TransactionsState.loaded(_groupByDay(transactions), filter),
       );
-    } on Failure catch (failure) {
+    } on Failure catch (failure, stackTrace) {
+      getIt<Talker>().handle(failure, stackTrace);
       emit(TransactionsState.error(failure));
     }
   }

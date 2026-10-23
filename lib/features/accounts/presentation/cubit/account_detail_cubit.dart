@@ -3,16 +3,20 @@ import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
+import 'package:spendyholik/app/di/injection.dart';
+import 'package:spendyholik/core/bloc/cubit_logging.dart';
 import 'package:spendyholik/core/errors/failure.dart';
 import 'package:spendyholik/core/events/data_change_bus.dart';
 import 'package:spendyholik/features/accounts/data/models/models.dart';
 import 'package:spendyholik/features/accounts/data/repositories/repositories.dart';
+import 'package:talker_flutter/talker_flutter.dart';
 
 part 'account_detail_cubit.freezed.dart';
 part 'account_detail_state.dart';
 
 @injectable
-class AccountDetailCubit extends Cubit<AccountDetailState> {
+class AccountDetailCubit extends Cubit<AccountDetailState>
+    with CubitLogging<AccountDetailState> {
   AccountDetailCubit(this._repository, DataChangeBus bus)
     : super(const AccountDetailState.loading()) {
     _changes = bus.changes
@@ -36,7 +40,8 @@ class AccountDetailCubit extends Cubit<AccountDetailState> {
       final account = await _repository.getAccount(accountId);
       final history = await _repository.getBalanceHistory(accountId);
       emit(AccountDetailState.loaded(account, history));
-    } on Failure catch (failure) {
+    } on Failure catch (failure, stackTrace) {
+      getIt<Talker>().handle(failure, stackTrace);
       emit(AccountDetailState.error(failure));
     }
   }
@@ -47,7 +52,8 @@ class AccountDetailCubit extends Cubit<AccountDetailState> {
     try {
       await _repository.archive(_accountId);
       emit(const AccountDetailState.archived());
-    } on Failure catch (failure) {
+    } on Failure catch (failure, stackTrace) {
+      getIt<Talker>().handle(failure, stackTrace);
       emit(AccountDetailState.error(failure));
     }
   }
@@ -56,7 +62,8 @@ class AccountDetailCubit extends Cubit<AccountDetailState> {
     try {
       await _repository.unarchive(_accountId);
       await reload();
-    } on Failure catch (failure) {
+    } on Failure catch (failure, stackTrace) {
+      getIt<Talker>().handle(failure, stackTrace);
       emit(AccountDetailState.error(failure));
     }
   }

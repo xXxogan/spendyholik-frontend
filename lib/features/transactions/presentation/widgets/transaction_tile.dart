@@ -1,9 +1,9 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:spendyholik/app/theme/app_colors.dart';
-import 'package:spendyholik/core/format/format.dart';
 import 'package:spendyholik/core/models/models.dart';
 import 'package:spendyholik/core/widgets/widgets.dart';
 import 'package:spendyholik/features/transactions/data/models/models.dart';
+import 'package:spendyholik/features/transactions/presentation/widgets/transaction_amount.dart';
 
 class TransactionTile extends StatelessWidget {
   const TransactionTile({
@@ -30,20 +30,12 @@ class TransactionTile extends StatelessWidget {
     final category = t.category;
 
     final title = t.title.isEmpty ? category?.name ?? '' : t.title;
-    final (amount, amountColor) = switch (t.type) {
-      TransactionType.expense => (
-        formatMoney(-t.amount, currency, locale),
-        AppColors.negative(brightness),
-      ),
-      TransactionType.income => (
-        formatMoney(t.amount, currency, locale, signed: true),
-        AppColors.positive(brightness),
-      ),
-      TransactionType.transfer => (
-        formatMoney(t.amount, currency, locale),
-        null,
-      ),
-    };
+    final (amount, amountColor) = transactionAmount(
+      t,
+      currency,
+      locale,
+      brightness,
+    );
 
     return InkWell(
       onTap: onTap,

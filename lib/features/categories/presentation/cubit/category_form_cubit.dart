@@ -1,16 +1,20 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
+import 'package:spendyholik/app/di/injection.dart';
+import 'package:spendyholik/core/bloc/cubit_logging.dart';
 import 'package:spendyholik/core/errors/failure.dart';
 import 'package:spendyholik/core/models/models.dart';
 import 'package:spendyholik/features/categories/data/models/models.dart';
 import 'package:spendyholik/features/categories/data/repositories/repositories.dart';
+import 'package:talker_flutter/talker_flutter.dart';
 
 part 'category_form_cubit.freezed.dart';
 part 'category_form_state.dart';
 
 @injectable
-class CategoryFormCubit extends Cubit<CategoryFormState> {
+class CategoryFormCubit extends Cubit<CategoryFormState>
+    with CubitLogging<CategoryFormState> {
   CategoryFormCubit(this._repository) : super(const CategoryFormState());
 
   final CategoryRepository _repository;
@@ -39,7 +43,8 @@ class CategoryFormCubit extends Cubit<CategoryFormState> {
           categories: categories,
         ),
       );
-    } on Failure catch (failure) {
+    } on Failure catch (failure, stackTrace) {
+      getIt<Talker>().handle(failure, stackTrace);
       emit(CategoryFormState(categoryId: categoryId, failure: failure));
     }
   }
@@ -89,7 +94,8 @@ class CategoryFormCubit extends Cubit<CategoryFormState> {
         await _repository.update(categoryId, draft);
       }
       emit(state.copyWith(status: .success));
-    } on ValidationFailure catch (failure) {
+    } on ValidationFailure catch (failure, stackTrace) {
+      getIt<Talker>().handle(failure, stackTrace);
       emit(
         state.copyWith(
           status: .failure,
@@ -98,7 +104,8 @@ class CategoryFormCubit extends Cubit<CategoryFormState> {
           },
         ),
       );
-    } on Failure catch (failure) {
+    } on Failure catch (failure, stackTrace) {
+      getIt<Talker>().handle(failure, stackTrace);
       emit(state.copyWith(status: .failure, failure: failure));
     }
   }

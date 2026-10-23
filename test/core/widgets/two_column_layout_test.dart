@@ -35,4 +35,47 @@ void main() {
     expect(s.dy, p.dy);
     expect(s.dx, greaterThan(p.dx));
   });
+
+  testWidgets(
+    'смена раскладки (широкий ↔ средний) не пересоздаёт блоки — их Cubit не перезагружаются',
+    (tester) async {
+      var created = 0;
+      Future<void> pumpAt(double width) => pumpPage(
+        tester,
+        SingleChildScrollView(
+          child: TwoColumnLayout(
+            primary: [_Probe(onCreate: () => created++)],
+            secondary: const [SizedBox(height: 100)],
+          ),
+        ),
+        width: width,
+      );
+
+      await pumpAt(1280);
+      await pumpAt(900);
+      await pumpAt(1280);
+
+      expect(created, 1);
+    },
+  );
+}
+
+class _Probe extends StatefulWidget {
+  const _Probe({required this.onCreate});
+
+  final VoidCallback onCreate;
+
+  @override
+  State<_Probe> createState() => _ProbeState();
+}
+
+class _ProbeState extends State<_Probe> {
+  @override
+  void initState() {
+    super.initState();
+    widget.onCreate();
+  }
+
+  @override
+  Widget build(BuildContext context) => const SizedBox(height: 100);
 }

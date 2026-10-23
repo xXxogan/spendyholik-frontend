@@ -2,6 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:spendyholik/app/di/injection.dart';
+import 'package:spendyholik/app/router/app_router.gr.dart';
 import 'package:spendyholik/core/format/format.dart';
 import 'package:spendyholik/core/models/models.dart';
 import 'package:spendyholik/core/widgets/widgets.dart';
@@ -163,7 +164,13 @@ class _DayGroup extends StatelessWidget {
             child: Column(
               children: [
                 for (final transaction in group.items)
-                  TransactionTile(transaction: transaction, currency: currency),
+                  TransactionTile(
+                    transaction: transaction,
+                    currency: currency,
+                    onTap: () => context.router.push(
+                      TransactionDetailRoute(transactionId: transaction.id),
+                    ),
+                  ),
               ],
             ),
           ),
