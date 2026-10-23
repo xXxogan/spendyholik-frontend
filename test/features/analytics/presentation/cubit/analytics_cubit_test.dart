@@ -36,7 +36,7 @@ AnalyticsReport report({
   expense: expense,
   expenseChange: 0.12,
   expenseByCategory: shares,
-  monthly: const [],
+  trend: const [],
 );
 
 void main() {

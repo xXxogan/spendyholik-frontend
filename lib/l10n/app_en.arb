@@ -139,5 +139,8 @@
   "analyticsPrevYear": "last year",
   "analyticsByCategory": "Expenses by category",
   "analyticsEmpty": "No transactions in this period",
-  "analyticsNoExpenses": "No expenses"
+  "analyticsNoExpenses": "No expenses",
+  "analyticsTrendWeek": "Trend by weekday",
+  "analyticsTrendMonth": "Trend by month",
+  "analyticsTrendYear": "Trend by year"
 }

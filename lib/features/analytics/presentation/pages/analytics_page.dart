@@ -26,7 +26,7 @@ class AnalyticsView extends StatelessWidget {
 
   // Базовая валюта придёт из SessionCubit вместе с фичей user (T-28).
   static const _currency = Currency.rub;
-  static const _maxWidth = 720.0;
+  static const _segmentsMaxWidth = 480.0;
 
   @override
   Widget build(BuildContext context) {
@@ -40,40 +40,39 @@ class AnalyticsView extends StatelessWidget {
       AnalyticsError(:final preset) => preset,
     };
 
-    Widget constrained(Widget child) => Center(
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: _maxWidth),
-        child: child,
-      ),
-    );
-
     return BaseLayout.slivers(
       largeTitle: l10n.navAnalytics,
       slivers: [
         ContentSliverPadding(
           sliver: SliverToBoxAdapter(
-            child: constrained(
-              Padding(
+            child: Align(
+              alignment: .centerLeft,
+              child: Padding(
                 padding: const .symmetric(vertical: 12),
-                child: SegmentedButton<PeriodPreset>(
-                  segments: [
-                    ButtonSegment(
-                      value: PeriodPreset.week,
-                      label: Text(l10n.periodWeek),
-                    ),
-                    ButtonSegment(
-                      value: PeriodPreset.month,
-                      label: Text(l10n.periodMonth),
-                    ),
-                    ButtonSegment(
-                      value: PeriodPreset.year,
-                      label: Text(l10n.periodYear),
-                    ),
-                  ],
-                  selected: {preset},
-                  showSelectedIcon: false,
-                  onSelectionChanged: (selection) =>
-                      cubit.selectPeriod(selection.first),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(
+                    maxWidth: _segmentsMaxWidth,
+                  ),
+                  child: SegmentedButton<PeriodPreset>(
+                    segments: [
+                      ButtonSegment(
+                        value: PeriodPreset.week,
+                        label: Text(l10n.periodWeek),
+                      ),
+                      ButtonSegment(
+                        value: PeriodPreset.month,
+                        label: Text(l10n.periodMonth),
+                      ),
+                      ButtonSegment(
+                        value: PeriodPreset.year,
+                        label: Text(l10n.periodYear),
+                      ),
+                    ],
+                    selected: {preset},
+                    showSelectedIcon: false,
+                    onSelectionChanged: (selection) =>
+                        cubit.selectPeriod(selection.first),
+                  ),
                 ),
               ),
             ),
@@ -86,24 +85,61 @@ class AnalyticsView extends StatelessWidget {
           AnalyticsLoaded(:final report, :final percents) =>
             ContentSliverPadding(
               sliver: SliverToBoxAdapter(
-                child: constrained(
-                  Column(
-                    crossAxisAlignment: .stretch,
-                    children: [
-                      AnalyticsSummary(
-                        report: report,
-                        preset: preset,
-                        currency: _currency,
-                      ),
-                      const SizedBox(height: 24),
-                      SectionHeader(title: l10n.analyticsByCategory),
-                      CategoryShareList(
-                        shares: report.expenseByCategory,
-                        percents: percents,
-                        currency: _currency,
-                      ),
-                    ],
-                  ),
+                child: TwoColumnLayout(
+                  primary: [
+                    AnalyticsSummary(
+                      report: report,
+                      preset: preset,
+                      currency: _currency,
+                    ),
+                    Column(
+                      crossAxisAlignment: .stretch,
+                      children: [
+                        SectionHeader(title: l10n.analyticsByCategory),
+                        ContentCard(
+                          child: Column(
+                            spacing: 20,
+                            children: [
+                              if (report.expenseByCategory.isNotEmpty)
+                                ExpenseDonutChart(
+                                  shares: report.expenseByCategory,
+                                  percents: percents,
+                                  total: report.expense,
+                                  currency: _currency,
+                                ),
+                              CategoryShareList(
+                                shares: report.expenseByCategory,
+                                percents: percents,
+                                currency: _currency,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                  secondary: [
+                    Column(
+                      crossAxisAlignment: .stretch,
+                      children: [
+                        SectionHeader(
+                          title: switch (preset) {
+                            PeriodPreset.week => l10n.analyticsTrendWeek,
+                            PeriodPreset.year => l10n.analyticsTrendYear,
+                            PeriodPreset.month ||
+                            PeriodPreset.custom => l10n.analyticsTrendMonth,
+                          },
+                        ),
+                        ContentCard(
+                          child: TrendBarChart(
+                            trend: report.trend,
+                            preset: preset,
+                            currency: _currency,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
             ),

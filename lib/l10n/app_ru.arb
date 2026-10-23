@@ -208,5 +208,8 @@
   "analyticsPrevYear": "в прошлом году",
   "analyticsByCategory": "Расходы по категориям",
   "analyticsEmpty": "Нет операций за этот период",
-  "analyticsNoExpenses": "Расходов нет"
+  "analyticsNoExpenses": "Расходов нет",
+  "analyticsTrendWeek": "Динамика по дням недели",
+  "analyticsTrendMonth": "Динамика по месяцам",
+  "analyticsTrendYear": "Динамика по годам"
 }

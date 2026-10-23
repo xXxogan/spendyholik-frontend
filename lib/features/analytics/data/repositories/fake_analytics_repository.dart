@@ -38,19 +38,12 @@ class FakeAnalyticsRepository implements AnalyticsRepository {
             ),
         ]..sort((a, b) => b.amount.compareTo(a.amount));
 
-        final lastMonth = DateTime(period.start.year, period.start.month);
-        final monthly = [
-          for (var back = 5; back >= 0; back--)
+        final trend = [
+          for (final bucket in _trendBuckets(preset, period))
             () {
-              final month = DateTime(lastMonth.year, lastMonth.month - back);
-              final totals = _totals(
-                DatePeriod(
-                  start: month,
-                  end: DateTime(month.year, month.month + 1),
-                ),
-              );
-              return MonthlyTotals(
-                month: month,
+              final totals = _totals(bucket);
+              return PeriodTotals(
+                start: bucket.start,
                 income: totals.income,
                 expense: totals.expense,
               );
@@ -65,9 +58,43 @@ class FakeAnalyticsRepository implements AnalyticsRepository {
               ? null
               : (current.expense - previous.expense) / previous.expense,
           expenseByCategory: shares,
-          monthly: monthly,
+          trend: trend,
         );
       });
+
+  static const _months = 6;
+  static const _years = 3;
+
+  /// Неделя — по дням, месяц — последние месяцы, год — последние годы.
+  static List<DatePeriod> _trendBuckets(
+    PeriodPreset preset,
+    DatePeriod period,
+  ) {
+    final s = period.start;
+    return switch (preset) {
+      PeriodPreset.week => [
+        for (var d = 0; d < 7; d++)
+          DatePeriod(
+            start: DateTime(s.year, s.month, s.day + d),
+            end: DateTime(s.year, s.month, s.day + d + 1),
+          ),
+      ],
+      PeriodPreset.year => [
+        for (var back = _years - 1; back >= 0; back--)
+          DatePeriod(
+            start: DateTime(s.year - back),
+            end: DateTime(s.year - back + 1),
+          ),
+      ],
+      PeriodPreset.month || PeriodPreset.custom => [
+        for (var back = _months - 1; back >= 0; back--)
+          DatePeriod(
+            start: DateTime(s.year, s.month - back),
+            end: DateTime(s.year, s.month - back + 1),
+          ),
+      ],
+    };
+  }
 
   Iterable<TransactionModel> _inPeriod(DatePeriod period) =>
       _backend.transactions.where((t) => period.contains(t.occurredAt));

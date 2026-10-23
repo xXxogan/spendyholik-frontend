@@ -35,7 +35,7 @@ void main() {
         share: 0.607,
       ),
     ],
-    monthly: const [],
+    trend: const [],
   );
 
   setUpAll(() => registerFallbackValue(PeriodPreset.month));

@@ -15,15 +15,16 @@ class CategoryShare {
   final double share;
 }
 
-class MonthlyTotals {
-  const MonthlyTotals({
-    required this.month,
+/// Отрезок графика динамики: день, месяц или год — по шагу периода отчёта.
+class PeriodTotals {
+  const PeriodTotals({
+    required this.start,
     required this.income,
     required this.expense,
   });
 
-  /// Первое число месяца.
-  final DateTime month;
+  /// Начало дня, месяца или года.
+  final DateTime start;
   final int income;
   final int expense;
 }
@@ -35,7 +36,7 @@ class AnalyticsReport {
     required this.expense,
     required this.expenseChange,
     required this.expenseByCategory,
-    required this.monthly,
+    required this.trend,
   });
 
   final DatePeriod period;
@@ -48,8 +49,9 @@ class AnalyticsReport {
   /// По убыванию суммы, категории верхнего уровня.
   final List<CategoryShare> expenseByCategory;
 
-  /// Последние 6 месяцев по возрастанию, последний — месяц периода.
-  final List<MonthlyTotals> monthly;
+  /// По возрастанию: неделя — 7 дней недели, месяц — последние 6 месяцев,
+  /// год — последние 3 года; последний отрезок содержит период отчёта.
+  final List<PeriodTotals> trend;
 
   int get net => income - expense;
 }

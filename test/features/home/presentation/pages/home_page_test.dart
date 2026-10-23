@@ -74,7 +74,7 @@ void main() {
         expense: 0,
         expenseChange: null,
         expenseByCategory: const [],
-        monthly: const [],
+        trend: const [],
       ),
     );
     when(() => transactions.getTransactions(any())).thenAnswer((_) async => []);
