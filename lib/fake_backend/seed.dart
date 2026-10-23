@@ -216,6 +216,144 @@ abstract final class FakeSeed {
     const e = TransactionType.expense;
     const i = TransactionType.income;
     const t = TransactionType.transfer;
+    // Помесячная история до свежих 36 дней: для сравнения периодов и
+    // графиков по месяцам. Суммы меняются от месяца к месяцу детерминированно.
+    List<TransactionModel> history() => [
+      for (var m = 1; m <= 6; m++)
+        ...() {
+          final base = 30 * m + 6;
+          int vary(int amount, int seed) =>
+              amount + (m * 7919 + seed * 104729) % (amount ~/ 3);
+          return [
+            tx(
+              i,
+              11850000,
+              'Зарплата \u00b7 Яндекс',
+              base + 1,
+              10,
+              0,
+              'acc-savings',
+              category: 'cat-salary',
+            ),
+            tx(
+              t,
+              6000000,
+              'На карту',
+              base + 2,
+              12,
+              0,
+              'acc-savings',
+              toAccount: 'acc-tinkoff',
+            ),
+            tx(
+              e,
+              4500000,
+              'Аренда квартиры',
+              base + 3,
+              12,
+              0,
+              'acc-savings',
+              category: 'cat-housing',
+            ),
+            for (var w = 0; w < 4; w++)
+              tx(
+                e,
+                vary(180000, w),
+                'Пятёрочка',
+                base + 4 + w * 7,
+                18,
+                30,
+                'acc-tinkoff',
+                category: 'cat-groceries',
+              ),
+            tx(
+              e,
+              vary(95000, 11),
+              'Даблби',
+              base + 6,
+              13,
+              10,
+              'acc-tinkoff',
+              category: 'cat-cafe',
+            ),
+            tx(
+              e,
+              vary(210000, 12),
+              'Upside',
+              base + 19,
+              20,
+              0,
+              'acc-tinkoff',
+              category: 'cat-cafe',
+            ),
+            for (var w = 0; w < 3; w++)
+              tx(
+                e,
+                vary(60000, 20 + w),
+                'Метро',
+                base + 5 + w * 9,
+                8,
+                45,
+                'acc-tinkoff',
+                category: 'cat-transport',
+              ),
+            tx(
+              e,
+              29900,
+              'Яндекс Плюс',
+              base + 2,
+              9,
+              30,
+              'acc-tinkoff',
+              category: 'cat-subscriptions',
+            ),
+            tx(
+              e,
+              vary(150000, 30),
+              'Кино \u00b7 Афиша',
+              base + 13,
+              19,
+              0,
+              'acc-tinkoff',
+              category: 'cat-fun',
+            ),
+            if (m.isEven)
+              tx(
+                e,
+                vary(120000, 40),
+                'Аптека',
+                base + 9,
+                14,
+                20,
+                'acc-cash',
+                category: 'cat-health',
+              ),
+            if (m % 3 == 0)
+              tx(
+                e,
+                vary(900000, 50),
+                'Озон',
+                base + 16,
+                21,
+                15,
+                'acc-tinkoff',
+                category: 'cat-shopping',
+              ),
+            if (m % 3 == 1)
+              tx(
+                i,
+                vary(2500000, 60),
+                'Фриланс',
+                base + 15,
+                17,
+                0,
+                'acc-tinkoff',
+                category: 'cat-freelance',
+              ),
+          ];
+        }(),
+    ];
+
     return [
       tx(
         e,
@@ -423,6 +561,7 @@ abstract final class FakeSeed {
         'acc-savings',
         category: 'cat-interest',
       ),
+      ...history(),
     ];
   }
 }

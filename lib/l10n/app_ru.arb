@@ -162,5 +162,51 @@
   "quickAddTitle": "Быстрое добавление",
   "quickAddSubmit": "Добавить",
   "quickAddDone": "Операция добавлена",
-  "quickAddNoDebit": "Нет активной дебетовой карты"
+  "quickAddNoDebit": "Нет активной дебетовой карты",
+  "analyticsIncome": "Доходы",
+  "analyticsExpense": "Расходы",
+  "analyticsNet": "Итого: {amount}",
+  "@analyticsNet": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsExpenseMore": "Расходы на {percent}% больше, чем {when}",
+  "@analyticsExpenseMore": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      },
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsExpenseLess": "Расходы на {percent}% меньше, чем {when}",
+  "@analyticsExpenseLess": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      },
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsExpenseSame": "Расходы как {when}",
+  "@analyticsExpenseSame": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsPrevWeek": "на прошлой неделе",
+  "analyticsPrevMonth": "в прошлом месяце",
+  "analyticsPrevYear": "в прошлом году",
+  "analyticsByCategory": "Расходы по категориям",
+  "analyticsEmpty": "Нет операций за этот период",
+  "analyticsNoExpenses": "Расходов нет"
 }

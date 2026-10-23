@@ -127,5 +127,17 @@
   "quickAddTitle": "Quick add",
   "quickAddSubmit": "Add",
   "quickAddDone": "Transaction added",
-  "quickAddNoDebit": "No active debit card"
+  "quickAddNoDebit": "No active debit card",
+  "analyticsIncome": "Income",
+  "analyticsExpense": "Expenses",
+  "analyticsNet": "Net: {amount}",
+  "analyticsExpenseMore": "Expenses {percent}% higher than {when}",
+  "analyticsExpenseLess": "Expenses {percent}% lower than {when}",
+  "analyticsExpenseSame": "Expenses same as {when}",
+  "analyticsPrevWeek": "last week",
+  "analyticsPrevMonth": "last month",
+  "analyticsPrevYear": "last year",
+  "analyticsByCategory": "Expenses by category",
+  "analyticsEmpty": "No transactions in this period",
+  "analyticsNoExpenses": "No expenses"
 }

@@ -5,11 +5,15 @@ import 'package:spendyholik/app/di/injection.dart';
 import 'package:spendyholik/app/router/app_router.dart';
 import 'package:spendyholik/app/theme/app_theme.dart';
 import 'package:spendyholik/core/events/data_change_bus.dart';
+import 'package:spendyholik/core/models/models.dart';
 import 'package:spendyholik/core/widgets/glass/glass.dart';
 import 'package:spendyholik/features/accounts/data/models/models.dart';
 import 'package:spendyholik/features/accounts/data/repositories/repositories.dart';
 import 'package:spendyholik/features/accounts/presentation/cubit/accounts_cubit.dart';
 import 'package:spendyholik/features/accounts/presentation/cubit/total_balance_cubit.dart';
+import 'package:spendyholik/features/analytics/data/models/models.dart';
+import 'package:spendyholik/features/analytics/data/repositories/repositories.dart';
+import 'package:spendyholik/features/analytics/presentation/cubit/analytics_cubit.dart';
 import 'package:spendyholik/features/transactions/data/models/models.dart';
 import 'package:spendyholik/features/transactions/data/repositories/repositories.dart';
 import 'package:spendyholik/features/transactions/presentation/cubit/transactions_cubit.dart';
@@ -45,8 +49,13 @@ class MockDataChangeBus extends Mock implements DataChangeBus {}
 
 class MockTransactionRepository extends Mock implements TransactionRepository {}
 
+class MockAnalyticsRepository extends Mock implements AnalyticsRepository {}
+
 void main() {
-  setUpAll(() => registerFallbackValue(const TransactionFilter()));
+  setUpAll(() {
+    registerFallbackValue(const TransactionFilter());
+    registerFallbackValue(PeriodPreset.month);
+  });
 
   // Оболочке не важны данные вкладок — Главной хватает пустых счетов.
   setUp(() {
@@ -57,11 +66,23 @@ void main() {
     when(() => repository.getTotalBalance())
         .thenAnswer((_) async => const TotalBalance(total: 0, monthDelta: 0));
     final transactions = MockTransactionRepository();
+    final analytics = MockAnalyticsRepository();
+    when(() => analytics.getReport(any())).thenAnswer(
+      (_) async => AnalyticsReport(
+        period: DatePeriod.current(PeriodPreset.month, DateTime.now()),
+        income: 0,
+        expense: 0,
+        expenseChange: null,
+        expenseByCategory: const [],
+        monthly: const [],
+      ),
+    );
     when(() => transactions.getTransactions(any())).thenAnswer((_) async => []);
     getIt
       ..registerFactory(() => AccountsCubit(repository, bus))
       ..registerFactory(() => TotalBalanceCubit(repository, bus))
-      ..registerFactory(() => TransactionsCubit(transactions, bus));
+      ..registerFactory(() => TransactionsCubit(transactions, bus))
+      ..registerFactory(() => AnalyticsCubit(analytics, bus));
   });
 
   tearDown(getIt.reset);
