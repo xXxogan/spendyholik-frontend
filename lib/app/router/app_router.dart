@@ -35,9 +35,14 @@ class AppRouter extends RootStackRouter {
           page: AccountEditRoute.page,
           path: 'accounts/:accountId/edit',
         ),
+        AutoRoute(page: TransactionCreateRoute.page, path: 'transactions/new'),
         AutoRoute(
           page: TransactionDetailRoute.page,
           path: 'transactions/:transactionId',
+        ),
+        AutoRoute(
+          page: TransactionEditRoute.page,
+          path: 'transactions/:transactionId/edit',
         ),
         AutoRoute(page: CategoriesRoute.page, path: 'categories'),
         AutoRoute(page: CategoryCreateRoute.page, path: 'categories/new'),

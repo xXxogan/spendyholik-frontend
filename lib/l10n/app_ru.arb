@@ -148,5 +148,15 @@
   "periodWeek": "Неделя",
   "periodMonth": "Месяц",
   "periodYear": "Год",
-  "periodCustom": "Произвольный"
+  "periodCustom": "Произвольный",
+  "transactionFormNewTitle": "Новая операция",
+  "transactionFormEditTitle": "Изменить операцию",
+  "transactionFormAmount": "Сумма",
+  "transactionFormDate": "Дата",
+  "transactionFormTitle": "Название",
+  "transactionFormOptional": "Необязательно",
+  "transactionFormSaved": "Операция сохранена",
+  "transactionsAdd": "Добавить операцию",
+  "transactionEditAction": "Изменить",
+  "categoryPickerEmpty": "Нет категорий этого типа"
 }

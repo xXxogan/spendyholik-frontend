@@ -2,6 +2,7 @@ import 'package:injectable/injectable.dart';
 import 'package:spendyholik/core/errors/failure.dart';
 import 'package:spendyholik/core/events/data_change_bus.dart';
 import 'package:spendyholik/fake_backend/fake_backend.dart';
+import 'package:spendyholik/features/accounts/data/models/models.dart';
 import 'package:spendyholik/features/transactions/data/models/models.dart';
 import 'package:spendyholik/features/transactions/data/repositories/transaction_repository.dart';
 
@@ -56,16 +57,75 @@ class FakeTransactionRepository implements TransactionRepository {
   );
 
   @override
-  Future<TransactionModel> create(TransactionDraft draft) =>
-      throw UnimplementedError();
+  Future<TransactionModel> create(TransactionDraft draft) async {
+    final created = await _backend(() {
+      final transaction = _fromDraft(
+        'tx-${DateTime.now().microsecondsSinceEpoch}',
+        draft,
+      );
+      _backend.addTransaction(transaction);
+      return transaction;
+    });
+    _bus.emit(_changedTopics);
+    return created;
+  }
 
   @override
-  Future<TransactionModel> update(String id, TransactionDraft draft) =>
-      throw UnimplementedError();
+  Future<TransactionModel> update(String id, TransactionDraft draft) async {
+    final updated = await _backend(() {
+      final transaction = _fromDraft(id, draft);
+      _backend.replaceTransaction(transaction);
+      return transaction;
+    });
+    _bus.emit(_changedTopics);
+    return updated;
+  }
 
   @override
   Future<void> delete(String id) => _backend(() {
     _backend.deleteTransaction(id);
-    _bus.emit({DataTopic.transactions, DataTopic.accounts, DataTopic.budgets});
+    _bus.emit(_changedTopics);
   });
+
+  /// Категории — из-за счётчиков операций у них.
+  static const _changedTopics = {
+    DataTopic.transactions,
+    DataTopic.accounts,
+    DataTopic.budgets,
+    DataTopic.categories,
+  };
+
+  TransactionModel _fromDraft(String id, TransactionDraft draft) {
+    AccountRef account(String accountId) {
+      final a = _backend.accounts.firstWhere(
+        (a) => a.id == accountId,
+        orElse: () => throw const NotFoundFailure(),
+      );
+      return AccountRef(id: a.id, name: a.name, color: a.color);
+    }
+
+    return TransactionModel(
+      id: id,
+      type: draft.type,
+      amount: draft.amount,
+      title: draft.title,
+      category: switch (draft.categoryId) {
+        final categoryId? =>
+          _backend.categories
+              .firstWhere(
+                (c) => c.id == categoryId,
+                orElse: () => throw const NotFoundFailure(),
+              )
+              .toRef(),
+        null => null,
+      },
+      account: account(draft.accountId),
+      toAccount: switch (draft.toAccountId) {
+        final toAccountId? => account(toAccountId),
+        null => null,
+      },
+      occurredAt: draft.occurredAt,
+      note: draft.note,
+    );
+  }
 }

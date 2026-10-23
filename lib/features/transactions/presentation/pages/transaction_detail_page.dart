@@ -64,6 +64,16 @@ class TransactionDetailView extends StatelessWidget {
           leading: const AppBackButton(fallback: _fallback),
           title: title,
           largeTitle: title != null,
+          actions: [
+            if (transaction != null)
+              AppGlassIconButton(
+                icon: Icons.edit_outlined,
+                tooltip: context.l10n.transactionEditAction,
+                onPressed: () => context.router.push(
+                  TransactionEditRoute(transactionId: transaction.id),
+                ),
+              ),
+          ],
           body: BaseLayout.slivers(
             largeTitle: title,
             slivers: [

@@ -113,5 +113,15 @@
   "periodWeek": "Week",
   "periodMonth": "Month",
   "periodYear": "Year",
-  "periodCustom": "Custom"
+  "periodCustom": "Custom",
+  "transactionFormNewTitle": "New transaction",
+  "transactionFormEditTitle": "Edit transaction",
+  "transactionFormAmount": "Amount",
+  "transactionFormDate": "Date",
+  "transactionFormTitle": "Title",
+  "transactionFormOptional": "Optional",
+  "transactionFormSaved": "Transaction saved",
+  "transactionsAdd": "Add transaction",
+  "transactionEditAction": "Edit",
+  "categoryPickerEmpty": "No categories of this type"
 }

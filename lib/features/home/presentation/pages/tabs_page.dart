@@ -1,5 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:spendyholik/app/router/app_router.gr.dart';
 import 'package:spendyholik/core/layout/window_size.dart';
 import 'package:spendyholik/core/widgets/widgets.dart';
 import 'package:spendyholik/features/home/presentation/widgets/widgets.dart';
@@ -17,6 +18,9 @@ class TabsPage extends StatelessWidget {
         final tabsRouter = AutoTabsRouter.of(context);
         final destinations = homeDestinations(context.l10n);
         final isDashboard = tabsRouter.activeIndex == 0;
+        final isTransactions =
+            homeTabRoutes[tabsRouter.activeIndex].routeName ==
+            TransactionsRoute.name;
 
         return AppGlassScaffold(
           titleWidget: isDashboard ? const BrandTitle() : null,
@@ -30,6 +34,15 @@ class TabsPage extends StatelessWidget {
                     color: Theme.of(context).colorScheme.primary,
                     onPressed: () =>
                         tabsRouter.setActiveIndex(destinations.length - 1),
+                  ),
+                ]
+              : isTransactions
+              ? [
+                  AppGlassIconButton(
+                    tooltip: context.l10n.transactionsAdd,
+                    icon: Icons.add,
+                    onPressed: () =>
+                        context.router.push(const TransactionCreateRoute()),
                   ),
                 ]
               : null,

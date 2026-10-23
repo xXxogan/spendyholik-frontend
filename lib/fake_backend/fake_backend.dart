@@ -114,6 +114,15 @@ class FakeBackend {
     );
   }
 
+  void addTransaction(TransactionModel transaction) =>
+      transactions.add(transaction);
+
+  void replaceTransaction(TransactionModel transaction) {
+    final index = transactions.indexWhere((t) => t.id == transaction.id);
+    if (index == -1) throw const NotFoundFailure();
+    transactions[index] = transaction;
+  }
+
   void deleteTransaction(String id) {
     final index = transactions.indexWhere((t) => t.id == id);
     if (index == -1) throw const NotFoundFailure();

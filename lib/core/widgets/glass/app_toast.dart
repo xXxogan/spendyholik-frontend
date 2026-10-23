@@ -7,12 +7,15 @@ import 'package:spendyholik/core/widgets/glass/shell_scope.dart';
 /// Свой показ вместо `GlassToast.show`: тот растягивает тост от края до края
 /// окна, а оверлей страницы лежит под боковой панелью — тост уходит под неё.
 void showAppToast(BuildContext context, String message, {bool error = false}) {
+  // Читаем сейчас: страница часто сразу уходит назад, а builder записи
+  // вызывается и после — с context закрытой страницы.
+  final leftInset = ShellScope.leftInsetOf(context);
   late final OverlayEntry entry;
   entry = OverlayEntry(
     builder: (_) => _AppToastOverlay(
       message: message,
       type: error ? GlassToastType.error : GlassToastType.success,
-      leftInset: ShellScope.leftInsetOf(context),
+      leftInset: leftInset,
       onDismissed: entry.remove,
     ),
   );

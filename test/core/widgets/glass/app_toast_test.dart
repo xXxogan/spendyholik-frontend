@@ -45,4 +45,43 @@ void main() {
 
     expect(find.text('Счёт сохранён'), findsNothing);
   });
+
+  testWidgets('страница показала тост и закрылась — тост живёт без ошибок', (
+    tester,
+  ) async {
+    await pumpPage(
+      tester,
+      Builder(
+        builder: (context) => TextButton(
+          onPressed: () => Navigator.of(context).push(
+            MaterialPageRoute<void>(
+              builder: (page) => ShellScope(
+                leftInset: 100,
+                child: TextButton(
+                  onPressed: () {
+                    showAppToast(page, 'Операция сохранена');
+                    Navigator.of(page).pop();
+                  },
+                  child: const Text('save'),
+                ),
+              ),
+            ),
+          ),
+          child: const Text('open'),
+        ),
+      ),
+    );
+    await tester.tap(find.text('open'));
+    await settle(tester);
+
+    await tester.tap(find.text('save'));
+    await settle(tester);
+    // В приложении оверлей перестраивается каскадом сверху уже без страницы.
+    tester.element(find.byType(Overlay).first).markNeedsBuild();
+    await tester.pump();
+
+    expect(tester.takeException(), isNull);
+    expect(find.text('Операция сохранена'), findsOneWidget);
+    await tester.pump(const Duration(seconds: 5));
+  });
 }
