@@ -109,4 +109,23 @@ void main() {
     expect(find.text('Budgets'), findsWidgets);
     expect(find.text('Главная'), findsNothing);
   });
+
+  testWidgets('кнопка быстрого добавления — на любой вкладке', (tester) async {
+    await pumpApp(tester, width: 400);
+    expect(find.byTooltip('Быстрое добавление'), findsOneWidget);
+
+    await tester.tap(find.text('Аналитика').first);
+    await settle(tester);
+    expect(find.byTooltip('Быстрое добавление'), findsOneWidget);
+  });
+
+  testWidgets('телефон — кнопка быстрого добавления выше таб-бара', (
+    tester,
+  ) async {
+    await pumpApp(tester, width: 400);
+
+    final fab = tester.getRect(find.byType(AppGlassFab));
+    final nav = tester.getRect(find.byType(AppBottomNav));
+    expect(fab.bottom, lessThanOrEqualTo(nav.top - 8));
+  });
 }

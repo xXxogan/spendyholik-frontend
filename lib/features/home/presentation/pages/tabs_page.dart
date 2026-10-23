@@ -4,6 +4,7 @@ import 'package:spendyholik/app/router/app_router.gr.dart';
 import 'package:spendyholik/core/layout/window_size.dart';
 import 'package:spendyholik/core/widgets/widgets.dart';
 import 'package:spendyholik/features/home/presentation/widgets/widgets.dart';
+import 'package:spendyholik/features/transactions/transactions.dart';
 import 'package:spendyholik/l10n/l10n.dart';
 
 @RoutePage()
@@ -47,6 +48,11 @@ class TabsPage extends StatelessWidget {
                 ]
               : null,
           body: child,
+          floatingButton: AppGlassFab(
+            icon: Icons.add,
+            tooltip: context.l10n.quickAddTitle,
+            onPressed: () => showQuickAddSheet(context),
+          ),
           bottomBar: context.windowSize == WindowSize.compact
               ? AppBottomNav(
                   destinations: destinations,

@@ -123,5 +123,9 @@
   "transactionFormSaved": "Transaction saved",
   "transactionsAdd": "Add transaction",
   "transactionEditAction": "Edit",
-  "categoryPickerEmpty": "No categories of this type"
+  "categoryPickerEmpty": "No categories of this type",
+  "quickAddTitle": "Quick add",
+  "quickAddSubmit": "Add",
+  "quickAddDone": "Transaction added",
+  "quickAddNoDebit": "No active debit card"
 }

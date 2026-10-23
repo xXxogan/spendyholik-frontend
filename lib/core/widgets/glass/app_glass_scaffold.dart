@@ -17,6 +17,7 @@ class AppGlassScaffold extends StatefulWidget {
     this.actions,
     this.centerTitle = false,
     this.bottomBar,
+    this.floatingButton,
   });
 
   final Widget body;
@@ -27,6 +28,9 @@ class AppGlassScaffold extends StatefulWidget {
   final List<Widget>? actions;
   final bool centerTitle;
   final Widget? bottomBar;
+
+  /// Справа внизу над контентом: над таб-баром, если он есть.
+  final Widget? floatingButton;
 
   @override
   State<AppGlassScaffold> createState() => _AppGlassScaffoldState();
@@ -74,6 +78,29 @@ class _AppGlassScaffoldState extends State<AppGlassScaffold> {
         ),
       ),
       bottomBar: widget.bottomBar,
+      bodyOverlays: [
+        if (widget.floatingButton case final button?)
+          Positioned(
+            right: 16,
+            bottom: _floatingBottom(context),
+            child: button,
+          ),
+      ],
     );
+  }
+
+  /// Над таб-баром по тем же правилам, по которым его ставит GlassScaffold:
+  /// у нижнего края, safe area снизу — только на Android.
+  double _floatingBottom(BuildContext context) {
+    final bar = widget.bottomBar;
+    final safeBottom = MediaQuery.paddingOf(context).bottom;
+    if (bar == null) return safeBottom + 16;
+    final barHeight = bar is PreferredSizeWidget
+        ? bar.preferredSize.height
+        : 60.0;
+    final barSafeArea = Theme.of(context).platform == TargetPlatform.android
+        ? safeBottom
+        : 0.0;
+    return barHeight + barSafeArea + 12;
   }
 }

@@ -158,5 +158,9 @@
   "transactionFormSaved": "Операция сохранена",
   "transactionsAdd": "Добавить операцию",
   "transactionEditAction": "Изменить",
-  "categoryPickerEmpty": "Нет категорий этого типа"
+  "categoryPickerEmpty": "Нет категорий этого типа",
+  "quickAddTitle": "Быстрое добавление",
+  "quickAddSubmit": "Добавить",
+  "quickAddDone": "Операция добавлена",
+  "quickAddNoDebit": "Нет активной дебетовой карты"
 }
