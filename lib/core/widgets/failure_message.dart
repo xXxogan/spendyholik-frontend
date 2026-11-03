@@ -5,5 +5,6 @@ String failureMessage(AppLocalizations l10n, Failure failure) =>
     switch (failure) {
       NetworkFailure() => l10n.errorNetwork,
       NotFoundFailure() => l10n.errorNotFound,
+      InvalidCredentialsFailure() => l10n.errorInvalidCredentials,
       _ => l10n.errorUnknown,
     };

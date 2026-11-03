@@ -14,4 +14,5 @@ String fieldErrorText(AppLocalizations l10n, FieldError error) =>
       FieldError.wrongPassword => l10n.fieldErrorWrongPassword,
       FieldError.alreadyExists => l10n.fieldErrorAlreadyExists,
       FieldError.belowRepaid => l10n.fieldErrorBelowRepaid,
+      FieldError.emailTaken => l10n.fieldErrorEmailTaken,
     };

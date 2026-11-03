@@ -36,19 +36,33 @@ class FakeAuthRepository implements AuthRepository {
     return user;
   }
 
-  // Вход и регистрация — T-29, профиль — T-30.
   @override
-  Future<UserModel> signIn(String email, String password) =>
-      throw UnimplementedError();
-
-  @override
-  Future<UserModel> signInWith(AuthProvider provider) =>
-      throw UnimplementedError();
+  Future<UserModel> signIn(String email, String password) => _signInAs(() {
+    final match = _backend.accountsOfUsers.where(
+      (a) => _sameEmail(a.$1.email, email) && a.$2 == password,
+    );
+    if (match.isEmpty) throw const InvalidCredentialsFailure();
+    return match.first.$1;
+  });
 
   @override
   Future<UserModel> register(String name, String email, String password) =>
-      throw UnimplementedError();
+      _signInAs(() {
+        if (_backend.accountsOfUsers.any(
+          (a) => _sameEmail(a.$1.email, email),
+        )) {
+          throw const EmailTakenFailure();
+        }
+        final user = UserModel(
+          id: 'user-${DateTime.now().microsecondsSinceEpoch}',
+          name: name,
+          email: email,
+        );
+        _backend.accountsOfUsers.add((user, password));
+        return user;
+      });
 
+  // Профиль — T-30.
   @override
   Future<UserModel> updateProfile({
     required String name,
@@ -58,4 +72,13 @@ class FakeAuthRepository implements AuthRepository {
   @override
   Future<void> changePassword(String current, String next) =>
       throw UnimplementedError();
+
+  Future<UserModel> _signInAs(UserModel Function() resolve) async {
+    final user = await _backend(() => _backend.user = resolve());
+    _changes.add(user);
+    return user;
+  }
+
+  bool _sameEmail(String a, String b) =>
+      a.trim().toLowerCase() == b.trim().toLowerCase();
 }

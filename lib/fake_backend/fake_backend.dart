@@ -44,9 +44,12 @@ class FakeBackend {
   late final List<(String, RecurringDraft, bool)> _recurring;
   late final List<NotificationModel> notifications;
 
-  /// Сессия стартует «вошедшей»: экраны входа появятся в T-29, а до тех пор
-  /// приложение должно оставаться проверяемым.
-  UserModel? user = FakeSeed.user;
+  UserModel? user;
+
+  /// Пароль рядом с пользователем — только в фейке; настоящий сервер хранит хеш.
+  final List<(UserModel, String)> accountsOfUsers = [
+    (FakeSeed.user, FakeSeed.password),
+  ];
   late final List<DebtModel> _debts;
   late final List<(String, DebtEvent)> _debtEvents;
 

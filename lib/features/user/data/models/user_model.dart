@@ -1,7 +1,5 @@
 import 'package:spendyholik/core/models/currency.dart';
 
-enum AuthProvider { apple, google }
-
 class UserModel {
   const UserModel({
     required this.id,

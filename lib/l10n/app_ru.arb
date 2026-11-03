@@ -526,11 +526,7 @@
       }
     }
   },
-  "userOnboardingTitle": "Добро пожаловать",
-  "userLoginTitle": "Вход",
-  "userRegisterTitle": "Регистрация",
   "userCurrencyTitle": "Базовая валюта",
-  "userScreenComingSoon": "Экран появится в следующей задаче",
   "onboardingAccountsTitle": "Все счета в одном месте",
   "onboardingAccountsText": "Карты, наличные и накопительные счета. Общий баланс обновляется автоматически.",
   "onboardingAnalyticsTitle": "Видно, куда уходят деньги",
@@ -549,5 +545,29 @@
   "currencyByn": "Белорусский рубль",
   "currencyGel": "Грузинский лари",
   "currencyUah": "Украинская гривна",
-  "currencyCny": "Китайский юань"
+  "currencyCny": "Китайский юань",
+  "fieldErrorEmailTaken": "Email уже зарегистрирован",
+  "errorInvalidCredentials": "Неверный email или пароль",
+  "authEmail": "Email",
+  "authPassword": "Пароль",
+  "authShowPassword": "Показать пароль",
+  "authHidePassword": "Скрыть пароль",
+  "loginTitle": "С возвращением",
+  "loginSubtitle": "Войдите, чтобы продолжить",
+  "loginSubmit": "Войти",
+  "loginNoAccount": "Нет аккаунта?",
+  "loginCreateAccount": "Создать",
+  "registerTitle": "Создать аккаунт",
+  "registerSubtitle": "Бесплатно, без карты",
+  "registerName": "Имя",
+  "registerPasswordHint": "Минимум {count} символов",
+  "@registerPasswordHint": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "registerSubmit": "Создать аккаунт",
+  "registerTerms": "Создавая аккаунт, вы принимаете условия и политику конфиденциальности"
 }

@@ -11,9 +11,6 @@ abstract interface class AuthRepository {
   /// [InvalidCredentialsFailure] при неверной паре.
   Future<UserModel> signIn(String email, String password);
 
-  /// Фаза 1: входит под фейкового пользователя.
-  Future<UserModel> signInWith(AuthProvider provider);
-
   /// [EmailTakenFailure], если email занят.
   Future<UserModel> register(String name, String email, String password);
 
