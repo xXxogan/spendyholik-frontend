@@ -497,5 +497,33 @@
   "debtFormNote": "Заметка",
   "debtFormNoteHint": "Необязательно",
   "debtFormSaved": "Долг сохранён",
-  "debtEditAction": "Редактировать"
+  "debtEditAction": "Редактировать",
+  "notificationsTitle": "Уведомления",
+  "notificationsEmpty": "Уведомлений нет",
+  "notificationBudgetTitle": "Бюджет «{subject}» почти исчерпан",
+  "@notificationBudgetTitle": {
+    "placeholders": {
+      "subject": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationBudgetDetails": "Потрачено {percent}% лимита",
+  "@notificationBudgetDetails": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "notificationIncomeTitle": "Поступили деньги",
+  "notificationRecurringTitle": "Регулярный платёж завтра",
+  "notificationGoalTitle": "Цель достигнута на {percent}%",
+  "@notificationGoalTitle": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  }
 }

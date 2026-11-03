@@ -6,6 +6,7 @@ import 'package:spendyholik/features/budgets/data/models/models.dart';
 import 'package:spendyholik/features/categories/categories.dart';
 import 'package:spendyholik/features/debts/data/models/models.dart';
 import 'package:spendyholik/features/goals/data/models/models.dart';
+import 'package:spendyholik/features/notifications/data/models/models.dart';
 import 'package:spendyholik/features/recurring/data/models/models.dart';
 import 'package:spendyholik/features/transactions/transactions.dart';
 
@@ -170,6 +171,42 @@ abstract final class FakeSeed {
       icon: EntityIcon.transfer,
       color: EntityColor.gray,
       transactionCount: 0,
+    ),
+  ];
+
+  /// Два непрочитанных и два прочитанных — как в AC-25.
+  static List<NotificationModel> notifications(DateTime now) => [
+    NotificationModel(
+      id: 'ntf-budget',
+      kind: NotificationKind.budgetAlmostSpent,
+      createdAt: now.subtract(const Duration(hours: 2)),
+      isRead: false,
+      subject: 'Развлечения',
+      percent: 86,
+    ),
+    NotificationModel(
+      id: 'ntf-salary',
+      kind: NotificationKind.incomeReceived,
+      createdAt: now.subtract(const Duration(days: 1, hours: 3)),
+      isRead: false,
+      subject: 'Яндекс',
+      amount: 11850000,
+    ),
+    NotificationModel(
+      id: 'ntf-plus',
+      kind: NotificationKind.recurringTomorrow,
+      createdAt: now.subtract(const Duration(days: 3)),
+      isRead: true,
+      subject: 'Яндекс Плюс',
+      amount: 29900,
+    ),
+    NotificationModel(
+      id: 'ntf-goal',
+      kind: NotificationKind.goalProgress,
+      createdAt: now.subtract(const Duration(days: 6)),
+      isRead: true,
+      subject: 'Подушка безопасности',
+      percent: 60,
     ),
   ];
 

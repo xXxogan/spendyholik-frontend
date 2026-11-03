@@ -60,6 +60,7 @@ class AppRouter extends RootStackRouter {
         AutoRoute(page: DebtCreateRoute.page, path: 'debts/new'),
         AutoRoute(page: DebtDetailRoute.page, path: 'debts/:debtId'),
         AutoRoute(page: DebtEditRoute.page, path: 'debts/:debtId/edit'),
+        AutoRoute(page: NotificationsRoute.page, path: 'notifications'),
         AutoRoute(page: CategoriesRoute.page, path: 'categories'),
         AutoRoute(page: CategoryCreateRoute.page, path: 'categories/new'),
         AutoRoute(

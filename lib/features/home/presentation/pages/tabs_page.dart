@@ -5,6 +5,7 @@ import 'package:spendyholik/core/layout/window_size.dart';
 import 'package:spendyholik/core/widgets/widgets.dart';
 import 'package:spendyholik/features/budgets/budgets.dart';
 import 'package:spendyholik/features/home/presentation/widgets/widgets.dart';
+import 'package:spendyholik/features/notifications/notifications.dart';
 import 'package:spendyholik/features/transactions/transactions.dart';
 import 'package:spendyholik/l10n/l10n.dart';
 
@@ -27,6 +28,7 @@ class TabsPage extends StatelessWidget {
           largeTitle: !isDashboard,
           actions: switch (homeTabRoutes[tabsRouter.activeIndex].routeName) {
             DashboardRoute.name => [
+              const NotificationsBellButton(),
               AppGlassIconButton(
                 tooltip: destinations.last.label,
                 icon: Icons.person_2,

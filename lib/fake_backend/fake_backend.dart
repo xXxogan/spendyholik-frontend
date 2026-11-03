@@ -8,6 +8,7 @@ import 'package:spendyholik/features/budgets/data/models/models.dart';
 import 'package:spendyholik/features/categories/categories.dart';
 import 'package:spendyholik/features/debts/data/models/models.dart';
 import 'package:spendyholik/features/goals/data/models/models.dart';
+import 'package:spendyholik/features/notifications/data/models/models.dart';
 import 'package:spendyholik/features/recurring/data/models/models.dart';
 import 'package:spendyholik/features/transactions/transactions.dart';
 
@@ -24,6 +25,7 @@ class FakeBackend {
     _goals = FakeSeed.goals(DateTime.now());
     _contributions = FakeSeed.contributions(DateTime.now(), _initialAccounts);
     _recurring = FakeSeed.recurring(DateTime.now());
+    notifications = List.of(FakeSeed.notifications(DateTime.now()));
     _debts = FakeSeed.debts(DateTime.now());
     _debtEvents = FakeSeed.debtEvents(DateTime.now(), _debts, _initialAccounts);
   }
@@ -39,6 +41,7 @@ class FakeBackend {
   late final List<GoalModel> _goals;
   late final List<(String, GoalContribution)> _contributions;
   late final List<(String, RecurringDraft, bool)> _recurring;
+  late final List<NotificationModel> notifications;
   late final List<DebtModel> _debts;
   late final List<(String, DebtEvent)> _debtEvents;
 
@@ -203,6 +206,12 @@ class FakeBackend {
           isPaused: paused,
         ),
     ];
+  }
+
+  void markNotificationRead(String id) {
+    final index = notifications.indexWhere((n) => n.id == id);
+    if (index == -1) throw const NotFoundFailure();
+    notifications[index] = notifications[index].copyWith(isRead: true);
   }
 
   void setRecurringPaused(String id, {required bool paused}) {

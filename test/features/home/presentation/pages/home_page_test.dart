@@ -18,6 +18,8 @@ import 'package:spendyholik/features/budgets/data/repositories/repositories.dart
 import 'package:spendyholik/features/budgets/presentation/cubit/budgets_cubit.dart';
 import 'package:spendyholik/features/goals/data/repositories/repositories.dart';
 import 'package:spendyholik/features/goals/presentation/cubit/goals_cubit.dart';
+import 'package:spendyholik/features/notifications/data/repositories/repositories.dart';
+import 'package:spendyholik/features/notifications/presentation/cubit/unread_count_cubit.dart';
 import 'package:spendyholik/features/transactions/data/models/models.dart';
 import 'package:spendyholik/features/transactions/data/repositories/repositories.dart';
 import 'package:spendyholik/features/transactions/presentation/cubit/transactions_cubit.dart';
@@ -59,6 +61,9 @@ class MockBudgetRepository extends Mock implements BudgetRepository {}
 
 class MockGoalRepository extends Mock implements GoalRepository {}
 
+class MockNotificationRepository extends Mock
+    implements NotificationRepository {}
+
 void main() {
   setUpAll(() {
     registerFallbackValue(const TransactionFilter());
@@ -90,13 +95,16 @@ void main() {
     when(budgets.getBudgets).thenAnswer((_) async => []);
     final goals = MockGoalRepository();
     when(goals.getGoals).thenAnswer((_) async => []);
+    final notifications = MockNotificationRepository();
+    when(notifications.getUnreadCount).thenAnswer((_) async => 0);
     getIt
       ..registerFactory(() => AccountsCubit(repository, bus))
       ..registerFactory(() => TotalBalanceCubit(repository, bus))
       ..registerFactory(() => TransactionsCubit(transactions, bus))
       ..registerFactory(() => AnalyticsCubit(analytics, bus))
       ..registerFactory(() => BudgetsCubit(budgets, bus))
-      ..registerFactory(() => GoalsCubit(goals, bus));
+      ..registerFactory(() => GoalsCubit(goals, bus))
+      ..registerFactory(() => UnreadCountCubit(notifications, bus));
   });
 
   tearDown(getIt.reset);

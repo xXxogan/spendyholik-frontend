@@ -294,5 +294,12 @@
   "debtFormNote": "Note",
   "debtFormNoteHint": "Optional",
   "debtFormSaved": "Debt saved",
-  "debtEditAction": "Edit"
+  "debtEditAction": "Edit",
+  "notificationsTitle": "Notifications",
+  "notificationsEmpty": "No notifications",
+  "notificationBudgetTitle": "Budget “{subject}” is almost spent",
+  "notificationBudgetDetails": "{percent}% of the limit spent",
+  "notificationIncomeTitle": "Money received",
+  "notificationRecurringTitle": "Recurring payment tomorrow",
+  "notificationGoalTitle": "Goal {percent}% reached"
 }

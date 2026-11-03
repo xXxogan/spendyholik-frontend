@@ -44,6 +44,7 @@ const homeLinkRoutes = <PageRouteInfo>[
   CategoriesRoute(),
   RecurringRoute(),
   DebtsRoute(),
+  NotificationsRoute(),
 ];
 
 List<AppNavDestination> homeLinks(AppLocalizations l10n) => [
@@ -61,5 +62,10 @@ List<AppNavDestination> homeLinks(AppLocalizations l10n) => [
     icon: Icons.handshake_outlined,
     selectedIcon: Icons.handshake,
     label: l10n.debtsTitle,
+  ),
+  AppNavDestination(
+    icon: Icons.notifications_outlined,
+    selectedIcon: Icons.notifications,
+    label: l10n.notificationsTitle,
   ),
 ];
