@@ -28,13 +28,52 @@ class FakeDebtRepository implements DebtRepository {
     return _backend.debtEventsOf(id);
   });
 
-  // Форма — T-24.
   @override
-  Future<DebtModel> create(DebtDraft draft) => throw UnimplementedError();
+  Future<DebtModel> create(DebtDraft draft) async {
+    final created = await _backend(() {
+      final now = DateTime.now();
+      final debt = DebtModel(
+        id: 'debt-${now.microsecondsSinceEpoch}',
+        counterparty: draft.counterparty,
+        direction: draft.direction,
+        total: draft.amount,
+        remaining: draft.amount,
+        dueDate: draft.dueDate,
+        note: draft.note,
+        createdAt: now,
+      );
+      _backend.addDebt(debt);
+      return _find(debt.id);
+    });
+    _bus.emit({DataTopic.debts});
+    return created;
+  }
 
   @override
-  Future<DebtModel> update(String id, DebtDraft draft) =>
-      throw UnimplementedError();
+  Future<DebtModel> update(String id, DebtDraft draft) async {
+    final updated = await _backend(() {
+      final old = _find(id);
+      if (draft.amount < old.total - old.remaining) {
+        throw const ValidationFailure('amount', FieldError.belowRepaid);
+      }
+      // Погашения уже сдвинули балансы в сторону старого направления.
+      _backend.updateDebt(
+        DebtModel(
+          id: id,
+          counterparty: draft.counterparty,
+          direction: old.direction,
+          total: draft.amount,
+          remaining: draft.amount,
+          dueDate: draft.dueDate,
+          note: draft.note,
+          createdAt: old.createdAt,
+        ),
+      );
+      return _find(id);
+    });
+    _bus.emit({DataTopic.debts});
+    return updated;
+  }
 
   @override
   Future<DebtModel> repay(String id, int amount, String accountId) async {

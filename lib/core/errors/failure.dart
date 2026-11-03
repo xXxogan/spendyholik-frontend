@@ -46,4 +46,5 @@ enum FieldError {
   sameAccount,
   wrongPassword,
   alreadyExists,
+  belowRepaid,
 }

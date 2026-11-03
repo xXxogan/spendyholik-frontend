@@ -482,5 +482,20 @@
   "debtRepayHalf": "Половина",
   "debtRepayAccount": "Счёт",
   "debtRepaySubmit": "Погасить",
-  "debtRepayDone": "Долг погашен"
+  "debtRepayDone": "Долг погашен",
+  "fieldErrorBelowRepaid": "Меньше уже погашенного",
+  "debtsAdd": "Новый долг",
+  "debtFormNewTitle": "Новый долг",
+  "debtFormEditTitle": "Долг",
+  "debtFormCounterparty": "Кому / от кого",
+  "debtFormCounterpartyHint": "Имя человека",
+  "debtFormDirection": "Направление",
+  "debtFormAmount": "Сумма",
+  "debtFormDueDate": "Дата возврата",
+  "debtFormNoDueDate": "Не указана",
+  "debtFormDueDateClear": "Убрать дату возврата",
+  "debtFormNote": "Заметка",
+  "debtFormNoteHint": "Необязательно",
+  "debtFormSaved": "Долг сохранён",
+  "debtEditAction": "Редактировать"
 }

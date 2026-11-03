@@ -279,5 +279,20 @@
   "debtRepayHalf": "Half",
   "debtRepayAccount": "Account",
   "debtRepaySubmit": "Repay",
-  "debtRepayDone": "Debt repaid"
+  "debtRepayDone": "Debt repaid",
+  "fieldErrorBelowRepaid": "Less than already repaid",
+  "debtsAdd": "New debt",
+  "debtFormNewTitle": "New debt",
+  "debtFormEditTitle": "Debt",
+  "debtFormCounterparty": "To / from whom",
+  "debtFormCounterpartyHint": "Person's name",
+  "debtFormDirection": "Direction",
+  "debtFormAmount": "Amount",
+  "debtFormDueDate": "Due date",
+  "debtFormNoDueDate": "Not set",
+  "debtFormDueDateClear": "Remove due date",
+  "debtFormNote": "Note",
+  "debtFormNoteHint": "Optional",
+  "debtFormSaved": "Debt saved",
+  "debtEditAction": "Edit"
 }

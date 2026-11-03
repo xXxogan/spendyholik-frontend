@@ -10,7 +10,9 @@ class DebtsDirectionSegment extends StatelessWidget {
   });
 
   final DebtDirection selected;
-  final ValueChanged<DebtDirection> onSelected;
+
+  /// `null` — сегмент неактивен (направление правкой не меняется).
+  final ValueChanged<DebtDirection>? onSelected;
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +25,10 @@ class DebtsDirectionSegment extends StatelessWidget {
       ],
       selected: {selected},
       showSelectedIcon: false,
-      onSelectionChanged: (selection) => onSelected(selection.first),
+      onSelectionChanged: switch (onSelected) {
+        final onSelected? => (selection) => onSelected(selection.first),
+        null => null,
+      },
     );
   }
 }

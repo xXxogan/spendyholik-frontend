@@ -119,6 +119,39 @@ class FakeBackend {
       ),
   ];
 
+  void addDebt(DebtModel debt) {
+    _debts.add(debt);
+    _debtEvents.add((
+      debt.id,
+      DebtEvent(
+        id: 'de-${debt.createdAt.microsecondsSinceEpoch}',
+        kind: DebtEventKind.opened,
+        amount: debt.total,
+        date: debt.createdAt,
+      ),
+    ));
+  }
+
+  /// Направление и дата создания не меняются; сумма открытия следует за total.
+  void updateDebt(DebtModel debt) {
+    final index = _debts.indexWhere((d) => d.id == debt.id);
+    _debts[index] = debt;
+    final eventIndex = _debtEvents.indexWhere(
+      (e) => e.$1 == debt.id && e.$2.kind == .opened,
+    );
+    if (eventIndex == -1) return;
+    final opened = _debtEvents[eventIndex].$2;
+    _debtEvents[eventIndex] = (
+      debt.id,
+      DebtEvent(
+        id: opened.id,
+        kind: opened.kind,
+        amount: debt.total,
+        date: opened.date,
+      ),
+    );
+  }
+
   void addDebtRepayment(String debtId, int amount, AccountModel account) =>
       _debtEvents.add((
         debtId,

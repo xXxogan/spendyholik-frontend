@@ -40,6 +40,15 @@ class DebtDetailView extends StatelessWidget {
       leading: const AppBackButton(fallback: DebtsRoute()),
       title: l10n.debtDetailTitle,
       largeTitle: true,
+      actions: [
+        if (state case DebtDetailLoaded(:final debt))
+          AppGlassIconButton(
+            icon: Icons.edit_outlined,
+            tooltip: l10n.debtEditAction,
+            onPressed: () =>
+                context.router.push(DebtEditRoute(debtId: debt.id)),
+          ),
+      ],
       body: BaseLayout.slivers(
         largeTitle: l10n.debtDetailTitle,
         slivers: [

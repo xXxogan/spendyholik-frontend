@@ -49,6 +49,14 @@ class DebtsView extends StatelessWidget {
       ),
       title: title,
       largeTitle: true,
+      actions: [
+        AppGlassIconButton(
+          icon: Icons.add,
+          tooltip: l10n.debtsAdd,
+          onPressed: () =>
+              context.router.push(DebtCreateRoute(initialDirection: direction)),
+        ),
+      ],
       body: BaseLayout.slivers(
         largeTitle: title,
         slivers: [
