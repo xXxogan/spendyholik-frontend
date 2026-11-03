@@ -149,7 +149,6 @@
   "budgetsSegmentBudgets": "Budgets",
   "budgetsSegmentGoals": "Goals",
   "budgetsEmpty": "No budgets yet",
-  "budgetsGoalsSoon": "Goals are coming soon",
   "budgetsThisWeek": "This week",
   "budgetsRemaining": "{period} · {amount} left",
   "budgetsExceeded": "{period} · over by {amount}",
@@ -175,5 +174,11 @@
   "budgetDeleteAction": "Delete budget",
   "budgetDeleteConfirmTitle": "Delete budget?",
   "budgetDeleteConfirmMessage": "The category's transactions will stay.",
-  "budgetDeleted": "Budget deleted"
+  "budgetDeleted": "Budget deleted",
+  "goalsEmpty": "No goals yet",
+  "goalSavedOfTarget": "{saved} of {target}",
+  "goalDeadline": "by {date}",
+  "goalReached": "goal reached",
+  "goalRemaining": "{amount} to go",
+  "dashboardNearestGoal": "Nearest goal · {name}"
 }

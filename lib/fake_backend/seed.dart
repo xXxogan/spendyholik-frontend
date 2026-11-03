@@ -4,6 +4,7 @@ import 'package:spendyholik/core/models/entity_icon.dart';
 import 'package:spendyholik/features/accounts/accounts.dart';
 import 'package:spendyholik/features/budgets/data/models/models.dart';
 import 'package:spendyholik/features/categories/categories.dart';
+import 'package:spendyholik/features/goals/data/models/models.dart';
 import 'package:spendyholik/features/transactions/transactions.dart';
 
 abstract final class FakeSeed {
@@ -169,6 +170,77 @@ abstract final class FakeSeed {
       transactionCount: 0,
     ),
   ];
+
+  /// `saved` здесь не важен: FakeBackend считает его из пополнений.
+  static List<GoalModel> goals(DateTime now) => [
+    const GoalModel(
+      id: 'goal-buffer',
+      name: 'Подушка безопасности',
+      target: 20000000,
+      saved: 0,
+    ),
+    GoalModel(
+      id: 'goal-trip',
+      name: 'Отпуск в Грузии',
+      target: 9000000,
+      saved: 0,
+      deadline: DateTime(now.year, now.month + 8),
+    ),
+    const GoalModel(
+      id: 'goal-laptop',
+      name: 'MacBook Air',
+      target: 18000000,
+      saved: 0,
+    ),
+    GoalModel(
+      id: 'goal-phone',
+      name: 'Новый телефон',
+      target: 6000000,
+      saved: 0,
+      deadline: DateTime(now.year, now.month - 1),
+    ),
+  ];
+
+  /// Помесячные пополнения: по ним в деталях цели считается прогноз.
+  static List<(String, GoalContribution)> contributions(
+    DateTime now,
+    List<AccountModel> accounts,
+  ) {
+    AccountRef acc(String id) {
+      final a = accounts.firstWhere((a) => a.id == id);
+      return AccountRef(id: a.id, name: a.name, color: a.color);
+    }
+
+    var n = 0;
+    (String, GoalContribution) contribution(
+      String goalId,
+      int amount,
+      String account,
+      int monthsAgo,
+    ) {
+      n++;
+      return (
+        goalId,
+        GoalContribution(
+          id: 'gc-${n.toString().padLeft(3, '0')}',
+          amount: amount,
+          from: acc(account),
+          date: DateTime(now.year, now.month - monthsAgo, 5, 12),
+        ),
+      );
+    }
+
+    return [
+      for (var m = 1; m <= 6; m++)
+        contribution('goal-buffer', 2000000, 'acc-savings', m),
+      for (var m = 1; m <= 3; m++)
+        contribution('goal-trip', 1500000, 'acc-tinkoff', m),
+      contribution('goal-laptop', 2000000, 'acc-tinkoff', 2),
+      contribution('goal-laptop', 1000000, 'acc-cash', 5),
+      for (var m = 2; m <= 5; m++)
+        contribution('goal-phone', 1500000, 'acc-tinkoff', m),
+    ];
+  }
 
   /// Траты сида зависят от дня месяца, поэтому лимит подбирается под долю
   /// от уже потраченного — так на любой день видны ok, warning и exceeded.

@@ -6,6 +6,7 @@ import 'package:spendyholik/fake_backend/seed.dart';
 import 'package:spendyholik/features/accounts/accounts.dart';
 import 'package:spendyholik/features/budgets/data/models/models.dart';
 import 'package:spendyholik/features/categories/categories.dart';
+import 'package:spendyholik/features/goals/data/models/models.dart';
 import 'package:spendyholik/features/transactions/transactions.dart';
 
 /// «Сервер» фазы 1: данные в памяти до перезапуска. В фазе 2 удаляется
@@ -18,6 +19,8 @@ class FakeBackend {
       FakeSeed.transactions(DateTime.now(), _initialAccounts, _categories),
     );
     _budgets = FakeSeed.budgets(DateTime.now(), _spent);
+    _goals = FakeSeed.goals(DateTime.now());
+    _contributions = FakeSeed.contributions(DateTime.now(), _initialAccounts);
   }
 
   /// Начальные балансы; итоговые считаются из операций, как на сервере.
@@ -28,6 +31,8 @@ class FakeBackend {
   late final List<CategoryModel> _categories;
   late final List<TransactionModel> transactions;
   late final List<(String, BudgetDraft)> _budgets;
+  late final List<GoalModel> _goals;
+  late final List<(String, GoalContribution)> _contributions;
 
   List<AccountModel> get accounts => [
     for (final a in _initialAccounts)
@@ -62,6 +67,20 @@ class FakeBackend {
         }(),
     ];
   }
+
+  List<GoalModel> get goals => [
+    for (final goal in _goals)
+      goal.copyWith(
+        saved: _contributions
+            .where((c) => c.$1 == goal.id)
+            .fold<int>(0, (sum, c) => sum + c.$2.amount),
+      ),
+  ];
+
+  List<GoalContribution> contributionsOf(String goalId) => [
+    for (final (id, contribution) in _contributions)
+      if (id == goalId) contribution,
+  ]..sort((a, b) => b.date.compareTo(a.date));
 
   /// Баланс счёта на момент [moment]: операции раньше него, не включая.
   int balanceAt(String accountId, DateTime moment) {

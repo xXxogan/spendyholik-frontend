@@ -218,7 +218,6 @@
   "budgetsSegmentBudgets": "Бюджеты",
   "budgetsSegmentGoals": "Цели",
   "budgetsEmpty": "Бюджетов пока нет",
-  "budgetsGoalsSoon": "Цели появятся скоро",
   "budgetsThisWeek": "Эта неделя",
   "budgetsRemaining": "{period} · осталось {amount}",
   "@budgetsRemaining": {
@@ -285,5 +284,42 @@
   "budgetDeleteAction": "Удалить бюджет",
   "budgetDeleteConfirmTitle": "Удалить бюджет?",
   "budgetDeleteConfirmMessage": "Операции категории останутся.",
-  "budgetDeleted": "Бюджет удалён"
+  "budgetDeleted": "Бюджет удалён",
+  "goalsEmpty": "Целей пока нет",
+  "goalSavedOfTarget": "{saved} из {target}",
+  "@goalSavedOfTarget": {
+    "placeholders": {
+      "saved": {
+        "type": "String"
+      },
+      "target": {
+        "type": "String"
+      }
+    }
+  },
+  "goalDeadline": "до {date}",
+  "@goalDeadline": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "goalReached": "цель достигнута",
+  "goalRemaining": "Осталось {amount}",
+  "@goalRemaining": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardNearestGoal": "Ближайшая цель · {name}",
+  "@dashboardNearestGoal": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  }
 }

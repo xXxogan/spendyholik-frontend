@@ -45,56 +45,67 @@ class BudgetDetailView extends StatelessWidget {
       _ => null,
     };
 
-    return AppGlassScaffold(
-      leading: const AppBackButton(fallback: _fallback),
-      title: l10n.budgetDetailTitle,
-      largeTitle: true,
-      actions: [
-        if (budget != null)
-          AppGlassIconButton(
-            icon: Icons.edit_outlined,
-            tooltip: l10n.budgetEditAction,
-            onPressed: () =>
-                context.router.push(BudgetEditRoute(budgetId: budget.id)),
-          ),
-      ],
-      body: BaseLayout.slivers(
-        largeTitle: l10n.budgetDetailTitle,
-        slivers: [
-          switch (state) {
-            BudgetDetailLoaded(:final budget) => ContentSliverPadding(
-              sliver: SliverToBoxAdapter(
-                child: Padding(
-                  padding: const .only(top: 12, bottom: 120),
-                  child: TwoColumnLayout(
-                    primary: [
-                      BudgetSummaryCard(budget: budget, currency: _currency),
-                    ],
-                    secondary: [
-                      TransactionsSection(
-                        filter: TransactionFilter(
-                          type: TransactionType.expense,
-                          categoryId: budget.category.id,
-                          period: budget.currentPeriod,
+    return BlocListener<BudgetDetailCubit, BudgetDetailState>(
+      listenWhen: (_, state) => state is BudgetDetailDeleted,
+      listener: (context, _) {
+        // Удалили формой правки — она уже сняла и детали; уходим сами,
+        // только если детали на экране.
+        if (ModalRoute.of(context)?.isCurrent != true) return;
+        showAppToast(context, l10n.budgetDeleted);
+        navigateBack(context.router, _fallback);
+      },
+      child: AppGlassScaffold(
+        leading: const AppBackButton(fallback: _fallback),
+        title: l10n.budgetDetailTitle,
+        largeTitle: true,
+        actions: [
+          if (budget != null)
+            AppGlassIconButton(
+              icon: Icons.edit_outlined,
+              tooltip: l10n.budgetEditAction,
+              onPressed: () =>
+                  context.router.push(BudgetEditRoute(budgetId: budget.id)),
+            ),
+        ],
+        body: BaseLayout.slivers(
+          largeTitle: l10n.budgetDetailTitle,
+          slivers: [
+            switch (state) {
+              BudgetDetailLoaded(:final budget) => ContentSliverPadding(
+                sliver: SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const .only(top: 12, bottom: 120),
+                    child: TwoColumnLayout(
+                      primary: [
+                        BudgetSummaryCard(budget: budget, currency: _currency),
+                      ],
+                      secondary: [
+                        TransactionsSection(
+                          filter: TransactionFilter(
+                            type: TransactionType.expense,
+                            categoryId: budget.category.id,
+                            period: budget.currentPeriod,
+                          ),
+                          title: l10n.budgetDetailTransactions,
                         ),
-                        title: l10n.budgetDetailTransactions,
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
-            BudgetDetailError(:final failure) => SliverFillRemaining(
-              hasScrollBody: false,
-              child: Center(
-                child: FailureView(failure: failure, onRetry: cubit.reload),
+              BudgetDetailError(:final failure) => SliverFillRemaining(
+                hasScrollBody: false,
+                child: Center(
+                  child: FailureView(failure: failure, onRetry: cubit.reload),
+                ),
               ),
-            ),
-            BudgetDetailLoading() => const SliverToBoxAdapter(
-              child: SkeletonList(itemCount: 3, itemHeight: 120),
-            ),
-          },
-        ],
+              BudgetDetailLoading() ||
+              BudgetDetailDeleted() => const SliverToBoxAdapter(
+                child: SkeletonList(itemCount: 3, itemHeight: 120),
+              ),
+            },
+          ],
+        ),
       ),
     );
   }

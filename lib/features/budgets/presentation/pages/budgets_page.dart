@@ -7,6 +7,7 @@ import 'package:spendyholik/core/models/models.dart';
 import 'package:spendyholik/core/widgets/widgets.dart';
 import 'package:spendyholik/features/budgets/presentation/cubit/budgets_cubit.dart';
 import 'package:spendyholik/features/budgets/presentation/widgets/widgets.dart';
+import 'package:spendyholik/features/goals/goals.dart';
 import 'package:spendyholik/l10n/l10n.dart';
 
 @RoutePage()
@@ -65,10 +66,7 @@ class _BudgetsViewState extends State<BudgetsView> {
           ),
         ),
         if (_tab == BudgetsTab.goals)
-          SliverFillRemaining(
-            hasScrollBody: false,
-            child: Center(child: Text(l10n.budgetsGoalsSoon)),
-          )
+          const GoalsList()
         else
           switch (state) {
             BudgetsLoading() => const SliverToBoxAdapter(

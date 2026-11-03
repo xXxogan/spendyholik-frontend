@@ -35,6 +35,12 @@ class BudgetDetailCubit extends Cubit<BudgetDetailState>
     try {
       emit(BudgetDetailState.loaded(await _repository.getBudget(budgetId)));
     } on Failure catch (failure, stackTrace) {
+      // Бюджет был открыт и пропал — его удалили (в том числе своей же
+      // формой правки поверх деталей): это не ошибка.
+      if (failure is NotFoundFailure && state is BudgetDetailLoaded) {
+        emit(const BudgetDetailState.deleted());
+        return;
+      }
       getIt<Talker>().handle(failure, stackTrace);
       emit(BudgetDetailState.error(failure));
     }

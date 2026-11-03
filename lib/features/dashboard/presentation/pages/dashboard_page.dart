@@ -3,6 +3,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:spendyholik/core/widgets/widgets.dart';
 import 'package:spendyholik/features/accounts/accounts.dart';
 import 'package:spendyholik/features/budgets/budgets.dart';
+import 'package:spendyholik/features/goals/goals.dart';
 import 'package:spendyholik/features/transactions/transactions.dart';
 import 'package:spendyholik/l10n/l10n.dart';
 
@@ -27,6 +28,7 @@ class DashboardPage extends StatelessWidget {
                   TotalBalanceCard(),
                   AccountsSection(),
                   BudgetsSection(limit: 2),
+                  NearestGoalCard(),
                 ],
                 secondary: [
                   TransactionsSection(

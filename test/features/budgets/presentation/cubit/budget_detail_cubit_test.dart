@@ -90,4 +90,22 @@ void main() {
     skip: 2,
     expect: () => [BudgetDetailState.loaded(after)],
   );
+
+  blocTest<BudgetDetailCubit, BudgetDetailState>(
+    'бюджет удалён, пока открыт: перезагрузка по шине — deleted, а не error',
+    setUp: () {
+      var calls = 0;
+      when(() => repository.getBudget('food')).thenAnswer(
+        (_) async => ++calls == 1 ? before : throw const NotFoundFailure(),
+      );
+    },
+    build: build,
+    act: (cubit) async {
+      await cubit.load('food');
+      changes.add({DataTopic.budgets});
+      await Future<void>.delayed(Duration.zero);
+    },
+    skip: 2,
+    expect: () => [const BudgetDetailState.deleted()],
+  );
 }

@@ -16,6 +16,8 @@ import 'package:spendyholik/features/analytics/data/repositories/repositories.da
 import 'package:spendyholik/features/analytics/presentation/cubit/analytics_cubit.dart';
 import 'package:spendyholik/features/budgets/data/repositories/repositories.dart';
 import 'package:spendyholik/features/budgets/presentation/cubit/budgets_cubit.dart';
+import 'package:spendyholik/features/goals/data/repositories/repositories.dart';
+import 'package:spendyholik/features/goals/presentation/cubit/goals_cubit.dart';
 import 'package:spendyholik/features/transactions/data/models/models.dart';
 import 'package:spendyholik/features/transactions/data/repositories/repositories.dart';
 import 'package:spendyholik/features/transactions/presentation/cubit/transactions_cubit.dart';
@@ -55,6 +57,8 @@ class MockAnalyticsRepository extends Mock implements AnalyticsRepository {}
 
 class MockBudgetRepository extends Mock implements BudgetRepository {}
 
+class MockGoalRepository extends Mock implements GoalRepository {}
+
 void main() {
   setUpAll(() {
     registerFallbackValue(const TransactionFilter());
@@ -84,12 +88,15 @@ void main() {
     when(() => transactions.getTransactions(any())).thenAnswer((_) async => []);
     final budgets = MockBudgetRepository();
     when(budgets.getBudgets).thenAnswer((_) async => []);
+    final goals = MockGoalRepository();
+    when(goals.getGoals).thenAnswer((_) async => []);
     getIt
       ..registerFactory(() => AccountsCubit(repository, bus))
       ..registerFactory(() => TotalBalanceCubit(repository, bus))
       ..registerFactory(() => TransactionsCubit(transactions, bus))
       ..registerFactory(() => AnalyticsCubit(analytics, bus))
-      ..registerFactory(() => BudgetsCubit(budgets, bus));
+      ..registerFactory(() => BudgetsCubit(budgets, bus))
+      ..registerFactory(() => GoalsCubit(goals, bus));
   });
 
   tearDown(getIt.reset);
