@@ -127,6 +127,19 @@ class FakeBackend {
     _recurring[index] = (id, _recurring[index].$2, paused);
   }
 
+  String addRecurring(RecurringDraft draft) {
+    final id = 'rec-${DateTime.now().microsecondsSinceEpoch}';
+    _recurring.add((id, draft, false));
+    return id;
+  }
+
+  void updateRecurring(String id, RecurringDraft draft) {
+    final index = _recurring.indexWhere((r) => r.$1 == id);
+    if (index == -1) throw const NotFoundFailure();
+    // Пауза — свойство шаблона, правка полей её не снимает.
+    _recurring[index] = (id, draft, _recurring[index].$3);
+  }
+
   GoalModel addGoal(GoalDraft draft) {
     final goal = GoalModel(
       id: 'goal-${DateTime.now().microsecondsSinceEpoch}',

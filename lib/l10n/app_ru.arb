@@ -411,5 +411,28 @@
       }
     }
   },
-  "recurringPaused": "Приостановлено"
+  "recurringPaused": "Приостановлено",
+  "recurringAdd": "Новый шаблон",
+  "recurringFormNewTitle": "Новый шаблон",
+  "recurringFormEditTitle": "Шаблон",
+  "recurringFormName": "Название",
+  "recurringFormNameHint": "Например, Интернет",
+  "recurringFormAmount": "Сумма",
+  "recurringFormType": "Тип",
+  "recurringFormCategory": "Категория",
+  "recurringFormAccount": "Счёт",
+  "recurringFormFrequency": "Повтор",
+  "recurringFrequencyMonthly": "Ежемесячно",
+  "recurringFrequencyWeekly": "Еженедельно",
+  "recurringFrequencyYearly": "Ежегодно",
+  "recurringFormAnchor": "Первое выполнение",
+  "recurringFormNextExecution": "Следующее выполнение: {date}",
+  "@recurringFormNextExecution": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "recurringFormSaved": "Шаблон сохранён"
 }

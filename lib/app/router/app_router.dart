@@ -51,6 +51,11 @@ class AppRouter extends RootStackRouter {
         AutoRoute(page: GoalDetailRoute.page, path: 'goals/:goalId'),
         AutoRoute(page: GoalEditRoute.page, path: 'goals/:goalId/edit'),
         AutoRoute(page: RecurringRoute.page, path: 'recurring'),
+        AutoRoute(page: RecurringCreateRoute.page, path: 'recurring/new'),
+        AutoRoute(
+          page: RecurringEditRoute.page,
+          path: 'recurring/:recurringId/edit',
+        ),
         AutoRoute(page: CategoriesRoute.page, path: 'categories'),
         AutoRoute(page: CategoryCreateRoute.page, path: 'categories/new'),
         AutoRoute(

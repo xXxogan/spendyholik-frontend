@@ -22,14 +22,25 @@ class FakeRecurringRepository implements RecurringRepository {
     ];
   });
 
-  // Форма шаблона — T-21.
   @override
-  Future<RecurringModel> create(RecurringDraft draft) =>
-      throw UnimplementedError();
+  Future<RecurringModel> create(RecurringDraft draft) async {
+    final created = await _backend(() {
+      final id = _backend.addRecurring(draft);
+      return _backend.recurring.firstWhere((r) => r.id == id);
+    });
+    _bus.emit({DataTopic.recurring});
+    return created;
+  }
 
   @override
-  Future<RecurringModel> update(String id, RecurringDraft draft) =>
-      throw UnimplementedError();
+  Future<RecurringModel> update(String id, RecurringDraft draft) async {
+    final updated = await _backend(() {
+      _backend.updateRecurring(id, draft);
+      return _backend.recurring.firstWhere((r) => r.id == id);
+    });
+    _bus.emit({DataTopic.recurring});
+    return updated;
+  }
 
   @override
   Future<RecurringModel> setPaused(String id, bool paused) async {

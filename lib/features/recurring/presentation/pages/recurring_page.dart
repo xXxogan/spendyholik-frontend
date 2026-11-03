@@ -41,6 +41,13 @@ class RecurringView extends StatelessWidget {
       ),
       title: title,
       largeTitle: true,
+      actions: [
+        AppGlassIconButton(
+          icon: Icons.add,
+          tooltip: l10n.recurringAdd,
+          onPressed: () => context.router.push(const RecurringCreateRoute()),
+        ),
+      ],
       body: BaseLayout.slivers(
         largeTitle: title,
         slivers: [
@@ -60,6 +67,9 @@ class RecurringView extends StatelessWidget {
                 itemCount: templates.length,
                 itemBuilder: (context, index) => RecurringCard(
                   template: templates[index],
+                  onTap: () => context.router.push(
+                    RecurringEditRoute(recurringId: templates[index].id),
+                  ),
                   currency: _currency,
                   onTogglePause: () => cubit.togglePause(templates[index].id),
                 ),

@@ -218,5 +218,28 @@
   "recurringYearly": "Every year, {date}",
   "recurringScheduleOnPause": "{schedule} · paused",
   "recurringNext": "Next: {date}",
-  "recurringPaused": "Paused"
+  "recurringPaused": "Paused",
+  "recurringAdd": "New template",
+  "recurringFormNewTitle": "New template",
+  "recurringFormEditTitle": "Template",
+  "recurringFormName": "Name",
+  "recurringFormNameHint": "For example, Internet",
+  "recurringFormAmount": "Amount",
+  "recurringFormType": "Type",
+  "recurringFormCategory": "Category",
+  "recurringFormAccount": "Account",
+  "recurringFormFrequency": "Repeat",
+  "recurringFrequencyMonthly": "Monthly",
+  "recurringFrequencyWeekly": "Weekly",
+  "recurringFrequencyYearly": "Yearly",
+  "recurringFormAnchor": "First run",
+  "recurringFormNextExecution": "Next run: {date}",
+  "@recurringFormNextExecution": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "recurringFormSaved": "Template saved"
 }
