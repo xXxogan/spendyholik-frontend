@@ -45,4 +45,5 @@ enum FieldError {
   exceedsTarget,
   sameAccount,
   wrongPassword,
+  alreadyExists,
 }

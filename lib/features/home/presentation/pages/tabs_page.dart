@@ -19,34 +19,38 @@ class TabsPage extends StatelessWidget {
         final tabsRouter = AutoTabsRouter.of(context);
         final destinations = homeDestinations(context.l10n);
         final isDashboard = tabsRouter.activeIndex == 0;
-        final isTransactions =
-            homeTabRoutes[tabsRouter.activeIndex].routeName ==
-            TransactionsRoute.name;
 
         return AppGlassScaffold(
           titleWidget: isDashboard ? const BrandTitle() : null,
           title: destinations[tabsRouter.activeIndex].label,
           largeTitle: !isDashboard,
-          actions: isDashboard
-              ? [
-                  AppGlassIconButton(
-                    tooltip: destinations.last.label,
-                    icon: Icons.person_2,
-                    color: Theme.of(context).colorScheme.primary,
-                    onPressed: () =>
-                        tabsRouter.setActiveIndex(destinations.length - 1),
-                  ),
-                ]
-              : isTransactions
-              ? [
-                  AppGlassIconButton(
-                    tooltip: context.l10n.transactionsAdd,
-                    icon: Icons.add,
-                    onPressed: () =>
-                        context.router.push(const TransactionCreateRoute()),
-                  ),
-                ]
-              : null,
+          actions: switch (homeTabRoutes[tabsRouter.activeIndex].routeName) {
+            DashboardRoute.name => [
+              AppGlassIconButton(
+                tooltip: destinations.last.label,
+                icon: Icons.person_2,
+                color: Theme.of(context).colorScheme.primary,
+                onPressed: () =>
+                    tabsRouter.setActiveIndex(destinations.length - 1),
+              ),
+            ],
+            TransactionsRoute.name => [
+              AppGlassIconButton(
+                tooltip: context.l10n.transactionsAdd,
+                icon: Icons.add,
+                onPressed: () =>
+                    context.router.push(const TransactionCreateRoute()),
+              ),
+            ],
+            BudgetsRoute.name => [
+              AppGlassIconButton(
+                tooltip: context.l10n.budgetsAdd,
+                icon: Icons.add,
+                onPressed: () => context.router.push(const BudgetCreateRoute()),
+              ),
+            ],
+            _ => null,
+          },
           body: child,
           floatingButton: AppGlassFab(
             icon: Icons.add,

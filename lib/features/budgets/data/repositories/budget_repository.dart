@@ -11,4 +11,7 @@ abstract interface class BudgetRepository {
   Future<BudgetModel> create(BudgetDraft draft);
 
   Future<BudgetModel> update(String id, BudgetDraft draft);
+
+  /// Операции категории не трогает. [NotFoundFailure], если бюджета нет.
+  Future<void> delete(String id);
 }

@@ -20,7 +20,10 @@ class FakeBudgetRepository implements BudgetRepository {
 
   @override
   Future<BudgetModel> create(BudgetDraft draft) async {
-    final created = await _backend(() => _find(_backend.addBudget(draft)));
+    final created = await _backend(() {
+      _checkCategoryFree(draft.categoryId);
+      return _find(_backend.addBudget(draft));
+    });
     _bus.emit({DataTopic.budgets});
     return created;
   }
@@ -28,11 +31,27 @@ class FakeBudgetRepository implements BudgetRepository {
   @override
   Future<BudgetModel> update(String id, BudgetDraft draft) async {
     final updated = await _backend(() {
+      _checkCategoryFree(draft.categoryId, except: id);
       _backend.updateBudget(id, draft);
       return _find(id);
     });
     _bus.emit({DataTopic.budgets});
     return updated;
+  }
+
+  @override
+  Future<void> delete(String id) async {
+    await _backend(() => _backend.deleteBudget(id));
+    _bus.emit({DataTopic.budgets});
+  }
+
+  void _checkCategoryFree(String categoryId, {String? except}) {
+    final taken = _backend.budgets.any(
+      (b) => b.category.id == categoryId && b.id != except,
+    );
+    if (taken) {
+      throw const ValidationFailure('categoryId', FieldError.alreadyExists);
+    }
   }
 
   BudgetModel _find(String id) => _backend.budgets.firstWhere(

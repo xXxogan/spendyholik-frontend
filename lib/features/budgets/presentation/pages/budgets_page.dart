@@ -2,6 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:spendyholik/app/di/injection.dart';
+import 'package:spendyholik/app/router/app_router.gr.dart';
 import 'package:spendyholik/core/models/models.dart';
 import 'package:spendyholik/core/widgets/widgets.dart';
 import 'package:spendyholik/features/budgets/presentation/cubit/budgets_cubit.dart';
@@ -82,8 +83,13 @@ class _BudgetsViewState extends State<BudgetsView> {
                   crossAxisSpacing: 12,
                 ),
                 itemCount: budgets.length,
-                itemBuilder: (context, index) =>
-                    BudgetCard(budget: budgets[index], currency: _currency),
+                itemBuilder: (context, index) => BudgetCard(
+                  budget: budgets[index],
+                  currency: _currency,
+                  onTap: () => context.router.push(
+                    BudgetDetailRoute(budgetId: budgets[index].id),
+                  ),
+                ),
               ),
             ),
             BudgetsEmpty() => SliverFillRemaining(

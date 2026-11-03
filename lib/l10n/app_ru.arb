@@ -90,6 +90,7 @@
   "fieldErrorExceedsTarget": "Больше суммы цели",
   "fieldErrorSameAccount": "Выберите другой счёт",
   "fieldErrorWrongPassword": "Неверный пароль",
+  "fieldErrorAlreadyExists": "На эту категорию уже есть бюджет",
   "categoriesTitle": "Категории",
   "categoryKindExpense": "Расходы",
   "categoryKindIncome": "Доходы",
@@ -248,5 +249,41 @@
         "type": "String"
       }
     }
-  }
+  },
+  "budgetsAdd": "Новый бюджет",
+  "budgetDetailTitle": "Бюджет",
+  "budgetDetailTransactions": "Операции в бюджете",
+  "budgetDetailRemaining": "Осталось {amount}",
+  "@budgetDetailRemaining": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetDetailExceeded": "Превышен на {amount}",
+  "@budgetDetailExceeded": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetEditAction": "Редактировать",
+  "budgetFormNewTitle": "Новый бюджет",
+  "budgetFormEditTitle": "Бюджет",
+  "budgetFormCategory": "Категория",
+  "budgetFormLimit": "Лимит",
+  "budgetFormLimitMonthly": "Лимит на месяц",
+  "budgetFormLimitWeekly": "Лимит на неделю",
+  "budgetFormPeriod": "Период",
+  "budgetFormPickDates": "Выбрать даты",
+  "budgetFormSaved": "Бюджет сохранён",
+  "budgetPeriodMonthly": "Ежемесячно",
+  "budgetPeriodWeekly": "Еженедельно",
+  "budgetPeriodOnce": "Разово",
+  "budgetDeleteAction": "Удалить бюджет",
+  "budgetDeleteConfirmTitle": "Удалить бюджет?",
+  "budgetDeleteConfirmMessage": "Операции категории останутся.",
+  "budgetDeleted": "Бюджет удалён"
 }

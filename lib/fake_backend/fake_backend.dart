@@ -150,6 +150,12 @@ class FakeBackend {
     _budgets[index] = (budgetId, draft);
   }
 
+  void deleteBudget(String budgetId) {
+    final index = _budgets.indexWhere((b) => b.$1 == budgetId);
+    if (index == -1) throw const NotFoundFailure();
+    _budgets.removeAt(index);
+  }
+
   void addTransaction(TransactionModel transaction) =>
       transactions.add(transaction);
 

@@ -2,6 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:spendyholik/app/di/injection.dart';
+import 'package:spendyholik/app/router/app_router.gr.dart';
 import 'package:spendyholik/app/theme/app_colors.dart';
 import 'package:spendyholik/core/format/format.dart';
 import 'package:spendyholik/core/models/models.dart';
@@ -77,43 +78,47 @@ class _BudgetRow extends StatelessWidget {
     final locale = Localizations.localeOf(context).toString();
     const currency = BudgetsSection._currency;
 
-    return Row(
-      spacing: 12,
-      children: [
-        EntityIconView(
-          icon: budget.category.icon,
-          color: AppColors.entity(budget.category.color, theme.brightness),
-          size: 32,
-        ),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: .stretch,
-            spacing: 6,
-            children: [
-              Row(
-                spacing: 8,
-                children: [
-                  Expanded(
-                    child: Text(
-                      budget.category.name,
-                      style: theme.textTheme.titleSmall,
-                      overflow: .ellipsis,
-                    ),
-                  ),
-                  Text(
-                    '${formatMoney(budget.spent, currency, locale)} / '
-                    '${formatMoney(budget.limit, currency, locale)}',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
-              BudgetProgressBar(budget: budget),
-            ],
+    return InkWell(
+      borderRadius: .circular(12),
+      onTap: () => context.router.push(BudgetDetailRoute(budgetId: budget.id)),
+      child: Row(
+        spacing: 12,
+        children: [
+          EntityIconView(
+            icon: budget.category.icon,
+            color: AppColors.entity(budget.category.color, theme.brightness),
+            size: 32,
           ),
-        ),
-      ],
+          Expanded(
+            child: Column(
+              crossAxisAlignment: .stretch,
+              spacing: 6,
+              children: [
+                Row(
+                  spacing: 8,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        budget.category.name,
+                        style: theme.textTheme.titleSmall,
+                        overflow: .ellipsis,
+                      ),
+                    ),
+                    Text(
+                      '${formatMoney(budget.spent, currency, locale)} / '
+                      '${formatMoney(budget.limit, currency, locale)}',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+                BudgetProgressBar(budget: budget),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

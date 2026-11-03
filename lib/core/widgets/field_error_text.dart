@@ -12,4 +12,5 @@ String fieldErrorText(AppLocalizations l10n, FieldError error) =>
       FieldError.exceedsTarget => l10n.fieldErrorExceedsTarget,
       FieldError.sameAccount => l10n.fieldErrorSameAccount,
       FieldError.wrongPassword => l10n.fieldErrorWrongPassword,
+      FieldError.alreadyExists => l10n.fieldErrorAlreadyExists,
     };
