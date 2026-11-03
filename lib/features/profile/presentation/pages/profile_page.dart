@@ -1,61 +1,56 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:spendyholik/app/router/app_router.gr.dart';
+import 'package:spendyholik/app/di/injection.dart';
+import 'package:spendyholik/app/theme/app_colors.dart';
 import 'package:spendyholik/core/widgets/widgets.dart';
+import 'package:spendyholik/features/profile/presentation/widgets/widgets.dart';
+import 'package:spendyholik/features/user/user.dart';
 import 'package:spendyholik/l10n/l10n.dart';
 
-// Сам Профиль — в своей задаче; пока здесь только вход в разделы вне вкладок.
 @RoutePage()
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
 
+  static const _maxWidth = 720.0;
+
   @override
   Widget build(BuildContext context) {
-    return BaseLayout(
-      largeTitle: context.l10n.navProfile,
-      children: [
-        Padding(
-          padding: const .symmetric(horizontal: 16, vertical: 12),
-          child: Card(
-            margin: .zero,
-            elevation: 0,
-            color: Theme.of(context).colorScheme.surface,
-            clipBehavior: .antiAlias,
-            shape: RoundedRectangleBorder(borderRadius: .circular(24)),
-            child: Column(
-              children: [
-                ListTile(
-                  leading: const Icon(Icons.category_outlined),
-                  title: Text(context.l10n.categoriesTitle),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () => context.router.push(const CategoriesRoute()),
+    final l10n = context.l10n;
+    final negative = AppColors.negative(Theme.of(context).brightness);
+
+    return BaseLayout.slivers(
+      largeTitle: l10n.navProfile,
+      slivers: [
+        ContentSliverPadding(
+          sliver: SliverToBoxAdapter(
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: _maxWidth),
+                child: Padding(
+                  padding: const .only(top: 12, bottom: 120),
+                  child: Column(
+                    crossAxisAlignment: .stretch,
+                    spacing: 16,
+                    children: [
+                      const ProfileHeader(),
+                      const ProfileMenu(),
+                      const SizedBox(height: 8),
+                      OutlinedButton(
+                        onPressed: () => getIt<SessionCubit>().signOut(),
+                        style: OutlinedButton.styleFrom(
+                          minimumSize: const Size.fromHeight(52),
+                          foregroundColor: negative,
+                          side: BorderSide(color: negative),
+                        ),
+                        child: Text(l10n.profileSignOut),
+                      ),
+                    ],
+                  ),
                 ),
-                const Divider(height: 1, indent: 16, endIndent: 16),
-                ListTile(
-                  leading: const Icon(Icons.event_repeat_outlined),
-                  title: Text(context.l10n.recurringTitle),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () => context.router.push(const RecurringRoute()),
-                ),
-                const Divider(height: 1, indent: 16, endIndent: 16),
-                ListTile(
-                  leading: const Icon(Icons.handshake_outlined),
-                  title: Text(context.l10n.debtsTitle),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () => context.router.push(const DebtsRoute()),
-                ),
-                const Divider(height: 1, indent: 16, endIndent: 16),
-                ListTile(
-                  leading: const Icon(Icons.notifications_outlined),
-                  title: Text(context.l10n.notificationsTitle),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () => context.router.push(const NotificationsRoute()),
-                ),
-              ],
+              ),
             ),
           ),
         ),
-        const SkeletonList(itemCount: 10),
       ],
     );
   }

@@ -11,10 +11,14 @@ class ShellScope extends InheritedWidget {
   static double leftInsetOf(BuildContext context) =>
       context.dependOnInheritedWidgetOfExactType<ShellScope>()?.leftInset ?? 0;
 
-  /// Сдвиг шапки вниз под оболочкой: кнопки 40 стоят в строке 44 на 2 ниже
-  /// её верха — так их верх вровень с верхом боковой панели.
+  /// Сдвиг шапки вниз. Под оболочкой: кнопки 40 стоят в строке 44 на 2 ниже
+  /// её верха — так их верх вровень с верхом боковой панели. На телефоне:
+  /// бейдж счётчика выступает над кнопкой на 8 и без сдвига уходил за край
+  /// экрана (Web и Android без выреза).
   static double appBarTopOf(BuildContext context) =>
-      leftInsetOf(context) == 0 ? 0 : SideNavMetrics.gap - 2;
+      leftInsetOf(context) == 0 ? _compactBarTop : SideNavMetrics.gap - 2;
+
+  static const _compactBarTop = 6.0;
 
   @override
   bool updateShouldNotify(ShellScope oldWidget) =>

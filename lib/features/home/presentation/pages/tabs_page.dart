@@ -21,13 +21,15 @@ class TabsPage extends StatelessWidget {
         final tabsRouter = AutoTabsRouter.of(context);
         final destinations = homeDestinations(context.l10n);
         final isDashboard = tabsRouter.activeIndex == 0;
+        final compact = context.windowSize == WindowSize.compact;
 
         return AppGlassScaffold(
           titleWidget: isDashboard ? const BrandTitle() : null,
           title: destinations[tabsRouter.activeIndex].label,
           largeTitle: !isDashboard,
           actions: switch (homeTabRoutes[tabsRouter.activeIndex].routeName) {
-            DashboardRoute.name => [
+            // На планшете и компьютере профиль и уведомления — в боковой панели.
+            DashboardRoute.name when compact => [
               const NotificationsBellButton(),
               AppGlassIconButton(
                 tooltip: destinations.last.label,
@@ -54,7 +56,7 @@ class TabsPage extends StatelessWidget {
             tooltip: context.l10n.quickAddTitle,
             onPressed: () => showQuickAddSheet(context),
           ),
-          bottomBar: context.windowSize == WindowSize.compact
+          bottomBar: compact
               ? AppBottomNav(
                   destinations: destinations,
                   selectedIndex: tabsRouter.activeIndex,

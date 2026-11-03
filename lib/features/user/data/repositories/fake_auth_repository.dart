@@ -29,8 +29,9 @@ class FakeAuthRepository implements AuthRepository {
   @override
   Future<UserModel> setBaseCurrency(Currency currency) async {
     final user = await _backend(() {
-      final current = _backend.user ?? (throw const UnauthorizedFailure());
-      return _backend.user = current.copyWith(baseCurrency: currency);
+      final updated = _current().copyWith(baseCurrency: currency);
+      _replaceAccount(updated, _password(updated));
+      return _backend.user = updated;
     });
     _changes.add(user);
     return user;
@@ -62,16 +63,48 @@ class FakeAuthRepository implements AuthRepository {
         return user;
       });
 
-  // Профиль — T-30.
   @override
   Future<UserModel> updateProfile({
     required String name,
     required String email,
-  }) => throw UnimplementedError();
+  }) async {
+    final user = await _backend(() {
+      final current = _current();
+      final taken = _backend.accountsOfUsers.any(
+        (a) => a.$1.id != current.id && _sameEmail(a.$1.email, email),
+      );
+      if (taken) throw const EmailTakenFailure();
+      final updated = current.copyWith(name: name, email: email);
+      _replaceAccount(updated, _password(current));
+      return _backend.user = updated;
+    });
+    _changes.add(user);
+    return user;
+  }
 
   @override
-  Future<void> changePassword(String current, String next) =>
-      throw UnimplementedError();
+  Future<void> changePassword(String current, String next) => _backend(() {
+    final user = _current();
+    if (_password(user) != current) {
+      throw const ValidationFailure(
+        'currentPassword',
+        FieldError.wrongPassword,
+      );
+    }
+    _replaceAccount(user, next);
+  });
+
+  UserModel _current() => _backend.user ?? (throw const UnauthorizedFailure());
+
+  String _password(UserModel user) =>
+      _backend.accountsOfUsers.firstWhere((a) => a.$1.id == user.id).$2;
+
+  void _replaceAccount(UserModel user, String password) {
+    final index = _backend.accountsOfUsers.indexWhere(
+      (a) => a.$1.id == user.id,
+    );
+    _backend.accountsOfUsers[index] = (user, password);
+  }
 
   Future<UserModel> _signInAs(UserModel Function() resolve) async {
     final user = await _backend(() => _backend.user = resolve());

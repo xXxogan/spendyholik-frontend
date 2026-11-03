@@ -16,6 +16,7 @@ class AppSideNav extends StatelessWidget {
     this.links = const [],
     this.selectedLink,
     this.onLinkSelected,
+    this.footer,
   });
 
   final List<AppNavDestination> destinations;
@@ -27,6 +28,9 @@ class AppSideNav extends StatelessWidget {
   final List<AppNavDestination> links;
   final int? selectedLink;
   final ValueChanged<int>? onLinkSelected;
+
+  /// Прижат к низу панели — пользователь.
+  final Widget? footer;
 
   @override
   Widget build(BuildContext context) {
@@ -55,6 +59,7 @@ class AppSideNav extends StatelessWidget {
                 extended: extended,
                 onTap: () => onLinkSelected?.call(i),
               ),
+            if (footer case final footer?) ...[const Spacer(), footer],
           ],
         ),
       ),

@@ -338,5 +338,12 @@
   "registerName": "Name",
   "registerPasswordHint": "At least {count} characters",
   "registerSubmit": "Create account",
-  "registerTerms": "By creating an account you accept the terms and the privacy policy"
+  "registerTerms": "By creating an account you accept the terms and the privacy policy",
+  "profileEditTitle": "Profile",
+  "profileSaved": "Profile saved",
+  "profileCurrency": "Base currency",
+  "profileChangePassword": "Change password",
+  "profileCurrentPassword": "Current password",
+  "profileNewPassword": "New password",
+  "profileSignOut": "Sign out"
 }

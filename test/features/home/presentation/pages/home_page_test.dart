@@ -20,7 +20,7 @@ import 'package:spendyholik/features/budgets/presentation/cubit/budgets_cubit.da
 import 'package:spendyholik/features/goals/data/repositories/repositories.dart';
 import 'package:spendyholik/features/goals/presentation/cubit/goals_cubit.dart';
 import 'package:spendyholik/features/notifications/data/repositories/repositories.dart';
-import 'package:spendyholik/features/notifications/presentation/cubit/unread_count_cubit.dart';
+import 'package:spendyholik/features/notifications/notifications.dart';
 import 'package:spendyholik/features/transactions/data/models/models.dart';
 import 'package:spendyholik/features/transactions/data/repositories/repositories.dart';
 import 'package:spendyholik/features/transactions/presentation/cubit/transactions_cubit.dart';
@@ -147,6 +147,26 @@ void main() {
     expect(find.byType(AppBottomNav), findsNothing);
     final sideNav = tester.widget<AppSideNav>(find.byType(AppSideNav));
     expect(sideNav.extended, isTrue);
+  });
+
+  testWidgets('телефон — колокольчик и профиль в шапке Главной', (
+    tester,
+  ) async {
+    await pumpApp(tester, width: 400);
+
+    expect(find.byType(NotificationsBellButton), findsOneWidget);
+    expect(find.byIcon(Icons.person_2), findsOneWidget);
+  });
+
+  testWidgets('планшет и компьютер — их нет в шапке, они в боковой панели', (
+    tester,
+  ) async {
+    for (final width in [800.0, 1280.0]) {
+      await pumpApp(tester, width: width);
+
+      expect(find.byType(NotificationsBellButton), findsNothing);
+      expect(find.byIcon(Icons.person_2), findsNothing);
+    }
   });
 
   testWidgets('выбранная вкладка сохраняется при смене ширины', (tester) async {

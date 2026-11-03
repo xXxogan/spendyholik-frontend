@@ -37,33 +37,40 @@ class _SpendyHolikAppState extends State<SpendyHolikApp> {
         BlocProvider.value(value: getIt<SettingsCubit>()),
         BlocProvider.value(value: getIt<SessionCubit>()),
       ],
-      child: BlocSelector<SettingsCubit, AppSettings, AppThemeMode>(
-        selector: (settings) => settings.themeMode,
-        builder: (context, themeMode) => MaterialApp.router(
-          onGenerateTitle: (context) => context.l10n.appTitle,
-          builder: (_, child) =>
-              BlocSelector<SessionCubit, SessionState, Currency>(
-                selector: (state) => switch (state) {
-                  SessionAuthenticated(:final user) =>
-                    user.baseCurrency ?? Currency.rub,
-                  _ => Currency.rub,
-                },
-                builder: (_, currency) => CurrencyScope(
-                  currency: currency,
-                  child: Material(type: .transparency, child: child),
+      child: BlocListener<SessionCubit, SessionState>(
+        // Выход откуда угодно — на вход; стек сбрасывается, «Назад» во вкладки не ведёт.
+        listenWhen: (previous, current) =>
+            previous is SessionAuthenticated &&
+            current is SessionUnauthenticated,
+        listener: (_, _) => getIt<AppRouter>().replaceAll([const LoginRoute()]),
+        child: BlocSelector<SettingsCubit, AppSettings, AppThemeMode>(
+          selector: (settings) => settings.themeMode,
+          builder: (context, themeMode) => MaterialApp.router(
+            onGenerateTitle: (context) => context.l10n.appTitle,
+            builder: (_, child) =>
+                BlocSelector<SessionCubit, SessionState, Currency>(
+                  selector: (state) => switch (state) {
+                    SessionAuthenticated(:final user) =>
+                      user.baseCurrency ?? Currency.rub,
+                    _ => Currency.rub,
+                  },
+                  builder: (_, currency) => CurrencyScope(
+                    currency: currency,
+                    child: Material(type: .transparency, child: child),
+                  ),
                 ),
-              ),
-          theme: AppTheme.light(),
-          darkTheme: AppTheme.dark(),
-          themeMode: switch (themeMode) {
-            AppThemeMode.system => ThemeMode.system,
-            AppThemeMode.light => ThemeMode.light,
-            AppThemeMode.dark => ThemeMode.dark,
-          },
-          localizationsDelegates: AppLocalizationsSetup.delegates,
-          supportedLocales: AppLocalizationsSetup.supportedLocales,
-          localeListResolutionCallback: AppLocalizationsSetup.resolve,
-          routerConfig: _routerConfig,
+            theme: AppTheme.light(),
+            darkTheme: AppTheme.dark(),
+            themeMode: switch (themeMode) {
+              AppThemeMode.system => ThemeMode.system,
+              AppThemeMode.light => ThemeMode.light,
+              AppThemeMode.dark => ThemeMode.dark,
+            },
+            localizationsDelegates: AppLocalizationsSetup.delegates,
+            supportedLocales: AppLocalizationsSetup.supportedLocales,
+            localeListResolutionCallback: AppLocalizationsSetup.resolve,
+            routerConfig: _routerConfig,
+          ),
         ),
       ),
     );

@@ -35,6 +35,15 @@ void main() {
     expect(action.top, SideNavMetrics.gap);
   });
 
+  testWidgets('телефон — над кнопками место под бейдж со счётчиком', (
+    tester,
+  ) async {
+    final action = await pumpAction(tester);
+
+    // Бейдж Badge с числом выступает над иконкой примерно на 8.
+    expect(action.top, greaterThanOrEqualTo(8));
+  });
+
   testWidgets('кнопки справа — с отступом от края', (tester) async {
     final action = await pumpAction(tester);
 

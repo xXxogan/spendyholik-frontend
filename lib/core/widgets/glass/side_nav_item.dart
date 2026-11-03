@@ -21,10 +21,15 @@ class SideNavItem extends StatelessWidget {
     final foreground = selected
         ? colorScheme.primary
         : colorScheme.onSurfaceVariant;
-    final icon = Icon(
+    final count = destination.badgeCount;
+    final iconData = Icon(
       selected ? destination.selectedIcon : destination.icon,
       color: foreground,
     );
+    // На рейле подписи нет — число садится на иконку.
+    final icon = !extended && count > 0
+        ? Badge(label: Text('$count'), child: iconData)
+        : iconData;
 
     final item = Padding(
       padding: const .symmetric(vertical: 2),
@@ -54,6 +59,7 @@ class SideNavItem extends StatelessWidget {
                               ?.copyWith(color: foreground),
                         ),
                       ),
+                      if (count > 0) Badge(label: Text('$count')),
                     ],
                   ),
                 )
@@ -66,6 +72,7 @@ class SideNavItem extends StatelessWidget {
       selected: selected,
       button: true,
       label: extended ? null : destination.label,
+      value: count > 0 ? '$count' : null,
       child: extended ? item : Tooltip(message: destination.label, child: item),
     );
   }

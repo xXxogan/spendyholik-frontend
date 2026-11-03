@@ -47,7 +47,10 @@ const homeLinkRoutes = <PageRouteInfo>[
   NotificationsRoute(),
 ];
 
-List<AppNavDestination> homeLinks(AppLocalizations l10n) => [
+List<AppNavDestination> homeLinks(
+  AppLocalizations l10n, {
+  int unreadNotifications = 0,
+}) => [
   AppNavDestination(
     icon: Icons.category_outlined,
     selectedIcon: Icons.category,
@@ -67,5 +70,6 @@ List<AppNavDestination> homeLinks(AppLocalizations l10n) => [
     icon: Icons.notifications_outlined,
     selectedIcon: Icons.notifications,
     label: l10n.notificationsTitle,
+    badgeCount: unreadNotifications,
   ),
 ];

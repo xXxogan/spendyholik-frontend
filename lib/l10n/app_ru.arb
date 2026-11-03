@@ -569,5 +569,12 @@
     }
   },
   "registerSubmit": "Создать аккаунт",
-  "registerTerms": "Создавая аккаунт, вы принимаете условия и политику конфиденциальности"
+  "registerTerms": "Создавая аккаунт, вы принимаете условия и политику конфиденциальности",
+  "profileEditTitle": "Профиль",
+  "profileSaved": "Профиль сохранён",
+  "profileCurrency": "Базовая валюта",
+  "profileChangePassword": "Смена пароля",
+  "profileCurrentPassword": "Текущий пароль",
+  "profileNewPassword": "Новый пароль",
+  "profileSignOut": "Выйти"
 }
