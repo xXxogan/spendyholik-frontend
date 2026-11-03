@@ -1,6 +1,8 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:spendyholik/app/di/injection.dart';
+import 'package:spendyholik/app/router/app_router.gr.dart';
 import 'package:spendyholik/core/models/models.dart';
 import 'package:spendyholik/core/widgets/widgets.dart';
 import 'package:spendyholik/features/goals/presentation/cubit/goals_cubit.dart';
@@ -32,8 +34,13 @@ class GoalsList extends StatelessWidget {
                 crossAxisSpacing: 12,
               ),
               itemCount: goals.length,
-              itemBuilder: (context, index) =>
-                  GoalCard(goal: goals[index], currency: _currency),
+              itemBuilder: (context, index) => GoalCard(
+                goal: goals[index],
+                currency: _currency,
+                onTap: () => context.router.push(
+                  GoalDetailRoute(goalId: goals[index].id),
+                ),
+              ),
             ),
           ),
           GoalsEmpty() => SliverFillRemaining(

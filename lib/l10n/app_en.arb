@@ -180,5 +180,19 @@
   "goalDeadline": "by {date}",
   "goalReached": "goal reached",
   "goalRemaining": "{amount} to go",
-  "dashboardNearestGoal": "Nearest goal · {name}"
+  "dashboardNearestGoal": "Nearest goal · {name}",
+  "goalDetailTitle": "Goal",
+  "goalOfTargetPercent": "of {target} · {percent}%",
+  "goalRemainingLabel": "Left to save",
+  "goalForecastLabel": "Forecast",
+  "goalForecastNone": "No data",
+  "goalReachedTitle": "Reached",
+  "goalForecastMonths": "{months, plural, one{{months} month} other{{months} months}}",
+  "goalHistory": "Contribution history",
+  "goalHistoryEmpty": "No contributions yet",
+  "goalContribution": "Goal contribution",
+  "goalTopUpTitle": "Top up goal",
+  "goalTopUpFrom": "From account",
+  "goalTopUpSubmit": "Top up",
+  "goalTopUpDone": "Goal topped up"
 }

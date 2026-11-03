@@ -236,7 +236,7 @@ abstract final class FakeSeed {
       for (var m = 1; m <= 3; m++)
         contribution('goal-trip', 1500000, 'acc-tinkoff', m),
       contribution('goal-laptop', 2000000, 'acc-tinkoff', 2),
-      contribution('goal-laptop', 1000000, 'acc-cash', 5),
+      contribution('goal-laptop', 1000000, 'acc-tinkoff', 5),
       for (var m = 2; m <= 5; m++)
         contribution('goal-phone', 1500000, 'acc-tinkoff', m),
     ];

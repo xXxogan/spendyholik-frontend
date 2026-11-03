@@ -49,14 +49,15 @@ class FakeAccountRepository implements AccountRepository {
         final now = DateTime.now();
         final start = DateTime(now.year, now.month, now.day - weeks * 7);
         final changes =
-            _backend.transactions
-                .where((t) => t.account.id == id || t.toAccount?.id == id)
+            [
+                  ..._backend.transactions
+                      .where((t) => t.account.id == id || t.toAccount?.id == id)
+                      .map((t) => t.occurredAt),
+                  ..._backend.contributionMomentsOf(id),
+                ]
                 .where(
-                  (t) =>
-                      !t.occurredAt.isBefore(start) &&
-                      !t.occurredAt.isAfter(now),
+                  (moment) => !moment.isBefore(start) && !moment.isAfter(now),
                 )
-                .map((t) => t.occurredAt)
                 .toList()
               ..sort();
 

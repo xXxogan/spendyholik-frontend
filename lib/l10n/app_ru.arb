@@ -321,5 +321,36 @@
         "type": "String"
       }
     }
-  }
+  },
+  "goalDetailTitle": "Цель",
+  "goalOfTargetPercent": "из {target} · {percent}%",
+  "@goalOfTargetPercent": {
+    "placeholders": {
+      "target": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "goalRemainingLabel": "Осталось накопить",
+  "goalForecastLabel": "Прогноз достижения",
+  "goalForecastNone": "Нет данных",
+  "goalReachedTitle": "Достигнута",
+  "goalForecastMonths": "{months, plural, one{{months} месяц} few{{months} месяца} many{{months} месяцев} other{{months} месяца}}",
+  "@goalForecastMonths": {
+    "placeholders": {
+      "months": {
+        "type": "int"
+      }
+    }
+  },
+  "goalHistory": "История пополнений",
+  "goalHistoryEmpty": "Пополнений пока нет",
+  "goalContribution": "Пополнение цели",
+  "goalTopUpTitle": "Пополнить цель",
+  "goalTopUpFrom": "Со счёта",
+  "goalTopUpSubmit": "Пополнить",
+  "goalTopUpDone": "Цель пополнена"
 }

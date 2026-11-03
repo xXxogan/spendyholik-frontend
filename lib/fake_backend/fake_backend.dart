@@ -77,6 +77,27 @@ class FakeBackend {
       ),
   ];
 
+  GoalContribution addContribution(
+    String goalId,
+    int amount,
+    AccountModel from,
+  ) {
+    final contribution = GoalContribution(
+      id: 'gc-${DateTime.now().microsecondsSinceEpoch}',
+      amount: amount,
+      from: AccountRef(id: from.id, name: from.name, color: from.color),
+      date: DateTime.now(),
+    );
+    _contributions.add((goalId, contribution));
+    return contribution;
+  }
+
+  /// Моменты пополнений целей с этого счёта — точки истории баланса.
+  List<DateTime> contributionMomentsOf(String accountId) => [
+    for (final (_, c) in _contributions)
+      if (c.from.id == accountId) c.date,
+  ];
+
   List<GoalContribution> contributionsOf(String goalId) => [
     for (final (id, contribution) in _contributions)
       if (id == goalId) contribution,
@@ -217,8 +238,13 @@ class FakeBackend {
         .fold(0, (sum, t) => sum + t.amount);
   }
 
+  /// Пополнения целей — тоже списания со счёта, хотя операциями не являются.
   int _delta(String accountId, {DateTime? before}) {
     var delta = 0;
+    for (final (_, c) in _contributions) {
+      if (before != null && !c.date.isBefore(before)) continue;
+      if (c.from.id == accountId) delta -= c.amount;
+    }
     for (final t in transactions) {
       if (before != null && !t.occurredAt.isBefore(before)) continue;
       switch (t.type) {
