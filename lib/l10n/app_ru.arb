@@ -525,5 +525,10 @@
         "type": "int"
       }
     }
-  }
+  },
+  "userOnboardingTitle": "Добро пожаловать",
+  "userLoginTitle": "Вход",
+  "userRegisterTitle": "Регистрация",
+  "userCurrencyTitle": "Базовая валюта",
+  "userScreenComingSoon": "Экран появится в следующей задаче"
 }

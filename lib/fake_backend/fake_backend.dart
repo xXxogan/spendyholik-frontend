@@ -11,6 +11,7 @@ import 'package:spendyholik/features/goals/data/models/models.dart';
 import 'package:spendyholik/features/notifications/data/models/models.dart';
 import 'package:spendyholik/features/recurring/data/models/models.dart';
 import 'package:spendyholik/features/transactions/transactions.dart';
+import 'package:spendyholik/features/user/data/models/models.dart';
 
 /// «Сервер» фазы 1: данные в памяти до перезапуска. В фазе 2 удаляется
 /// вместе с фейковыми репозиториями.
@@ -42,6 +43,10 @@ class FakeBackend {
   late final List<(String, GoalContribution)> _contributions;
   late final List<(String, RecurringDraft, bool)> _recurring;
   late final List<NotificationModel> notifications;
+
+  /// Сессия стартует «вошедшей»: экраны входа появятся в T-29, а до тех пор
+  /// приложение должно оставаться проверяемым.
+  UserModel? user = FakeSeed.user;
   late final List<DebtModel> _debts;
   late final List<(String, DebtEvent)> _debtEvents;
 

@@ -1,16 +1,31 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:injectable/injectable.dart';
 import 'package:spendyholik/app/router/app_router.gr.dart';
+import 'package:spendyholik/app/router/guards.dart';
+import 'package:spendyholik/features/user/user.dart';
 
 @lazySingleton
 @AutoRouterConfig()
 class AppRouter extends RootStackRouter {
+  AppRouter(this._session);
+
+  final SessionCubit _session;
+
   @override
   List<AutoRoute> get routes => [
+    AutoRoute(page: SplashRoute.page, path: '/splash', initial: true),
+    AutoRoute(page: OnboardingRoute.page, path: '/onboarding'),
+    AutoRoute(page: LoginRoute.page, path: '/login'),
+    AutoRoute(page: RegisterRoute.page, path: '/register'),
+    AutoRoute(
+      page: CurrencyRoute.page,
+      path: '/currency',
+      guards: [SessionGuard(_session)],
+    ),
     AutoRoute(
       page: HomeRoute.page,
       path: '/',
-      initial: true,
+      guards: [AuthGuard(_session)],
       children: [
         AutoRoute(
           page: TabsRoute.page,

@@ -1,3 +1,4 @@
+import 'package:spendyholik/core/models/currency.dart';
 import 'package:spendyholik/core/models/date_period.dart';
 import 'package:spendyholik/core/models/entity_color.dart';
 import 'package:spendyholik/core/models/entity_icon.dart';
@@ -8,9 +9,21 @@ import 'package:spendyholik/features/debts/data/models/models.dart';
 import 'package:spendyholik/features/goals/data/models/models.dart';
 import 'package:spendyholik/features/notifications/data/models/models.dart';
 import 'package:spendyholik/features/recurring/data/models/models.dart';
+import 'package:spendyholik/features/user/data/models/models.dart';
 import 'package:spendyholik/features/transactions/transactions.dart';
 
 abstract final class FakeSeed {
+  /// Тестовый вход фазы 1 — не настоящие учётные данные.
+  static const email = 'maria@example.com';
+  static const password = 'spendy-test-2026';
+
+  static const user = UserModel(
+    id: 'user-maria',
+    name: 'Мария Соколова',
+    email: email,
+    baseCurrency: Currency.rub,
+  );
+
   /// Балансы здесь начальные: итоговые считает FakeBackend из операций.
   static List<AccountModel> initialAccounts() => const [
     AccountModel(

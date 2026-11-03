@@ -1,3 +1,4 @@
+import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:mocktail/mocktail.dart';
@@ -23,6 +24,7 @@ import 'package:spendyholik/features/notifications/presentation/cubit/unread_cou
 import 'package:spendyholik/features/transactions/data/models/models.dart';
 import 'package:spendyholik/features/transactions/data/repositories/repositories.dart';
 import 'package:spendyholik/features/transactions/presentation/cubit/transactions_cubit.dart';
+import 'package:spendyholik/features/user/user.dart';
 import 'package:spendyholik/l10n/l10n.dart';
 
 import '../../../../helpers/pump_app.dart';
@@ -43,7 +45,7 @@ Future<void> pumpApp(
       locale: locale,
       localizationsDelegates: AppLocalizationsSetup.delegates,
       supportedLocales: AppLocalizationsSetup.supportedLocales,
-      routerConfig: AppRouter().config(),
+      routerConfig: AppRouter(getIt<SessionCubit>()).config(),
     ),
   );
   await settle(tester);
@@ -60,6 +62,9 @@ class MockAnalyticsRepository extends Mock implements AnalyticsRepository {}
 class MockBudgetRepository extends Mock implements BudgetRepository {}
 
 class MockGoalRepository extends Mock implements GoalRepository {}
+
+class MockSessionCubit extends MockCubit<SessionState>
+    implements SessionCubit {}
 
 class MockNotificationRepository extends Mock
     implements NotificationRepository {}
@@ -95,6 +100,17 @@ void main() {
     when(budgets.getBudgets).thenAnswer((_) async => []);
     final goals = MockGoalRepository();
     when(goals.getGoals).thenAnswer((_) async => []);
+    final session = MockSessionCubit();
+    when(() => session.state).thenReturn(
+      const SessionState.authenticated(
+        UserModel(
+          id: 'u1',
+          name: 'Мария',
+          email: 'maria@example.com',
+          baseCurrency: Currency.rub,
+        ),
+      ),
+    );
     final notifications = MockNotificationRepository();
     when(notifications.getUnreadCount).thenAnswer((_) async => 0);
     getIt
@@ -104,7 +120,8 @@ void main() {
       ..registerFactory(() => AnalyticsCubit(analytics, bus))
       ..registerFactory(() => BudgetsCubit(budgets, bus))
       ..registerFactory(() => GoalsCubit(goals, bus))
-      ..registerFactory(() => UnreadCountCubit(notifications, bus));
+      ..registerFactory(() => UnreadCountCubit(notifications, bus))
+      ..registerSingleton<SessionCubit>(session);
   });
 
   tearDown(getIt.reset);

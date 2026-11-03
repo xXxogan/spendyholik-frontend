@@ -301,5 +301,10 @@
   "notificationBudgetDetails": "{percent}% of the limit spent",
   "notificationIncomeTitle": "Money received",
   "notificationRecurringTitle": "Recurring payment tomorrow",
-  "notificationGoalTitle": "Goal {percent}% reached"
+  "notificationGoalTitle": "Goal {percent}% reached",
+  "userOnboardingTitle": "Welcome",
+  "userLoginTitle": "Sign in",
+  "userRegisterTitle": "Sign up",
+  "userCurrencyTitle": "Base currency",
+  "userScreenComingSoon": "This screen is coming in the next task"
 }

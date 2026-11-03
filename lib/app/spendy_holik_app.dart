@@ -1,10 +1,14 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:spendyholik/app/di/injection.dart';
 import 'package:spendyholik/app/router/app_router.dart';
+import 'package:spendyholik/app/router/app_router.gr.dart';
+import 'package:spendyholik/app/router/guards.dart';
 import 'package:spendyholik/app/theme/app_theme.dart';
 import 'package:spendyholik/core/logger/talker_auto_route_observer.dart';
 import 'package:spendyholik/features/settings/settings.dart';
+import 'package:spendyholik/features/user/user.dart';
 import 'package:spendyholik/l10n/l10n.dart';
 import 'package:talker/talker.dart';
 
@@ -17,13 +21,20 @@ class SpendyHolikApp extends StatefulWidget {
 
 class _SpendyHolikAppState extends State<SpendyHolikApp> {
   late final _routerConfig = getIt<AppRouter>().config(
+    deepLinkBuilder: (link) => switch (deepLinkNext(link.uri.toString())) {
+      final next? => DeepLink([SplashRoute(next: next)]),
+      null => link,
+    },
     navigatorObservers: () => [TalkerAutoRouteObserver(getIt<Talker>())],
   );
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider.value(
-      value: getIt<SettingsCubit>(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider.value(value: getIt<SettingsCubit>()),
+        BlocProvider.value(value: getIt<SessionCubit>()),
+      ],
       child: BlocSelector<SettingsCubit, AppSettings, AppThemeMode>(
         selector: (settings) => settings.themeMode,
         builder: (context, themeMode) => MaterialApp.router(
