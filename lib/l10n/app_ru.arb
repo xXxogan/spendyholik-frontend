@@ -211,5 +211,42 @@
   "analyticsNoExpenses": "Расходов нет",
   "analyticsTrendWeek": "Динамика по дням недели",
   "analyticsTrendMonth": "Динамика по месяцам",
-  "analyticsTrendYear": "Динамика по годам"
+  "analyticsTrendYear": "Динамика по годам",
+  "dashboardBudgets": "Бюджеты",
+  "dashboardAllBudgets": "Все",
+  "budgetsSegmentBudgets": "Бюджеты",
+  "budgetsSegmentGoals": "Цели",
+  "budgetsEmpty": "Бюджетов пока нет",
+  "budgetsGoalsSoon": "Цели появятся скоро",
+  "budgetsThisWeek": "Эта неделя",
+  "budgetsRemaining": "{period} · осталось {amount}",
+  "@budgetsRemaining": {
+    "placeholders": {
+      "period": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsExceeded": "{period} · превышен на {amount}",
+  "@budgetsExceeded": {
+    "placeholders": {
+      "period": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsOfLimit": "из {amount}",
+  "@budgetsOfLimit": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  }
 }

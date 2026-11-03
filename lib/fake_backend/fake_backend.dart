@@ -1,8 +1,10 @@
 import 'package:injectable/injectable.dart';
 import 'package:spendyholik/core/config/app_config.dart';
 import 'package:spendyholik/core/errors/failure.dart';
+import 'package:spendyholik/core/models/date_period.dart';
 import 'package:spendyholik/fake_backend/seed.dart';
 import 'package:spendyholik/features/accounts/accounts.dart';
+import 'package:spendyholik/features/budgets/data/models/models.dart';
 import 'package:spendyholik/features/categories/categories.dart';
 import 'package:spendyholik/features/transactions/transactions.dart';
 
@@ -15,6 +17,7 @@ class FakeBackend {
     transactions = List.of(
       FakeSeed.transactions(DateTime.now(), _initialAccounts, _categories),
     );
+    _budgets = FakeSeed.budgets(DateTime.now(), _spent);
   }
 
   /// Начальные балансы; итоговые считаются из операций, как на сервере.
@@ -24,6 +27,7 @@ class FakeBackend {
   );
   late final List<CategoryModel> _categories;
   late final List<TransactionModel> transactions;
+  late final List<(String, BudgetDraft)> _budgets;
 
   List<AccountModel> get accounts => [
     for (final a in _initialAccounts)
@@ -38,6 +42,26 @@ class FakeBackend {
             .length,
       ),
   ];
+
+  List<BudgetModel> get budgets {
+    final now = DateTime.now();
+    return [
+      for (final (id, draft) in _budgets)
+        () {
+          final period = _budgetPeriod(draft, now);
+          return BudgetModel(
+            id: id,
+            category: _categories
+                .firstWhere((c) => c.id == draft.categoryId)
+                .toRef(),
+            limit: draft.limit,
+            spent: _spent(draft.categoryId, period),
+            period: draft.period,
+            currentPeriod: period,
+          );
+        }(),
+    ];
+  }
 
   /// Баланс счёта на момент [moment]: операции раньше него, не включая.
   int balanceAt(String accountId, DateTime moment) {
@@ -114,6 +138,18 @@ class FakeBackend {
     );
   }
 
+  String addBudget(BudgetDraft draft) {
+    final id = 'bud-${DateTime.now().microsecondsSinceEpoch}';
+    _budgets.add((id, draft));
+    return id;
+  }
+
+  void updateBudget(String budgetId, BudgetDraft draft) {
+    final index = _budgets.indexWhere((b) => b.$1 == budgetId);
+    if (index == -1) throw const NotFoundFailure();
+    _budgets[index] = (budgetId, draft);
+  }
+
   void addTransaction(TransactionModel transaction) =>
       transactions.add(transaction);
 
@@ -127,6 +163,33 @@ class FakeBackend {
     final index = transactions.indexWhere((t) => t.id == id);
     if (index == -1) throw const NotFoundFailure();
     transactions.removeAt(index);
+  }
+
+  DatePeriod _budgetPeriod(BudgetDraft draft, DateTime now) =>
+      switch (draft.period) {
+        BudgetPeriod.monthly => DatePeriod.current(PeriodPreset.month, now),
+        BudgetPeriod.weekly => DatePeriod.current(PeriodPreset.week, now),
+        BudgetPeriod.once => DatePeriod(
+          start: draft.onceStart!,
+          end: draft.onceEnd!,
+        ),
+      };
+
+  /// Расходы категории вместе с её подкатегориями.
+  int _spent(String categoryId, DatePeriod period) {
+    final ids = {
+      categoryId,
+      for (final c in _categories)
+        if (c.parentId == categoryId) c.id,
+    };
+    return transactions
+        .where(
+          (t) =>
+              t.type == TransactionType.expense &&
+              ids.contains(t.category?.id) &&
+              period.contains(t.occurredAt),
+        )
+        .fold(0, (sum, t) => sum + t.amount);
   }
 
   int _delta(String accountId, {DateTime? before}) {

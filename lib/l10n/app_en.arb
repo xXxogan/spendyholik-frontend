@@ -142,5 +142,15 @@
   "analyticsNoExpenses": "No expenses",
   "analyticsTrendWeek": "Trend by weekday",
   "analyticsTrendMonth": "Trend by month",
-  "analyticsTrendYear": "Trend by year"
+  "analyticsTrendYear": "Trend by year",
+  "dashboardBudgets": "Budgets",
+  "dashboardAllBudgets": "All",
+  "budgetsSegmentBudgets": "Budgets",
+  "budgetsSegmentGoals": "Goals",
+  "budgetsEmpty": "No budgets yet",
+  "budgetsGoalsSoon": "Goals are coming soon",
+  "budgetsThisWeek": "This week",
+  "budgetsRemaining": "{period} · {amount} left",
+  "budgetsExceeded": "{period} · over by {amount}",
+  "budgetsOfLimit": "of {amount}"
 }

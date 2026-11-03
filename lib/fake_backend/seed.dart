@@ -1,6 +1,8 @@
+import 'package:spendyholik/core/models/date_period.dart';
 import 'package:spendyholik/core/models/entity_color.dart';
 import 'package:spendyholik/core/models/entity_icon.dart';
 import 'package:spendyholik/features/accounts/accounts.dart';
+import 'package:spendyholik/features/budgets/data/models/models.dart';
 import 'package:spendyholik/features/categories/categories.dart';
 import 'package:spendyholik/features/transactions/transactions.dart';
 
@@ -167,6 +169,54 @@ abstract final class FakeSeed {
       transactionCount: 0,
     ),
   ];
+
+  /// Траты сида зависят от дня месяца, поэтому лимит подбирается под долю
+  /// от уже потраченного — так на любой день видны ok, warning и exceeded.
+  /// Ничего не потрачено — лимит [fallback].
+  static List<(String, BudgetDraft)> budgets(
+    DateTime now,
+    int Function(String categoryId, DatePeriod period) spentOf,
+  ) {
+    final day = DateTime(now.year, now.month, now.day);
+    final onceStart = DateTime(day.year, day.month, day.day - 10);
+    final onceEnd = DateTime(day.year, day.month, day.day + 20);
+
+    (String, BudgetDraft) budget(
+      String id,
+      String categoryId,
+      BudgetPeriod period,
+      double share,
+      int fallback,
+    ) {
+      final spent = spentOf(categoryId, switch (period) {
+        BudgetPeriod.monthly => DatePeriod.current(PeriodPreset.month, now),
+        BudgetPeriod.weekly => DatePeriod.current(PeriodPreset.week, now),
+        BudgetPeriod.once => DatePeriod(start: onceStart, end: onceEnd),
+      });
+      const step = 10000;
+      final limit = spent == 0
+          ? fallback
+          : ((spent / share) / step).ceil() * step;
+      return (
+        id,
+        BudgetDraft(
+          categoryId: categoryId,
+          limit: limit,
+          period: period,
+          onceStart: period == BudgetPeriod.once ? onceStart : null,
+          onceEnd: period == BudgetPeriod.once ? onceEnd : null,
+        ),
+      );
+    }
+
+    return [
+      budget('bud-groceries', 'cat-groceries', .monthly, 0.71, 2000000),
+      budget('bud-fun', 'cat-fun', .monthly, 0.86, 800000),
+      budget('bud-transport', 'cat-transport', .weekly, 0.48, 500000),
+      budget('bud-cafe', 'cat-cafe', .monthly, 1.12, 600000),
+      budget('bud-shopping', 'cat-shopping', .once, 0.6, 1500000),
+    ];
+  }
 
   /// Даты строятся от [now] смещением в днях, чтобы «Сегодня/Вчера» были правдой.
   static List<TransactionModel> transactions(
