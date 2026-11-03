@@ -7,6 +7,7 @@ import 'package:spendyholik/app/di/injection.dart';
 import 'package:spendyholik/app/spendy_holik_app.dart';
 import 'package:spendyholik/app/theme/glass_manager.dart';
 import 'package:spendyholik/core/logger/liquid_glass_talker_logger.dart';
+import 'package:spendyholik/features/settings/settings.dart';
 import 'package:talker_bloc_logger/talker_bloc_logger.dart';
 import 'package:talker_flutter/talker_flutter.dart';
 
@@ -32,6 +33,7 @@ void main() {
 
     final glassLogger = getIt<LiquidGlassTalkerLogger>()..attach();
     await LiquidGlassWidgets.initialize();
+    await getIt<SettingsCubit>().load();
     talker.info('App started');
 
     runApp(
