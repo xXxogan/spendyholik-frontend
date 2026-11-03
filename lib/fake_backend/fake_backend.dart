@@ -119,6 +119,22 @@ class FakeBackend {
       ),
   ];
 
+  void addDebtRepayment(String debtId, int amount, AccountModel account) =>
+      _debtEvents.add((
+        debtId,
+        DebtEvent(
+          id: 'de-${DateTime.now().microsecondsSinceEpoch}',
+          kind: DebtEventKind.repayment,
+          amount: amount,
+          date: DateTime.now(),
+          account: AccountRef(
+            id: account.id,
+            name: account.name,
+            color: account.color,
+          ),
+        ),
+      ));
+
   List<DebtEvent> debtEventsOf(String debtId) => [
     for (final (id, event) in _debtEvents)
       if (id == debtId) event,

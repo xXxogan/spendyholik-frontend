@@ -263,5 +263,21 @@
         "type": "String"
       }
     }
-  }
+  },
+  "debtDetailTitle": "Debt",
+  "debtDetailTotal": "Debt amount",
+  "debtDetailRemaining": "Remaining",
+  "debtDetailDue": "Due",
+  "debtDetailNote": "Note",
+  "debtHistory": "History",
+  "debtEventBorrowed": "Loan received",
+  "debtEventLent": "Loan given",
+  "debtEventRepayment": "Repayment",
+  "debtRepayTitle": "Repay debt",
+  "debtRepaySubtitle": "{name} · {amount} left",
+  "debtRepayFull": "In full",
+  "debtRepayHalf": "Half",
+  "debtRepayAccount": "Account",
+  "debtRepaySubmit": "Repay",
+  "debtRepayDone": "Debt repaid"
 }

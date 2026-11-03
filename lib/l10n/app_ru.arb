@@ -456,5 +456,31 @@
         "type": "String"
       }
     }
-  }
+  },
+  "debtDetailTitle": "Долг",
+  "debtDetailTotal": "Сумма долга",
+  "debtDetailRemaining": "Осталось",
+  "debtDetailDue": "Срок",
+  "debtDetailNote": "Заметка",
+  "debtHistory": "История",
+  "debtEventBorrowed": "Получение займа",
+  "debtEventLent": "Выдача займа",
+  "debtEventRepayment": "Погашение",
+  "debtRepayTitle": "Погасить долг",
+  "debtRepaySubtitle": "{name} · осталось {amount}",
+  "@debtRepaySubtitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "debtRepayFull": "Полностью",
+  "debtRepayHalf": "Половина",
+  "debtRepayAccount": "Счёт",
+  "debtRepaySubmit": "Погасить",
+  "debtRepayDone": "Долг погашен"
 }

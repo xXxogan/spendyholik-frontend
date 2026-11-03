@@ -4,6 +4,7 @@ import 'package:spendyholik/app/theme/app_colors.dart';
 import 'package:spendyholik/core/format/format.dart';
 import 'package:spendyholik/core/models/models.dart';
 import 'package:spendyholik/features/debts/data/models/models.dart';
+import 'package:spendyholik/features/debts/presentation/widgets/debt_amount.dart';
 import 'package:spendyholik/l10n/l10n.dart';
 
 class DebtCard extends StatelessWidget {
@@ -34,6 +35,12 @@ class DebtCard extends StatelessWidget {
     final due = debt.dueDate;
     final overdue = debt.isOverdue(DateTime.now());
     final note = debt.note;
+    final (amount, amountColor) = debtAmount(
+      debt,
+      currency,
+      locale,
+      brightness,
+    );
 
     final details = <(String, {bool alert})>[
       if (note != null && note.isNotEmpty) (note, alert: false),
@@ -103,20 +110,10 @@ class DebtCard extends StatelessWidget {
                   mainAxisSize: .min,
                   children: [
                     Text(
-                      debt.isClosed
-                          ? formatMoney(debt.total, currency, locale)
-                          : isIOwe
-                          ? formatMoney(-debt.remaining, currency, locale)
-                          : formatMoney(
-                              debt.remaining,
-                              currency,
-                              locale,
-                              signed: true,
-                            ),
+                      amount,
                       style: theme.textTheme.titleMedium?.copyWith(
-                        color: debt.isClosed
-                            ? theme.colorScheme.onSurfaceVariant
-                            : accent,
+                        color:
+                            amountColor ?? theme.colorScheme.onSurfaceVariant,
                       ),
                     ),
                     if (!debt.isClosed && debt.remaining < debt.total)

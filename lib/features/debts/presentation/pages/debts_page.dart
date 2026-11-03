@@ -84,8 +84,13 @@ class DebtsView extends StatelessWidget {
                   crossAxisSpacing: 12,
                 ),
                 itemCount: visible.length,
-                itemBuilder: (context, index) =>
-                    DebtCard(debt: visible[index], currency: _currency),
+                itemBuilder: (context, index) => DebtCard(
+                  debt: visible[index],
+                  currency: _currency,
+                  onTap: () => context.router.push(
+                    DebtDetailRoute(debtId: visible[index].id),
+                  ),
+                ),
               ),
             ),
             DebtsEmpty() => SliverFillRemaining(
