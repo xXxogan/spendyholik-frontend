@@ -54,6 +54,7 @@ class FakeAccountRepository implements AccountRepository {
                       .where((t) => t.account.id == id || t.toAccount?.id == id)
                       .map((t) => t.occurredAt),
                   ..._backend.contributionMomentsOf(id),
+                  ..._backend.debtRepaymentMomentsOf(id),
                 ]
                 .where(
                   (moment) => !moment.isBefore(start) && !moment.isAfter(now),

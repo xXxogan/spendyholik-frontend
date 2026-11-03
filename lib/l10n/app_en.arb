@@ -241,5 +241,27 @@
       }
     }
   },
-  "recurringFormSaved": "Template saved"
+  "recurringFormSaved": "Template saved",
+  "debtsTitle": "Debts and loans",
+  "debtsIOwe": "I owe",
+  "debtsOwedToMe": "Owed to me",
+  "debtsEmpty": "Nothing here yet",
+  "debtDue": "due {date}",
+  "@debtDue": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "debtOverdue": "overdue",
+  "debtClosed": "closed",
+  "debtOfTotal": "of {amount}",
+  "@debtOfTotal": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  }
 }

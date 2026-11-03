@@ -40,7 +40,11 @@ List<AppNavDestination> homeDestinations(AppLocalizations l10n) => [
   ),
 ];
 
-const homeLinkRoutes = <PageRouteInfo>[CategoriesRoute(), RecurringRoute()];
+const homeLinkRoutes = <PageRouteInfo>[
+  CategoriesRoute(),
+  RecurringRoute(),
+  DebtsRoute(),
+];
 
 List<AppNavDestination> homeLinks(AppLocalizations l10n) => [
   AppNavDestination(
@@ -52,5 +56,10 @@ List<AppNavDestination> homeLinks(AppLocalizations l10n) => [
     icon: Icons.event_repeat_outlined,
     selectedIcon: Icons.event_repeat,
     label: l10n.recurringTitle,
+  ),
+  AppNavDestination(
+    icon: Icons.handshake_outlined,
+    selectedIcon: Icons.handshake,
+    label: l10n.debtsTitle,
   ),
 ];

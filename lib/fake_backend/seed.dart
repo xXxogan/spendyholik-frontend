@@ -4,6 +4,7 @@ import 'package:spendyholik/core/models/entity_icon.dart';
 import 'package:spendyholik/features/accounts/accounts.dart';
 import 'package:spendyholik/features/budgets/data/models/models.dart';
 import 'package:spendyholik/features/categories/categories.dart';
+import 'package:spendyholik/features/debts/data/models/models.dart';
 import 'package:spendyholik/features/goals/data/models/models.dart';
 import 'package:spendyholik/features/recurring/data/models/models.dart';
 import 'package:spendyholik/features/transactions/transactions.dart';
@@ -286,6 +287,113 @@ abstract final class FakeSeed {
       deadline: DateTime(now.year, now.month - 1),
     ),
   ];
+
+  /// Долги без остатка: `remaining` backend пересчитывает из событий.
+  static List<DebtModel> debts(DateTime now) {
+    DateTime ago(int days) => now.subtract(Duration(days: days));
+    DateTime ahead(int days) => now.add(Duration(days: days));
+
+    DebtModel debt(
+      String id,
+      String counterparty,
+      DebtDirection direction,
+      int total,
+      int createdDaysAgo, {
+      DateTime? dueDate,
+      String? note,
+    }) => DebtModel(
+      id: id,
+      counterparty: counterparty,
+      direction: direction,
+      total: total,
+      remaining: total,
+      dueDate: dueDate,
+      note: note,
+      createdAt: ago(createdDaysAgo),
+    );
+
+    return [
+      debt(
+        'debt-dmitry',
+        'Дмитрий',
+        .iOwe,
+        1200000,
+        10,
+        dueDate: ahead(17),
+        note: 'Заём до зарплаты',
+      ),
+      debt(
+        'debt-sister',
+        'Сестра',
+        .iOwe,
+        3000000,
+        60,
+        dueDate: ago(5),
+        note: 'На ремонт',
+      ),
+      debt('debt-colleague', 'Коллега', .iOwe, 500000, 25),
+      debt(
+        'debt-kirill',
+        'Кирилл',
+        .owedToMe,
+        850000,
+        6,
+        note: 'Возврат за концерт',
+      ),
+      debt('debt-oleg', 'Олег', .owedToMe, 1500000, 30, dueDate: ago(3)),
+      debt('debt-masha', 'Маша', .owedToMe, 200000, 18),
+    ];
+  }
+
+  /// События долгов: открытие на дату создания плюс погашения.
+  static List<(String, DebtEvent)> debtEvents(
+    DateTime now,
+    List<DebtModel> debts,
+    List<AccountModel> accounts,
+  ) {
+    AccountRef acc(String id) {
+      final a = accounts.firstWhere((a) => a.id == id);
+      return AccountRef(id: a.id, name: a.name, color: a.color);
+    }
+
+    var n = 0;
+    (String, DebtEvent) repayment(
+      String debtId,
+      int amount,
+      String account,
+      int daysAgo,
+    ) {
+      n++;
+      return (
+        debtId,
+        DebtEvent(
+          id: 'de-r${n.toString().padLeft(3, '0')}',
+          kind: .repayment,
+          amount: amount,
+          date: now.subtract(Duration(days: daysAgo)),
+          account: acc(account),
+        ),
+      );
+    }
+
+    return [
+      for (final d in debts)
+        (
+          d.id,
+          DebtEvent(
+            id: 'de-open-${d.id}',
+            kind: .opened,
+            amount: d.total,
+            date: d.createdAt,
+          ),
+        ),
+      repayment('debt-sister', 1000000, 'acc-tinkoff', 40),
+      repayment('debt-sister', 1000000, 'acc-tinkoff', 12),
+      repayment('debt-colleague', 500000, 'acc-cash', 20),
+      repayment('debt-oleg', 500000, 'acc-tinkoff', 8),
+      repayment('debt-masha', 200000, 'acc-cash', 15),
+    ];
+  }
 
   /// Помесячные пополнения: по ним в деталях цели считается прогноз.
   static List<(String, GoalContribution)> contributions(

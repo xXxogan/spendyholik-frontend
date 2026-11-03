@@ -37,6 +37,13 @@ class ProfilePage extends StatelessWidget {
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => context.router.push(const RecurringRoute()),
                 ),
+                const Divider(height: 1, indent: 16, endIndent: 16),
+                ListTile(
+                  leading: const Icon(Icons.handshake_outlined),
+                  title: Text(context.l10n.debtsTitle),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.router.push(const DebtsRoute()),
+                ),
               ],
             ),
           ),

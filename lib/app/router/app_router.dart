@@ -56,6 +56,7 @@ class AppRouter extends RootStackRouter {
           page: RecurringEditRoute.page,
           path: 'recurring/:recurringId/edit',
         ),
+        AutoRoute(page: DebtsRoute.page, path: 'debts'),
         AutoRoute(page: CategoriesRoute.page, path: 'categories'),
         AutoRoute(page: CategoryCreateRoute.page, path: 'categories/new'),
         AutoRoute(

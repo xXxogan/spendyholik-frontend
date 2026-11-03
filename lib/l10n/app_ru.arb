@@ -434,5 +434,27 @@
       }
     }
   },
-  "recurringFormSaved": "Шаблон сохранён"
+  "recurringFormSaved": "Шаблон сохранён",
+  "debtsTitle": "Долги и займы",
+  "debtsIOwe": "Я должен",
+  "debtsOwedToMe": "Мне должны",
+  "debtsEmpty": "Здесь пока пусто",
+  "debtDue": "до {date}",
+  "@debtDue": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "debtOverdue": "просрочен",
+  "debtClosed": "закрыт",
+  "debtOfTotal": "из {amount}",
+  "@debtOfTotal": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  }
 }

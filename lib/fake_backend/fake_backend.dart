@@ -6,6 +6,7 @@ import 'package:spendyholik/fake_backend/seed.dart';
 import 'package:spendyholik/features/accounts/accounts.dart';
 import 'package:spendyholik/features/budgets/data/models/models.dart';
 import 'package:spendyholik/features/categories/categories.dart';
+import 'package:spendyholik/features/debts/data/models/models.dart';
 import 'package:spendyholik/features/goals/data/models/models.dart';
 import 'package:spendyholik/features/recurring/data/models/models.dart';
 import 'package:spendyholik/features/transactions/transactions.dart';
@@ -23,6 +24,8 @@ class FakeBackend {
     _goals = FakeSeed.goals(DateTime.now());
     _contributions = FakeSeed.contributions(DateTime.now(), _initialAccounts);
     _recurring = FakeSeed.recurring(DateTime.now());
+    _debts = FakeSeed.debts(DateTime.now());
+    _debtEvents = FakeSeed.debtEvents(DateTime.now(), _debts, _initialAccounts);
   }
 
   /// Начальные балансы; итоговые считаются из операций, как на сервере.
@@ -36,6 +39,8 @@ class FakeBackend {
   late final List<GoalModel> _goals;
   late final List<(String, GoalContribution)> _contributions;
   late final List<(String, RecurringDraft, bool)> _recurring;
+  late final List<DebtModel> _debts;
+  late final List<(String, DebtEvent)> _debtEvents;
 
   List<AccountModel> get accounts => [
     for (final a in _initialAccounts)
@@ -94,6 +99,36 @@ class FakeBackend {
     _contributions.add((goalId, contribution));
     return contribution;
   }
+
+  /// `remaining` = сумма долга минус погашения.
+  List<DebtModel> get debts => [
+    for (final d in _debts)
+      DebtModel(
+        id: d.id,
+        counterparty: d.counterparty,
+        direction: d.direction,
+        total: d.total,
+        remaining:
+            d.total -
+            _debtEvents
+                .where((e) => e.$1 == d.id && e.$2.kind == .repayment)
+                .fold<int>(0, (sum, e) => sum + e.$2.amount),
+        dueDate: d.dueDate,
+        note: d.note,
+        createdAt: d.createdAt,
+      ),
+  ];
+
+  List<DebtEvent> debtEventsOf(String debtId) => [
+    for (final (id, event) in _debtEvents)
+      if (id == debtId) event,
+  ]..sort((a, b) => b.date.compareTo(a.date));
+
+  /// Моменты погашений долгов через этот счёт — точки истории баланса.
+  List<DateTime> debtRepaymentMomentsOf(String accountId) => [
+    for (final (_, e) in _debtEvents)
+      if (e.kind == .repayment && e.account?.id == accountId) e.date,
+  ];
 
   List<RecurringModel> get recurring {
     final now = DateTime.now();
@@ -317,12 +352,18 @@ class FakeBackend {
         .fold(0, (sum, t) => sum + t.amount);
   }
 
-  /// Пополнения целей — тоже списания со счёта, хотя операциями не являются.
+  /// Пополнения целей и погашения долгов двигают счёт, хотя операциями не являются.
   int _delta(String accountId, {DateTime? before}) {
     var delta = 0;
     for (final (_, c) in _contributions) {
       if (before != null && !c.date.isBefore(before)) continue;
       if (c.from.id == accountId) delta -= c.amount;
+    }
+    for (final (debtId, e) in _debtEvents) {
+      if (e.kind != .repayment || e.account?.id != accountId) continue;
+      if (before != null && !e.date.isBefore(before)) continue;
+      final direction = _debts.firstWhere((d) => d.id == debtId).direction;
+      delta += direction == .iOwe ? -e.amount : e.amount;
     }
     for (final t in transactions) {
       if (before != null && !t.occurredAt.isBefore(before)) continue;
