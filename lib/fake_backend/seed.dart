@@ -5,6 +5,7 @@ import 'package:spendyholik/features/accounts/accounts.dart';
 import 'package:spendyholik/features/budgets/data/models/models.dart';
 import 'package:spendyholik/features/categories/categories.dart';
 import 'package:spendyholik/features/goals/data/models/models.dart';
+import 'package:spendyholik/features/recurring/data/models/models.dart';
 import 'package:spendyholik/features/transactions/transactions.dart';
 
 abstract final class FakeSeed {
@@ -170,6 +171,91 @@ abstract final class FakeSeed {
       transactionCount: 0,
     ),
   ];
+
+  /// Шаблоны регулярных операций: id, черновик, на паузе ли.
+  static List<(String, RecurringDraft, bool)> recurring(DateTime now) {
+    final monday = DateTime(now.year, now.month, now.day - (now.weekday - 1));
+    return [
+      (
+        'rec-rent',
+        RecurringDraft(
+          title: 'Аренда квартиры',
+          type: TransactionType.expense,
+          amount: 4500000,
+          categoryId: 'cat-housing',
+          accountId: 'acc-savings',
+          frequency: RecurrenceFrequency.monthly,
+          anchor: DateTime(now.year - 1, 1, 1, 12),
+        ),
+        false,
+      ),
+      (
+        'rec-salary',
+        RecurringDraft(
+          title: 'Зарплата · Яндекс',
+          type: TransactionType.income,
+          amount: 11850000,
+          categoryId: 'cat-salary',
+          accountId: 'acc-savings',
+          frequency: RecurrenceFrequency.monthly,
+          anchor: DateTime(now.year - 1, 1, 5, 10),
+        ),
+        false,
+      ),
+      (
+        'rec-plus',
+        RecurringDraft(
+          title: 'Яндекс Плюс',
+          type: TransactionType.expense,
+          amount: 29900,
+          categoryId: 'cat-subscriptions',
+          accountId: 'acc-tinkoff',
+          frequency: RecurrenceFrequency.monthly,
+          anchor: DateTime(now.year - 1, 1, 31, 9, 30),
+        ),
+        false,
+      ),
+      (
+        'rec-cleaning',
+        RecurringDraft(
+          title: 'Уборка',
+          type: TransactionType.expense,
+          amount: 250000,
+          categoryId: 'cat-housing',
+          accountId: 'acc-tinkoff',
+          frequency: RecurrenceFrequency.weekly,
+          anchor: DateTime(monday.year, monday.month, monday.day - 21 + 4, 11),
+        ),
+        false,
+      ),
+      (
+        'rec-insurance',
+        RecurringDraft(
+          title: 'Страховка ОСАГО',
+          type: TransactionType.expense,
+          amount: 1450000,
+          categoryId: 'cat-transport',
+          accountId: 'acc-tinkoff',
+          frequency: RecurrenceFrequency.yearly,
+          anchor: DateTime(now.year - 2, 3, 15, 12),
+        ),
+        false,
+      ),
+      (
+        'rec-gym',
+        RecurringDraft(
+          title: 'Спортзал',
+          type: TransactionType.expense,
+          amount: 249000,
+          categoryId: 'cat-health',
+          accountId: 'acc-tinkoff',
+          frequency: RecurrenceFrequency.monthly,
+          anchor: DateTime(now.year - 1, 1, 10, 12),
+        ),
+        true,
+      ),
+    ];
+  }
 
   /// `saved` здесь не важен: FakeBackend считает его из пополнений.
   static List<GoalModel> goals(DateTime now) => [

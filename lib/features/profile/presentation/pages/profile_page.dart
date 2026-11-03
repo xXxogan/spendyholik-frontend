@@ -22,11 +22,22 @@ class ProfilePage extends StatelessWidget {
             color: Theme.of(context).colorScheme.surface,
             clipBehavior: .antiAlias,
             shape: RoundedRectangleBorder(borderRadius: .circular(24)),
-            child: ListTile(
-              leading: const Icon(Icons.category_outlined),
-              title: Text(context.l10n.categoriesTitle),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () => context.router.push(const CategoriesRoute()),
+            child: Column(
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.category_outlined),
+                  title: Text(context.l10n.categoriesTitle),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.router.push(const CategoriesRoute()),
+                ),
+                const Divider(height: 1, indent: 16, endIndent: 16),
+                ListTile(
+                  leading: const Icon(Icons.event_repeat_outlined),
+                  title: Text(context.l10n.recurringTitle),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.router.push(const RecurringRoute()),
+                ),
+              ],
             ),
           ),
         ),

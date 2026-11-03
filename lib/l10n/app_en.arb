@@ -210,5 +210,13 @@
   "goalDeleteAction": "Delete goal",
   "goalDeleteConfirmTitle": "Delete goal?",
   "goalDeleteConfirmMessage": "The saved money returns to the accounts it came from.",
-  "goalDeleted": "Goal deleted"
+  "goalDeleted": "Goal deleted",
+  "recurringTitle": "Recurring transactions",
+  "recurringEmpty": "No recurring transactions yet",
+  "recurringMonthly": "Monthly on day {day}",
+  "recurringWeekly": "Every week, {weekday}",
+  "recurringYearly": "Every year, {date}",
+  "recurringScheduleOnPause": "{schedule} · paused",
+  "recurringNext": "Next: {date}",
+  "recurringPaused": "Paused"
 }

@@ -7,6 +7,7 @@ import 'package:spendyholik/features/accounts/accounts.dart';
 import 'package:spendyholik/features/budgets/data/models/models.dart';
 import 'package:spendyholik/features/categories/categories.dart';
 import 'package:spendyholik/features/goals/data/models/models.dart';
+import 'package:spendyholik/features/recurring/data/models/models.dart';
 import 'package:spendyholik/features/transactions/transactions.dart';
 
 /// «Сервер» фазы 1: данные в памяти до перезапуска. В фазе 2 удаляется
@@ -21,6 +22,7 @@ class FakeBackend {
     _budgets = FakeSeed.budgets(DateTime.now(), _spent);
     _goals = FakeSeed.goals(DateTime.now());
     _contributions = FakeSeed.contributions(DateTime.now(), _initialAccounts);
+    _recurring = FakeSeed.recurring(DateTime.now());
   }
 
   /// Начальные балансы; итоговые считаются из операций, как на сервере.
@@ -33,6 +35,7 @@ class FakeBackend {
   late final List<(String, BudgetDraft)> _budgets;
   late final List<GoalModel> _goals;
   late final List<(String, GoalContribution)> _contributions;
+  late final List<(String, RecurringDraft, bool)> _recurring;
 
   List<AccountModel> get accounts => [
     for (final a in _initialAccounts)
@@ -90,6 +93,38 @@ class FakeBackend {
     );
     _contributions.add((goalId, contribution));
     return contribution;
+  }
+
+  List<RecurringModel> get recurring {
+    final now = DateTime.now();
+    return [
+      for (final (id, draft, paused) in _recurring)
+        RecurringModel(
+          id: id,
+          title: draft.title,
+          type: draft.type,
+          amount: draft.amount,
+          category: _categories
+              .firstWhere((c) => c.id == draft.categoryId)
+              .toRef(),
+          account: () {
+            final a = _initialAccounts.firstWhere(
+              (a) => a.id == draft.accountId,
+            );
+            return AccountRef(id: a.id, name: a.name, color: a.color);
+          }(),
+          frequency: draft.frequency,
+          anchor: draft.anchor,
+          nextDate: draft.frequency.nextAfter(draft.anchor, now),
+          isPaused: paused,
+        ),
+    ];
+  }
+
+  void setRecurringPaused(String id, {required bool paused}) {
+    final index = _recurring.indexWhere((r) => r.$1 == id);
+    if (index == -1) throw const NotFoundFailure();
+    _recurring[index] = (id, _recurring[index].$2, paused);
   }
 
   GoalModel addGoal(GoalDraft draft) {

@@ -40,12 +40,17 @@ List<AppNavDestination> homeDestinations(AppLocalizations l10n) => [
   ),
 ];
 
-const homeLinkRoutes = <PageRouteInfo>[CategoriesRoute()];
+const homeLinkRoutes = <PageRouteInfo>[CategoriesRoute(), RecurringRoute()];
 
 List<AppNavDestination> homeLinks(AppLocalizations l10n) => [
   AppNavDestination(
     icon: Icons.category_outlined,
     selectedIcon: Icons.category,
     label: l10n.categoriesTitle,
+  ),
+  AppNavDestination(
+    icon: Icons.event_repeat_outlined,
+    selectedIcon: Icons.event_repeat,
+    label: l10n.recurringTitle,
   ),
 ];

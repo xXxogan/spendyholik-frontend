@@ -368,5 +368,48 @@
   "goalDeleteAction": "Удалить цель",
   "goalDeleteConfirmTitle": "Удалить цель?",
   "goalDeleteConfirmMessage": "Накопленное вернётся на счета, с которых пополняли цель.",
-  "goalDeleted": "Цель удалена"
+  "goalDeleted": "Цель удалена",
+  "recurringTitle": "Регулярные операции",
+  "recurringEmpty": "Регулярных операций пока нет",
+  "recurringMonthly": "{day}-е число каждого месяца",
+  "@recurringMonthly": {
+    "placeholders": {
+      "day": {
+        "type": "int"
+      }
+    }
+  },
+  "recurringWeekly": "Каждую неделю, {weekday}",
+  "@recurringWeekly": {
+    "placeholders": {
+      "weekday": {
+        "type": "String"
+      }
+    }
+  },
+  "recurringYearly": "Каждый год, {date}",
+  "@recurringYearly": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "recurringScheduleOnPause": "{schedule} · на паузе",
+  "@recurringScheduleOnPause": {
+    "placeholders": {
+      "schedule": {
+        "type": "String"
+      }
+    }
+  },
+  "recurringNext": "Следующее: {date}",
+  "@recurringNext": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "recurringPaused": "Приостановлено"
 }
