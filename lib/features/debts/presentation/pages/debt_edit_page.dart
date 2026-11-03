@@ -115,8 +115,7 @@ class _DebtForm extends StatelessWidget {
       final error? => fieldErrorText(l10n, error),
       null => null,
     };
-    // Базовая валюта придёт из SessionCubit вместе с фичей user (T-28).
-    final currencySymbol = Currency.rub.symbol;
+    final currencySymbol = CurrencyScope.of(context).symbol;
     final dueDate = state.dueDate;
 
     return Column(

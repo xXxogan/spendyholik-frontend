@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:injectable/injectable.dart';
+import 'package:spendyholik/core/errors/failure.dart';
 import 'package:spendyholik/core/models/currency.dart';
 import 'package:spendyholik/fake_backend/fake_backend.dart';
 import 'package:spendyholik/features/user/data/models/models.dart';
@@ -25,7 +26,17 @@ class FakeAuthRepository implements AuthRepository {
     _changes.add(null);
   }
 
-  // Выбор валюты — T-28, вход и регистрация — T-29, профиль — T-30.
+  @override
+  Future<UserModel> setBaseCurrency(Currency currency) async {
+    final user = await _backend(() {
+      final current = _backend.user ?? (throw const UnauthorizedFailure());
+      return _backend.user = current.copyWith(baseCurrency: currency);
+    });
+    _changes.add(user);
+    return user;
+  }
+
+  // Вход и регистрация — T-29, профиль — T-30.
   @override
   Future<UserModel> signIn(String email, String password) =>
       throw UnimplementedError();
@@ -43,10 +54,6 @@ class FakeAuthRepository implements AuthRepository {
     required String name,
     required String email,
   }) => throw UnimplementedError();
-
-  @override
-  Future<UserModel> setBaseCurrency(Currency currency) =>
-      throw UnimplementedError();
 
   @override
   Future<void> changePassword(String current, String next) =>

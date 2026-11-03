@@ -5,7 +5,6 @@ import 'package:spendyholik/app/di/injection.dart';
 import 'package:spendyholik/app/router/app_router.gr.dart';
 import 'package:spendyholik/app/theme/app_colors.dart';
 import 'package:spendyholik/core/format/format.dart';
-import 'package:spendyholik/core/models/models.dart';
 import 'package:spendyholik/core/widgets/widgets.dart';
 import 'package:spendyholik/features/budgets/data/models/models.dart';
 import 'package:spendyholik/features/budgets/presentation/cubit/budgets_cubit.dart';
@@ -18,8 +17,6 @@ class BudgetsSection extends StatelessWidget {
 
   final int? limit;
 
-  // Базовая валюта придёт из SessionCubit вместе с фичей user (T-28).
-  static const _currency = Currency.rub;
   static const _budgetsTab = 3;
 
   @override
@@ -76,7 +73,7 @@ class _BudgetRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final locale = Localizations.localeOf(context).toString();
-    const currency = BudgetsSection._currency;
+    final currency = CurrencyScope.of(context);
 
     return InkWell(
       borderRadius: .circular(12),

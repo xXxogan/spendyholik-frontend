@@ -138,8 +138,7 @@ class _GoalForm extends StatelessWidget {
       final error? => fieldErrorText(l10n, error),
       null => null,
     };
-    // Базовая валюта придёт из SessionCubit вместе с фичей user (T-28).
-    final currencySymbol = Currency.rub.symbol;
+    final currencySymbol = CurrencyScope.of(context).symbol;
     final deadline = state.deadline;
 
     return Column(

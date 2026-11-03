@@ -28,8 +28,6 @@ class TransactionsPage extends StatelessWidget {
 class TransactionsView extends StatelessWidget {
   const TransactionsView({super.key});
 
-  // Базовая валюта придёт из SessionCubit вместе с фичей user (T-28).
-  static const _currency = Currency.rub;
   static const _maxWidth = 720.0;
 
   @override
@@ -95,7 +93,10 @@ class TransactionsView extends StatelessWidget {
             sliver: SliverList.builder(
               itemCount: groups.length,
               itemBuilder: (context, index) => constrained(
-                _DayGroup(group: groups[index], currency: _currency),
+                _DayGroup(
+                  group: groups[index],
+                  currency: CurrencyScope.of(context),
+                ),
               ),
             ),
           ),

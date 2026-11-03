@@ -4,7 +4,6 @@ import 'package:material_ui/material_ui.dart';
 import 'package:spendyholik/app/di/injection.dart';
 import 'package:spendyholik/app/router/app_router.gr.dart';
 import 'package:spendyholik/core/format/format.dart';
-import 'package:spendyholik/core/models/models.dart';
 import 'package:spendyholik/core/widgets/widgets.dart';
 import 'package:spendyholik/features/transactions/data/models/models.dart';
 import 'package:spendyholik/features/transactions/presentation/cubit/transactions_cubit.dart';
@@ -25,9 +24,6 @@ class TransactionsSection extends StatelessWidget {
   final String title;
   final String? actionLabel;
   final VoidCallback? onSeeAll;
-
-  // Базовая валюта придёт из SessionCubit вместе с фичей user (T-28).
-  static const _currency = Currency.rub;
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +50,7 @@ class TransactionsSection extends StatelessWidget {
                       for (final transaction in group.items)
                         TransactionTile(
                           transaction: transaction,
-                          currency: _currency,
+                          currency: CurrencyScope.of(context),
                           onTap: () => context.router.push(
                             TransactionDetailRoute(
                               transactionId: transaction.id,

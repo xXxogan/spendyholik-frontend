@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:spendyholik/app/di/injection.dart';
 import 'package:spendyholik/app/router/app_router.gr.dart';
-import 'package:spendyholik/core/models/models.dart';
 import 'package:spendyholik/core/widgets/widgets.dart';
 import 'package:spendyholik/features/debts/presentation/cubit/debt_detail_cubit.dart';
 import 'package:spendyholik/features/debts/presentation/widgets/widgets.dart';
@@ -26,9 +25,6 @@ class DebtDetailPage extends StatelessWidget {
 
 class DebtDetailView extends StatelessWidget {
   const DebtDetailView({super.key});
-
-  // Базовая валюта придёт из SessionCubit вместе с фичей user (T-28).
-  static const _currency = Currency.rub;
 
   @override
   Widget build(BuildContext context) {
@@ -60,7 +56,10 @@ class DebtDetailView extends StatelessWidget {
                     padding: const .only(top: 12, bottom: 120),
                     child: TwoColumnLayout(
                       primary: [
-                        DebtSummaryCard(debt: debt, currency: _currency),
+                        DebtSummaryCard(
+                          debt: debt,
+                          currency: CurrencyScope.of(context),
+                        ),
                         if (!debt.isClosed)
                           FilledButton(
                             onPressed: () => showDebtRepaySheet(context, debt),
@@ -74,7 +73,7 @@ class DebtDetailView extends StatelessWidget {
                         DebtHistoryList(
                           debt: debt,
                           history: history,
-                          currency: _currency,
+                          currency: CurrencyScope.of(context),
                         ),
                       ],
                     ),

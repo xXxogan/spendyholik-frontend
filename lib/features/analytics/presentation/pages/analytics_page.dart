@@ -24,8 +24,6 @@ class AnalyticsPage extends StatelessWidget {
 class AnalyticsView extends StatelessWidget {
   const AnalyticsView({super.key});
 
-  // Базовая валюта придёт из SessionCubit вместе с фичей user (T-28).
-  static const _currency = Currency.rub;
   static const _segmentsMaxWidth = 480.0;
 
   @override
@@ -90,7 +88,7 @@ class AnalyticsView extends StatelessWidget {
                     AnalyticsSummary(
                       report: report,
                       preset: preset,
-                      currency: _currency,
+                      currency: CurrencyScope.of(context),
                     ),
                     Column(
                       crossAxisAlignment: .stretch,
@@ -105,12 +103,12 @@ class AnalyticsView extends StatelessWidget {
                                   shares: report.expenseByCategory,
                                   percents: percents,
                                   total: report.expense,
-                                  currency: _currency,
+                                  currency: CurrencyScope.of(context),
                                 ),
                               CategoryShareList(
                                 shares: report.expenseByCategory,
                                 percents: percents,
-                                currency: _currency,
+                                currency: CurrencyScope.of(context),
                               ),
                             ],
                           ),
@@ -134,7 +132,7 @@ class AnalyticsView extends StatelessWidget {
                           child: TrendBarChart(
                             trend: report.trend,
                             preset: preset,
-                            currency: _currency,
+                            currency: CurrencyScope.of(context),
                           ),
                         ),
                       ],

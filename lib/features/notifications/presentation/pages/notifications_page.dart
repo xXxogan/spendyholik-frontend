@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:spendyholik/app/di/injection.dart';
 import 'package:spendyholik/app/router/app_router.gr.dart';
-import 'package:spendyholik/core/models/models.dart';
 import 'package:spendyholik/core/widgets/widgets.dart';
 import 'package:spendyholik/features/notifications/presentation/cubit/notifications_cubit.dart';
 import 'package:spendyholik/features/notifications/presentation/widgets/widgets.dart';
@@ -25,8 +24,6 @@ class NotificationsPage extends StatelessWidget {
 class NotificationsView extends StatelessWidget {
   const NotificationsView({super.key});
 
-  // Базовая валюта придёт из SessionCubit вместе с фичей user (T-28).
-  static const _currency = Currency.rub;
   static const _maxWidth = 720.0;
 
   @override
@@ -61,7 +58,7 @@ class NotificationsView extends StatelessWidget {
                         for (final n in notifications)
                           NotificationCard(
                             notification: n,
-                            currency: _currency,
+                            currency: CurrencyScope.of(context),
                             onTap: n.isRead ? null : () => cubit.markRead(n.id),
                           ),
                       ],

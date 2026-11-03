@@ -3,6 +3,7 @@ export 'base_layout.dart';
 export 'color_swatch_picker.dart';
 export 'content_card.dart';
 export 'content_sliver_padding.dart';
+export 'currency_scope.dart';
 export 'entity_icon_data.dart';
 export 'entity_icon_picker.dart';
 export 'entity_icon_view.dart';

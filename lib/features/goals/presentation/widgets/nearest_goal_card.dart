@@ -4,7 +4,6 @@ import 'package:material_ui/material_ui.dart';
 import 'package:spendyholik/app/di/injection.dart';
 import 'package:spendyholik/app/router/app_router.gr.dart';
 import 'package:spendyholik/core/format/format.dart';
-import 'package:spendyholik/core/models/models.dart';
 import 'package:spendyholik/core/widgets/widgets.dart';
 import 'package:spendyholik/features/goals/data/models/models.dart';
 import 'package:spendyholik/features/goals/presentation/cubit/goals_cubit.dart';
@@ -14,9 +13,6 @@ import 'package:spendyholik/l10n/l10n.dart';
 /// Блок Главной; нет незавершённых целей — блока нет.
 class NearestGoalCard extends StatelessWidget {
   const NearestGoalCard({super.key});
-
-  // Базовая валюта придёт из SessionCubit вместе с фичей user (T-28).
-  static const _currency = Currency.rub;
 
   @override
   Widget build(BuildContext context) {
@@ -77,7 +73,11 @@ class NearestGoalCard extends StatelessWidget {
                       ),
                       Text(
                         l10n.goalRemaining(
-                          formatMoney(goal.remaining, _currency, locale),
+                          formatMoney(
+                            goal.remaining,
+                            CurrencyScope.of(context),
+                            locale,
+                          ),
                         ),
                         style: theme.textTheme.titleMedium,
                       ),
@@ -92,8 +92,14 @@ class NearestGoalCard extends StatelessWidget {
             Row(
               mainAxisAlignment: .spaceBetween,
               children: [
-                Text(formatMoney(goal.saved, _currency, locale), style: muted),
-                Text(formatMoney(goal.target, _currency, locale), style: muted),
+                Text(
+                  formatMoney(goal.saved, CurrencyScope.of(context), locale),
+                  style: muted,
+                ),
+                Text(
+                  formatMoney(goal.target, CurrencyScope.of(context), locale),
+                  style: muted,
+                ),
               ],
             ),
           ],

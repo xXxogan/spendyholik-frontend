@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:spendyholik/app/di/injection.dart';
 import 'package:spendyholik/app/router/app_router.gr.dart';
-import 'package:spendyholik/core/models/models.dart';
 import 'package:spendyholik/core/widgets/widgets.dart';
 import 'package:spendyholik/features/goals/presentation/cubit/goals_cubit.dart';
 import 'package:spendyholik/features/goals/presentation/widgets/goal_card.dart';
@@ -12,9 +11,6 @@ import 'package:spendyholik/l10n/l10n.dart';
 /// Сливер: ставится прямо в `CustomScrollView` вкладки «Бюджеты».
 class GoalsList extends StatelessWidget {
   const GoalsList({super.key});
-
-  // Базовая валюта придёт из SessionCubit вместе с фичей user (T-28).
-  static const _currency = Currency.rub;
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +32,7 @@ class GoalsList extends StatelessWidget {
               itemCount: goals.length,
               itemBuilder: (context, index) => GoalCard(
                 goal: goals[index],
-                currency: _currency,
+                currency: CurrencyScope.of(context),
                 onTap: () => context.router.push(
                   GoalDetailRoute(goalId: goals[index].id),
                 ),

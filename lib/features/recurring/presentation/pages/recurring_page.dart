@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:spendyholik/app/di/injection.dart';
 import 'package:spendyholik/app/router/app_router.gr.dart';
-import 'package:spendyholik/core/models/models.dart';
 import 'package:spendyholik/core/widgets/widgets.dart';
 import 'package:spendyholik/features/recurring/presentation/cubit/recurring_cubit.dart';
 import 'package:spendyholik/features/recurring/presentation/widgets/widgets.dart';
@@ -24,9 +23,6 @@ class RecurringPage extends StatelessWidget {
 
 class RecurringView extends StatelessWidget {
   const RecurringView({super.key});
-
-  // Базовая валюта придёт из SessionCubit вместе с фичей user (T-28).
-  static const _currency = Currency.rub;
 
   @override
   Widget build(BuildContext context) {
@@ -70,7 +66,7 @@ class RecurringView extends StatelessWidget {
                   onTap: () => context.router.push(
                     RecurringEditRoute(recurringId: templates[index].id),
                   ),
-                  currency: _currency,
+                  currency: CurrencyScope.of(context),
                   onTogglePause: () => cubit.togglePause(templates[index].id),
                 ),
               ),

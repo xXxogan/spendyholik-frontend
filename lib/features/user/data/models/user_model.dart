@@ -16,4 +16,11 @@ class UserModel {
 
   /// null — валюта ещё не выбрана, после входа ведём на выбор валюты.
   final Currency? baseCurrency;
+
+  UserModel copyWith({Currency? baseCurrency}) => UserModel(
+    id: id,
+    name: name,
+    email: email,
+    baseCurrency: baseCurrency ?? this.baseCurrency,
+  );
 }

@@ -167,8 +167,7 @@ class _BudgetForm extends StatelessWidget {
               BudgetPeriod.once => l10n.budgetFormLimit,
             },
             hintText: '0',
-            // Базовая валюта придёт из SessionCubit вместе с фичей user (T-28).
-            suffixText: Currency.rub.symbol,
+            suffixText: CurrencyScope.of(context).symbol,
             errorText: error(.limit),
           ),
         ),

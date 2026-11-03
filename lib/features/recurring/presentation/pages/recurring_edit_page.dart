@@ -149,8 +149,7 @@ class _RecurringForm extends StatelessWidget {
           decoration: InputDecoration(
             labelText: l10n.recurringFormAmount,
             hintText: '0',
-            // Базовая валюта придёт из SessionCubit вместе с фичей user (T-28).
-            suffixText: Currency.rub.symbol,
+            suffixText: CurrencyScope.of(context).symbol,
             errorText: error(.amount),
           ),
         ),

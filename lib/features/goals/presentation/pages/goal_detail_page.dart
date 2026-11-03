@@ -4,7 +4,6 @@ import 'package:material_ui/material_ui.dart';
 import 'package:spendyholik/app/di/injection.dart';
 import 'package:spendyholik/app/router/app_router.gr.dart';
 import 'package:spendyholik/core/format/format.dart';
-import 'package:spendyholik/core/models/models.dart';
 import 'package:spendyholik/core/widgets/widgets.dart';
 import 'package:spendyholik/features/goals/presentation/cubit/goal_detail_cubit.dart';
 import 'package:spendyholik/features/goals/presentation/widgets/widgets.dart';
@@ -28,8 +27,6 @@ class GoalDetailPage extends StatelessWidget {
 class GoalDetailView extends StatelessWidget {
   const GoalDetailView({super.key});
 
-  // Базовая валюта придёт из SessionCubit вместе с фичей user (T-28).
-  static const _currency = Currency.rub;
   static const _fallback = TabsRoute(children: [BudgetsRoute()]);
 
   @override
@@ -79,7 +76,10 @@ class GoalDetailView extends StatelessWidget {
                       padding: const .only(top: 12, bottom: 120),
                       child: TwoColumnLayout(
                         primary: [
-                          GoalSummaryCard(goal: goal, currency: _currency),
+                          GoalSummaryCard(
+                            goal: goal,
+                            currency: CurrencyScope.of(context),
+                          ),
                           Row(
                             spacing: 12,
                             crossAxisAlignment: .start,
@@ -88,7 +88,7 @@ class GoalDetailView extends StatelessWidget {
                                 child: GoalStatTile(
                                   value: formatMoney(
                                     goal.remaining,
-                                    _currency,
+                                    CurrencyScope.of(context),
                                     locale,
                                   ),
                                   label: l10n.goalRemainingLabel,
@@ -121,7 +121,7 @@ class GoalDetailView extends StatelessWidget {
                         secondary: [
                           GoalContributionsList(
                             contributions: contributions,
-                            currency: _currency,
+                            currency: CurrencyScope.of(context),
                           ),
                         ],
                       ),

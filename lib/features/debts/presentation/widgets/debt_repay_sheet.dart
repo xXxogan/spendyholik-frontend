@@ -62,8 +62,7 @@ class _DebtRepayViewState extends State<DebtRepayView> {
           final error? => fieldErrorText(l10n, error),
           null => null,
         };
-        // Базовая валюта придёт из SessionCubit вместе с фичей user (T-28).
-        const currency = Currency.rub;
+        final currency = CurrencyScope.of(context);
 
         return SingleChildScrollView(
           child: Column(

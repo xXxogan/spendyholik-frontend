@@ -3,7 +3,6 @@ import 'package:material_ui/material_ui.dart';
 import 'package:spendyholik/app/di/injection.dart';
 import 'package:spendyholik/app/theme/app_colors.dart';
 import 'package:spendyholik/core/format/format.dart';
-import 'package:spendyholik/core/models/models.dart';
 import 'package:spendyholik/core/widgets/widgets.dart';
 import 'package:spendyholik/features/accounts/presentation/cubit/total_balance_cubit.dart';
 import 'package:spendyholik/features/accounts/presentation/widgets/total_balance_skeleton.dart';
@@ -11,9 +10,6 @@ import 'package:spendyholik/l10n/l10n.dart';
 
 class TotalBalanceCard extends StatelessWidget {
   const TotalBalanceCard({super.key});
-
-  // Базовая валюта придёт из SessionCubit вместе с фичей user (T-28).
-  static const _currency = Currency.rub;
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +37,7 @@ class TotalBalanceCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  formatMoney(balance.total, _currency, locale),
+                  formatMoney(balance.total, CurrencyScope.of(context), locale),
                   style: theme.textTheme.displaySmall?.copyWith(
                     fontWeight: .w700,
                   ),
@@ -51,7 +47,7 @@ class TotalBalanceCard extends StatelessWidget {
                   context.l10n.dashboardMonthDelta(
                     formatMoney(
                       balance.monthDelta,
-                      _currency,
+                      CurrencyScope.of(context),
                       locale,
                       signed: true,
                     ),

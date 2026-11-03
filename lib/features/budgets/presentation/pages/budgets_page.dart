@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:spendyholik/app/di/injection.dart';
 import 'package:spendyholik/app/router/app_router.gr.dart';
-import 'package:spendyholik/core/models/models.dart';
 import 'package:spendyholik/core/widgets/widgets.dart';
 import 'package:spendyholik/features/budgets/presentation/cubit/budgets_cubit.dart';
 import 'package:spendyholik/features/budgets/presentation/state/budgets_tab_notifier.dart';
@@ -27,8 +26,6 @@ class BudgetsPage extends StatelessWidget {
 class BudgetsView extends StatelessWidget {
   const BudgetsView({super.key});
 
-  // Базовая валюта придёт из SessionCubit вместе с фичей user (T-28).
-  static const _currency = Currency.rub;
   static const _segmentsMaxWidth = 480.0;
 
   @override
@@ -80,7 +77,7 @@ class BudgetsView extends StatelessWidget {
                   itemCount: budgets.length,
                   itemBuilder: (context, index) => BudgetCard(
                     budget: budgets[index],
-                    currency: _currency,
+                    currency: CurrencyScope.of(context),
                     onTap: () => context.router.push(
                       BudgetDetailRoute(budgetId: budgets[index].id),
                     ),

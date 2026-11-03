@@ -7,6 +7,8 @@ import 'package:spendyholik/app/router/app_router.gr.dart';
 import 'package:spendyholik/app/router/guards.dart';
 import 'package:spendyholik/app/theme/app_theme.dart';
 import 'package:spendyholik/core/logger/talker_auto_route_observer.dart';
+import 'package:spendyholik/core/models/models.dart';
+import 'package:spendyholik/core/widgets/widgets.dart';
 import 'package:spendyholik/features/settings/settings.dart';
 import 'package:spendyholik/features/user/user.dart';
 import 'package:spendyholik/l10n/l10n.dart';
@@ -39,7 +41,18 @@ class _SpendyHolikAppState extends State<SpendyHolikApp> {
         selector: (settings) => settings.themeMode,
         builder: (context, themeMode) => MaterialApp.router(
           onGenerateTitle: (context) => context.l10n.appTitle,
-          builder: (_, child) => Material(type: .transparency, child: child),
+          builder: (_, child) =>
+              BlocSelector<SessionCubit, SessionState, Currency>(
+                selector: (state) => switch (state) {
+                  SessionAuthenticated(:final user) =>
+                    user.baseCurrency ?? Currency.rub,
+                  _ => Currency.rub,
+                },
+                builder: (_, currency) => CurrencyScope(
+                  currency: currency,
+                  child: Material(type: .transparency, child: child),
+                ),
+              ),
           theme: AppTheme.light(),
           darkTheme: AppTheme.dark(),
           themeMode: switch (themeMode) {

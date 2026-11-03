@@ -34,8 +34,6 @@ class TransactionDetailPage extends StatelessWidget {
 class TransactionDetailView extends StatelessWidget {
   const TransactionDetailView({super.key});
 
-  // Базовая валюта придёт из SessionCubit вместе с фичей user (T-28).
-  static const _currency = Currency.rub;
   static const _maxWidth = 560.0;
   static const _fallback = TabsRoute(children: [TransactionsRoute()]);
 
@@ -90,7 +88,7 @@ class TransactionDetailView extends StatelessWidget {
                             padding: const .only(top: 12, bottom: 120),
                             child: _Content(
                               transaction: transaction,
-                              currency: _currency,
+                              currency: CurrencyScope.of(context),
                               onDelete: cubit.delete,
                             ),
                           ),

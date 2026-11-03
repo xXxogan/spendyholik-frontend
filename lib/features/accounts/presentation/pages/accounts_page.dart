@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:spendyholik/app/di/injection.dart';
 import 'package:spendyholik/app/router/app_router.gr.dart';
-import 'package:spendyholik/core/models/models.dart';
 import 'package:spendyholik/core/widgets/widgets.dart';
 import 'package:spendyholik/features/accounts/presentation/cubit/accounts_cubit.dart';
 import 'package:spendyholik/features/accounts/presentation/widgets/widgets.dart';
@@ -24,9 +23,6 @@ class AccountsPage extends StatelessWidget {
 
 class AccountsView extends StatelessWidget {
   const AccountsView({super.key});
-
-  // Базовая валюта придёт из SessionCubit вместе с фичей user (шаг 7 плана).
-  static const _currency = Currency.rub;
 
   @override
   Widget build(BuildContext context) {
@@ -79,7 +75,7 @@ class AccountsView extends StatelessWidget {
                 itemCount: accounts.length,
                 itemBuilder: (context, index) => AccountTile(
                   account: accounts[index],
-                  currency: _currency,
+                  currency: CurrencyScope.of(context),
                   onTap: () => context.router.push(
                     AccountDetailRoute(accountId: accounts[index].id),
                   ),
