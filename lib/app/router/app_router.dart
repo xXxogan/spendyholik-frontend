@@ -47,7 +47,9 @@ class AppRouter extends RootStackRouter {
         AutoRoute(page: BudgetCreateRoute.page, path: 'budgets/new'),
         AutoRoute(page: BudgetDetailRoute.page, path: 'budgets/:budgetId'),
         AutoRoute(page: BudgetEditRoute.page, path: 'budgets/:budgetId/edit'),
+        AutoRoute(page: GoalCreateRoute.page, path: 'goals/new'),
         AutoRoute(page: GoalDetailRoute.page, path: 'goals/:goalId'),
+        AutoRoute(page: GoalEditRoute.page, path: 'goals/:goalId/edit'),
         AutoRoute(page: CategoriesRoute.page, path: 'categories'),
         AutoRoute(page: CategoryCreateRoute.page, path: 'categories/new'),
         AutoRoute(

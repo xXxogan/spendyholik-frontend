@@ -10,5 +10,6 @@ sealed class GoalDetailState with _$GoalDetailState {
     List<GoalContribution> contributions,
     int? forecastMonths,
   ) = GoalDetailLoaded;
+  const factory GoalDetailState.deleted() = GoalDetailDeleted;
   const factory GoalDetailState.error(Failure failure) = GoalDetailError;
 }

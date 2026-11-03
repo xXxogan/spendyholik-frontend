@@ -4,5 +4,6 @@ export 'budget_period_label.dart';
 export 'budget_progress_bar.dart';
 export 'budget_subtitle.dart';
 export 'budget_summary_card.dart';
+export 'budgets_add_button.dart';
 export 'budgets_section.dart';
 export 'budgets_segment.dart';

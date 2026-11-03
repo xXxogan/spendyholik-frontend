@@ -194,5 +194,21 @@
   "goalTopUpTitle": "Top up goal",
   "goalTopUpFrom": "From account",
   "goalTopUpSubmit": "Top up",
-  "goalTopUpDone": "Goal topped up"
+  "goalTopUpDone": "Goal topped up",
+  "goalsAdd": "New goal",
+  "goalEditAction": "Edit",
+  "goalFormNewTitle": "New goal",
+  "goalFormEditTitle": "Goal",
+  "goalFormName": "Name",
+  "goalFormNameHint": "For example, Vacation",
+  "goalFormTarget": "Target amount",
+  "goalFormInitialContribution": "Initial contribution",
+  "goalFormDeadline": "Deadline",
+  "goalFormNoDeadline": "No deadline",
+  "goalFormDeadlineClear": "Remove deadline",
+  "goalFormSaved": "Goal saved",
+  "goalDeleteAction": "Delete goal",
+  "goalDeleteConfirmTitle": "Delete goal?",
+  "goalDeleteConfirmMessage": "The saved money returns to the accounts it came from.",
+  "goalDeleted": "Goal deleted"
 }

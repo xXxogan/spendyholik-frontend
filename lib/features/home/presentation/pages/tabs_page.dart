@@ -3,6 +3,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:spendyholik/app/router/app_router.gr.dart';
 import 'package:spendyholik/core/layout/window_size.dart';
 import 'package:spendyholik/core/widgets/widgets.dart';
+import 'package:spendyholik/features/budgets/budgets.dart';
 import 'package:spendyholik/features/home/presentation/widgets/widgets.dart';
 import 'package:spendyholik/features/transactions/transactions.dart';
 import 'package:spendyholik/l10n/l10n.dart';
@@ -42,13 +43,7 @@ class TabsPage extends StatelessWidget {
                     context.router.push(const TransactionCreateRoute()),
               ),
             ],
-            BudgetsRoute.name => [
-              AppGlassIconButton(
-                tooltip: context.l10n.budgetsAdd,
-                icon: Icons.add,
-                onPressed: () => context.router.push(const BudgetCreateRoute()),
-              ),
-            ],
+            BudgetsRoute.name => [const BudgetsAddButton()],
             _ => null,
           },
           body: child,

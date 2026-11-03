@@ -352,5 +352,21 @@
   "goalTopUpTitle": "Пополнить цель",
   "goalTopUpFrom": "Со счёта",
   "goalTopUpSubmit": "Пополнить",
-  "goalTopUpDone": "Цель пополнена"
+  "goalTopUpDone": "Цель пополнена",
+  "goalsAdd": "Новая цель",
+  "goalEditAction": "Редактировать",
+  "goalFormNewTitle": "Новая цель",
+  "goalFormEditTitle": "Цель",
+  "goalFormName": "Название",
+  "goalFormNameHint": "Например, Отпуск",
+  "goalFormTarget": "Целевая сумма",
+  "goalFormInitialContribution": "Начальный взнос",
+  "goalFormDeadline": "Срок достижения",
+  "goalFormNoDeadline": "Без срока",
+  "goalFormDeadlineClear": "Убрать срок",
+  "goalFormSaved": "Цель сохранена",
+  "goalDeleteAction": "Удалить цель",
+  "goalDeleteConfirmTitle": "Удалить цель?",
+  "goalDeleteConfirmMessage": "Накопленное вернётся на счета, с которых пополняли цель.",
+  "goalDeleted": "Цель удалена"
 }

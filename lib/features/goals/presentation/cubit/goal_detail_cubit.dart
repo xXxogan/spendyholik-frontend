@@ -64,6 +64,11 @@ class GoalDetailCubit extends Cubit<GoalDetailState>
         ),
       );
     } on Failure catch (failure, stackTrace) {
+      // Открытая цель пропала — её удалили (в том числе формой поверх деталей).
+      if (failure is NotFoundFailure && state is GoalDetailLoaded) {
+        emit(const GoalDetailState.deleted());
+        return;
+      }
       getIt<Talker>().handle(failure, stackTrace);
       emit(GoalDetailState.error(failure));
     }

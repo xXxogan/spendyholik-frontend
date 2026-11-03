@@ -137,5 +137,25 @@ void main() {
         isA<GoalDetailLoaded>().having((s) => s.goal.saved, 'saved', 14000000),
       ],
     );
+
+    blocTest<GoalDetailCubit, GoalDetailState>(
+      'цель удалена, пока открыта: перезагрузка по шине — deleted, а не error',
+      setUp: () {
+        var calls = 0;
+        when(() => repository.getGoal('buffer')).thenAnswer(
+          (_) async => ++calls == 1 ? _buffer : throw const NotFoundFailure(),
+        );
+        when(() => repository.getContributions('buffer'))
+            .thenAnswer((_) async => const []);
+      },
+      build: build,
+      act: (cubit) async {
+        await cubit.load('buffer');
+        changes.add({DataTopic.goals});
+        await Future<void>.delayed(Duration.zero);
+      },
+      skip: 2,
+      expect: () => [const GoalDetailState.deleted()],
+    );
   });
 }

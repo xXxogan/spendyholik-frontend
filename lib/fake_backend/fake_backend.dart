@@ -92,6 +92,37 @@ class FakeBackend {
     return contribution;
   }
 
+  GoalModel addGoal(GoalDraft draft) {
+    final goal = GoalModel(
+      id: 'goal-${DateTime.now().microsecondsSinceEpoch}',
+      name: draft.name,
+      target: draft.target,
+      saved: 0,
+      deadline: draft.deadline,
+    );
+    _goals.add(goal);
+    return goal;
+  }
+
+  void updateGoal(String goalId, GoalDraft draft) {
+    final index = _goals.indexWhere((g) => g.id == goalId);
+    if (index == -1) throw const NotFoundFailure();
+    _goals[index] = GoalModel(
+      id: goalId,
+      name: draft.name,
+      target: draft.target,
+      saved: 0,
+      deadline: draft.deadline,
+    );
+  }
+
+  void deleteGoal(String goalId) {
+    final index = _goals.indexWhere((g) => g.id == goalId);
+    if (index == -1) throw const NotFoundFailure();
+    _goals.removeAt(index);
+    _contributions.removeWhere((c) => c.$1 == goalId);
+  }
+
   /// Моменты пополнений целей с этого счёта — точки истории баланса.
   List<DateTime> contributionMomentsOf(String accountId) => [
     for (final (_, c) in _contributions)
