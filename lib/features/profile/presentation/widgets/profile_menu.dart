@@ -11,6 +11,7 @@ class ProfileMenu extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final items = [
+      (Icons.settings_outlined, l10n.settingsTitle, const SettingsRoute()),
       (Icons.category_outlined, l10n.categoriesTitle, const CategoriesRoute()),
       (
         Icons.event_repeat_outlined,
@@ -23,6 +24,7 @@ class ProfileMenu extends StatelessWidget {
         l10n.notificationsTitle,
         const NotificationsRoute(),
       ),
+      (Icons.info_outline, l10n.aboutTitle, const AboutRoute()),
     ];
 
     return Card(

@@ -446,6 +446,20 @@ class FakeBackend {
     return delta;
   }
 
+  /// Всё, кроме пользователя и его учётных данных.
+  void wipeAll() {
+    _initialAccounts.clear();
+    _categories.clear();
+    transactions.clear();
+    _budgets.clear();
+    _goals.clear();
+    _contributions.clear();
+    _recurring.clear();
+    _debts.clear();
+    _debtEvents.clear();
+    notifications.clear();
+  }
+
   Future<T> call<T>(T Function() handler) async {
     await Future<void>.delayed(AppConfig.fakeLatency);
     return handler();
