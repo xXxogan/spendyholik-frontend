@@ -87,18 +87,19 @@ class TransactionFormCubit extends Cubit<TransactionFormState>
 
   void titleChanged(String value) => emit(state.copyWith(title: value));
 
-  void categoryChanged(String? value) =>
-      emit(state.copyWith(categoryId: value, fieldErrors: _without(.category)));
+  void categoryChanged(String? value) => emit(
+    state.copyWith(categoryId: value, fieldErrors: _without(.categoryId)),
+  );
 
   void accountChanged(String? value) => emit(
     state.copyWith(
       accountId: value,
-      fieldErrors: _without(.account)..remove(TransactionField.toAccount),
+      fieldErrors: _without(.accountId)..remove(TransactionField.toAccountId),
     ),
   );
 
   void toAccountChanged(String? value) => emit(
-    state.copyWith(toAccountId: value, fieldErrors: _without(.toAccount)),
+    state.copyWith(toAccountId: value, fieldErrors: _without(.toAccountId)),
   );
 
   void dateChanged(DateTime day) {
@@ -125,14 +126,16 @@ class TransactionFormCubit extends Cubit<TransactionFormState>
 
     final amount = parseAmountInput(state.amount);
     if (amount == null) errors[.amount] = .invalidAmount;
-    if (!isTransfer && state.categoryId == null) errors[.category] = .required;
+    if (!isTransfer && state.categoryId == null) {
+      errors[.categoryId] = .required;
+    }
     final accountId = state.accountId;
-    if (accountId == null) errors[.account] = .required;
+    if (accountId == null) errors[.accountId] = .required;
     if (isTransfer) {
       if (state.toAccountId == null) {
-        errors[.toAccount] = .required;
+        errors[.toAccountId] = .required;
       } else if (state.toAccountId == accountId) {
-        errors[.toAccount] = .sameAccount;
+        errors[.toAccountId] = .sameAccount;
       }
     }
     if (errors.isNotEmpty) {
@@ -162,13 +165,14 @@ class TransactionFormCubit extends Cubit<TransactionFormState>
       emit(state.copyWith(status: .success));
     } on ValidationFailure catch (failure, stackTrace) {
       getIt<Talker>().handle(failure, stackTrace);
+      final field = TransactionField.values.asNameMap()[failure.field];
       emit(
-        state.copyWith(
-          status: .failure,
-          fieldErrors: {
-            TransactionField.values.byName(failure.field): failure.reason,
-          },
-        ),
+        field == null
+            ? state.copyWith(status: .failure, failure: failure)
+            : state.copyWith(
+                status: .failure,
+                fieldErrors: {field: failure.reason},
+              ),
       );
     } on Failure catch (failure, stackTrace) {
       getIt<Talker>().handle(failure, stackTrace);

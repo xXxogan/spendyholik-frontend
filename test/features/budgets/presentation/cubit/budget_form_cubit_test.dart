@@ -209,4 +209,22 @@ void main() {
       ),
     ],
   );
+
+  blocTest<BudgetFormCubit, BudgetFormState>(
+    'неизвестное поле от сервера — общая ошибка, а не вечный спиннер',
+    setUp: () => when(() => repository.create(any()))
+        .thenThrow(const ValidationFailure('periodStart', FieldError.required)),
+    build: build,
+    act: (cubit) => cubit
+      ..categoryChanged('cat-food')
+      ..limitChanged('5000')
+      ..save(),
+    skip: 3,
+    expect: () => [
+      isA<BudgetFormState>()
+          .having((s) => s.status, 'status', FormStatus.failure)
+          .having((s) => s.failure, 'failure', isA<ValidationFailure>())
+          .having((s) => s.fieldErrors, 'errors', isEmpty),
+    ],
+  );
 }

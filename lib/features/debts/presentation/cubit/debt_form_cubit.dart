@@ -90,11 +90,14 @@ class DebtFormCubit extends Cubit<DebtFormState>
       emit(state.copyWith(status: .success));
     } on ValidationFailure catch (failure, stackTrace) {
       getIt<Talker>().handle(failure, stackTrace);
+      final field = DebtField.values.asNameMap()[failure.field];
       emit(
-        state.copyWith(
-          status: .failure,
-          fieldErrors: {DebtField.values.byName(failure.field): failure.reason},
-        ),
+        field == null
+            ? state.copyWith(status: .failure, failure: failure)
+            : state.copyWith(
+                status: .failure,
+                fieldErrors: {field: failure.reason},
+              ),
       );
     } on Failure catch (failure, stackTrace) {
       getIt<Talker>().handle(failure, stackTrace);

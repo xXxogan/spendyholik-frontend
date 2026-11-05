@@ -52,7 +52,9 @@ class ProfileEditCubit extends Cubit<ProfileEditState>
     state.copyWith(newPassword: value, fieldErrors: _without(.newPassword)),
   );
 
-  /// Пароль меняется первым: при неверном текущем не сохраняется ничего.
+  /// Пароль — последним: если профиль не сохранится (занят email), пароль
+  /// останется старым. Обратное (имя сохранено, пароль нет) безопасно —
+  /// повторное сохранение ничего не ломает.
   Future<void> save() async {
     final errors = <ProfileField, FieldError>{};
     final name = state.name.trim();
@@ -74,23 +76,24 @@ class ProfileEditCubit extends Cubit<ProfileEditState>
 
     emit(state.copyWith(status: .submitting, failure: null));
     try {
-      if (changesPassword) {
-        await _auth.changePassword(state.currentPassword, state.newPassword);
-      }
       await _auth.updateProfile(name: name, email: email);
       if (state.currency != state.initialCurrency) {
         await _auth.setBaseCurrency(state.currency);
       }
+      if (changesPassword) {
+        await _auth.changePassword(state.currentPassword, state.newPassword);
+      }
       emit(state.copyWith(status: .success));
     } on ValidationFailure catch (failure, stackTrace) {
       getIt<Talker>().handle(failure, stackTrace);
+      final field = ProfileField.values.asNameMap()[failure.field];
       emit(
-        state.copyWith(
-          status: .failure,
-          fieldErrors: {
-            ProfileField.values.byName(failure.field): failure.reason,
-          },
-        ),
+        field == null
+            ? state.copyWith(status: .failure, failure: failure)
+            : state.copyWith(
+                status: .failure,
+                fieldErrors: {field: failure.reason},
+              ),
       );
     } on EmailTakenFailure catch (failure, stackTrace) {
       getIt<Talker>().handle(failure, stackTrace);

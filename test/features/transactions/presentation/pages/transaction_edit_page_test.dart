@@ -134,7 +134,7 @@ void main() {
         occurredAt: now,
         fieldErrors: const {
           TransactionField.amount: FieldError.invalidAmount,
-          TransactionField.category: FieldError.required,
+          TransactionField.categoryId: FieldError.required,
         },
       ),
     );

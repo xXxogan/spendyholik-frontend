@@ -31,6 +31,9 @@ class TransactionsSection extends StatelessWidget {
     final locale = Localizations.localeOf(context).toString();
 
     return BlocProvider(
+      // Родитель держит секцию под GlobalKey (TwoColumnLayout) — без ключа
+      // новый фильтр (правка бюджета) не дошёл бы до Cubit.
+      key: ValueKey(filter),
       create: (_) => getIt<TransactionsCubit>()..load(filter),
       child: Column(
         crossAxisAlignment: .stretch,

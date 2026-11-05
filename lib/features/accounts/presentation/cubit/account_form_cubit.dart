@@ -128,13 +128,14 @@ class AccountFormCubit extends Cubit<AccountFormState>
       emit(state.copyWith(status: .success));
     } on ValidationFailure catch (failure, stackTrace) {
       getIt<Talker>().handle(failure, stackTrace);
+      final field = AccountField.values.asNameMap()[failure.field];
       emit(
-        state.copyWith(
-          status: .failure,
-          fieldErrors: {
-            AccountField.values.byName(failure.field): failure.reason,
-          },
-        ),
+        field == null
+            ? state.copyWith(status: .failure, failure: failure)
+            : state.copyWith(
+                status: .failure,
+                fieldErrors: {field: failure.reason},
+              ),
       );
     } on Failure catch (failure, stackTrace) {
       getIt<Talker>().handle(failure, stackTrace);

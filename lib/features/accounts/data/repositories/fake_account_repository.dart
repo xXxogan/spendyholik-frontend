@@ -90,7 +90,14 @@ class FakeAccountRepository implements AccountRepository {
       _backend.updateAccount(id, draft);
       return _find(id);
     });
-    _bus.emit({DataTopic.accounts});
+    // Имя счёта видно в операциях, истории целей и долгов, шаблонах.
+    _bus.emit({
+      DataTopic.accounts,
+      DataTopic.transactions,
+      DataTopic.goals,
+      DataTopic.debts,
+      DataTopic.recurring,
+    });
     return updated;
   }
 

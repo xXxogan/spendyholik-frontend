@@ -112,17 +112,16 @@ void main() {
   );
 
   blocTest<ProfileEditCubit, ProfileEditState>(
-    'неверный текущий пароль — ошибка у поля, профиль не сохраняется',
+    'неверный текущий пароль — ошибка у поля',
     setUp: () => when(() => auth.changePassword(any(), any())).thenThrow(
       const ValidationFailure('currentPassword', FieldError.wrongPassword),
     ),
     build: build,
     act: (cubit) => cubit
-      ..nameChanged('Мария Петрова')
       ..currentPasswordChanged('wrong-pass')
       ..newPasswordChanged('new-pass-123')
       ..save(),
-    skip: 4,
+    skip: 3,
     expect: () => [
       isA<ProfileEditState>()
           .having((s) => s.status, 'status', FormStatus.failure)
@@ -130,12 +129,22 @@ void main() {
             ProfileField.currentPassword: FieldError.wrongPassword,
           }),
     ],
-    verify: (_) => verifyNever(
+  );
+
+  blocTest<ProfileEditCubit, ProfileEditState>(
+    'email занят — пароль не меняется (иначе старый уже не подойдёт)',
+    setUp: () => when(
       () => auth.updateProfile(
         name: any(named: 'name'),
         email: any(named: 'email'),
       ),
-    ),
+    ).thenThrow(const EmailTakenFailure()),
+    build: build,
+    act: (cubit) => cubit
+      ..currentPasswordChanged('old-pass-123')
+      ..newPasswordChanged('new-pass-123')
+      ..save(),
+    verify: (_) => verifyNever(() => auth.changePassword(any(), any())),
   );
 
   blocTest<ProfileEditCubit, ProfileEditState>(

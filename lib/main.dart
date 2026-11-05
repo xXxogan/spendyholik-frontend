@@ -26,7 +26,7 @@ void main() {
         printStateFullData: false,
         printEventFullData: false,
         printTransitions: true,
-        printChanges: true,
+        printChanges: false,
       ),
     );
     FlutterError.onError = (details) =>

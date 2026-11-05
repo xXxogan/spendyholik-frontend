@@ -42,15 +42,23 @@ class SessionCubit extends Cubit<SessionState> with CubitLogging<SessionState> {
       emit(SessionState.authenticated(user));
     } else {
       emit(
-        SessionState.unauthenticated(
-          onboardingSeen: await _onboarding.isSeen(),
-        ),
+        SessionState.unauthenticated(onboardingSeen: await _onboardingSeen()),
       );
     }
     getIt<Talker>().info('Session restored: ${state.runtimeType}');
   }
 
   Future<void> signOut() => _auth.signOut();
+
+  /// Хранилище недоступно — покажем онбординг ещё раз, это безвредно.
+  Future<bool> _onboardingSeen() async {
+    try {
+      return await _onboarding.isSeen();
+    } on Exception catch (error, stackTrace) {
+      getIt<Talker>().handle(error, stackTrace, 'Onboarding flag read failed');
+      return false;
+    }
+  }
 
   @override
   Future<void> close() async {

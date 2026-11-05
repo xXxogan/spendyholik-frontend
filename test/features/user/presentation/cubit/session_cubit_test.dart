@@ -72,6 +72,17 @@ void main() {
   );
 
   blocTest<SessionCubit, SessionState>(
+    'хранилище недоступно (Web без storage) — онбординг, а не вечный Splash',
+    setUp: () {
+      when(() => auth.restoreSession()).thenAnswer((_) async => null);
+      when(() => onboarding.isSeen()).thenThrow(Exception('storage blocked'));
+    },
+    build: build,
+    act: (cubit) => cubit.restore(),
+    expect: () => [const SessionState.unauthenticated(onboardingSeen: false)],
+  );
+
+  blocTest<SessionCubit, SessionState>(
     'userChanges: вышел — unauthenticated (онбординг уже видел)',
     setUp: () =>
         when(() => auth.restoreSession()).thenAnswer((_) async => maria),

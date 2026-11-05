@@ -33,8 +33,13 @@ class FakeCategoryRepository implements CategoryRepository {
       _backend.updateCategory(id, draft);
       return _find(id);
     });
-    // Имя и иконка категории видны в списке операций.
-    _bus.emit({DataTopic.categories, DataTopic.transactions});
+    // Имя и иконка категории видны в операциях, бюджетах и шаблонах.
+    _bus.emit({
+      DataTopic.categories,
+      DataTopic.transactions,
+      DataTopic.budgets,
+      DataTopic.recurring,
+    });
     return updated;
   }
 

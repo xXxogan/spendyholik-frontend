@@ -36,13 +36,19 @@ String formatMoneyCompact(int minor, Currency currency, String locale) {
 /// Принимает «1 240,5» и «1240.50»; возвращает минорные единицы. Ноль, пусто и мусор — null.
 int? parseAmountInput(String input) {
   final cleaned = input.replaceAll(RegExp(r'\s'), '').replaceAll(',', '.');
-  if (!RegExp(r'^\d+(\.\d{0,2})?$').hasMatch(cleaned)) return null;
+  final match = _amount.firstMatch(cleaned);
+  if (match == null) return null;
 
-  final parts = cleaned.split('.');
-  final fraction = parts.length > 1 ? parts[1].padRight(2, '0') : '00';
-  final minor = int.parse(parts[0]) * 100 + int.parse(fraction);
+  final whole = match.group(1)!;
+  final fraction = (match.group(2) ?? '').padRight(2, '0');
+  final minor =
+      int.parse(whole.isEmpty ? '0' : whole) * 100 + int.parse(fraction);
   return minor > 0 ? minor : null;
 }
+
+// Целая часть — до 12 цифр без ведущих нулей: длиннее int переполнялся
+// (на Web — терял точность в double) и сумма сохранялась молча неверной.
+final _amount = RegExp(r'^0*(\d{0,12})(?:\.(\d{0,2}))?$');
 
 /// Для балансов счёта: как [parseAmountInput], но ноль и минус допустимы.
 int? parseSignedAmountInput(String input) {

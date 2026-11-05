@@ -53,4 +53,6 @@ app.*.map.json
 *.gr.dart
 *.freezed.dart
 *.config.dart
-lib/l10n/app_localizations*.dart
+lib/l10n/app_localizations.dart
+lib/l10n/app_localizations_en.dart
+lib/l10n/app_localizations_ru.dart

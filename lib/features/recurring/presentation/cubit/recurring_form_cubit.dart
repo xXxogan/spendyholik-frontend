@@ -121,13 +121,14 @@ class RecurringFormCubit extends Cubit<RecurringFormState>
       emit(state.copyWith(status: .success));
     } on ValidationFailure catch (failure, stackTrace) {
       getIt<Talker>().handle(failure, stackTrace);
+      final field = RecurringField.values.asNameMap()[failure.field];
       emit(
-        state.copyWith(
-          status: .failure,
-          fieldErrors: {
-            RecurringField.values.byName(failure.field): failure.reason,
-          },
-        ),
+        field == null
+            ? state.copyWith(status: .failure, failure: failure)
+            : state.copyWith(
+                status: .failure,
+                fieldErrors: {field: failure.reason},
+              ),
       );
     } on Failure catch (failure, stackTrace) {
       getIt<Talker>().handle(failure, stackTrace);

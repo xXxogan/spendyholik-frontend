@@ -176,7 +176,7 @@ class _TransactionForm extends StatelessWidget {
                 : CategoryKind.income,
             selected: state.categoryId,
             onSelected: cubit.categoryChanged,
-            errorText: error(.category),
+            errorText: error(.categoryId),
           ),
         ],
         AccountPicker(
@@ -185,14 +185,14 @@ class _TransactionForm extends StatelessWidget {
               : l10n.transactionDetailAccount,
           selected: state.accountId,
           onSelected: cubit.accountChanged,
-          errorText: error(.account),
+          errorText: error(.accountId),
         ),
         if (isTransfer)
           AccountPicker(
             label: l10n.transactionDetailTo,
             selected: state.toAccountId,
             onSelected: cubit.toAccountChanged,
-            errorText: error(.toAccount),
+            errorText: error(.toAccountId),
           ),
         InkWell(
           onTap: () => _pickDate(context, occurredAt),

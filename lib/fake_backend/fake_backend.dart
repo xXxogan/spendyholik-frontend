@@ -329,6 +329,9 @@ class FakeBackend {
       interestRate: draft.interestRate,
       creditLimit: draft.creditLimit,
     );
+    _renameAccountRefs(
+      AccountRef(id: accountId, name: draft.name, color: draft.color),
+    );
   }
 
   CategoryModel addCategory(CategoryDraft draft) {
@@ -356,7 +359,68 @@ class FakeBackend {
       parentId: draft.parentId,
       transactionCount: 0,
     );
+    final ref = _categories[index].toRef();
+    for (var i = 0; i < transactions.length; i++) {
+      final t = transactions[i];
+      if (t.category?.id == categoryId) {
+        transactions[i] = _retag(t, category: ref);
+      }
+    }
   }
+
+  /// Операции, пополнения и погашения хранят снимок счёта, как ответ сервера,
+  /// — после правки счёта обновляем снимки.
+  void _renameAccountRefs(AccountRef ref) {
+    for (var i = 0; i < transactions.length; i++) {
+      final t = transactions[i];
+      if (t.account.id == ref.id || t.toAccount?.id == ref.id) {
+        transactions[i] = _retag(
+          t,
+          account: t.account.id == ref.id ? ref : null,
+          toAccount: t.toAccount?.id == ref.id ? ref : null,
+        );
+      }
+    }
+    for (var i = 0; i < _contributions.length; i++) {
+      final (goalId, c) = _contributions[i];
+      if (c.from.id != ref.id) continue;
+      _contributions[i] = (
+        goalId,
+        GoalContribution(id: c.id, amount: c.amount, from: ref, date: c.date),
+      );
+    }
+    for (var i = 0; i < _debtEvents.length; i++) {
+      final (debtId, e) = _debtEvents[i];
+      if (e.account?.id != ref.id) continue;
+      _debtEvents[i] = (
+        debtId,
+        DebtEvent(
+          id: e.id,
+          kind: e.kind,
+          amount: e.amount,
+          date: e.date,
+          account: ref,
+        ),
+      );
+    }
+  }
+
+  TransactionModel _retag(
+    TransactionModel t, {
+    CategoryRef? category,
+    AccountRef? account,
+    AccountRef? toAccount,
+  }) => TransactionModel(
+    id: t.id,
+    type: t.type,
+    amount: t.amount,
+    title: t.title,
+    category: category ?? t.category,
+    account: account ?? t.account,
+    toAccount: toAccount ?? t.toAccount,
+    occurredAt: t.occurredAt,
+    note: t.note,
+  );
 
   String addBudget(BudgetDraft draft) {
     final id = 'bud-${DateTime.now().microsecondsSinceEpoch}';

@@ -124,7 +124,7 @@ void main() {
     await cubit.save();
 
     expect(cubit.state.fieldErrors, {
-      TransactionField.category: FieldError.required,
+      TransactionField.categoryId: FieldError.required,
     });
   });
 
@@ -137,7 +137,7 @@ void main() {
     await cubit.save();
 
     expect(cubit.state.fieldErrors, {
-      TransactionField.toAccount: FieldError.sameAccount,
+      TransactionField.toAccountId: FieldError.sameAccount,
     });
   });
 
@@ -148,7 +148,7 @@ void main() {
     await cubit.save();
 
     expect(cubit.state.fieldErrors, {
-      TransactionField.toAccount: FieldError.required,
+      TransactionField.toAccountId: FieldError.required,
     });
   });
 

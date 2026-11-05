@@ -72,6 +72,15 @@ void main() {
       expect(parseAmountInput('1,2,3'), isNull);
     });
     test('отрицательное → null', () => expect(parseAmountInput('-5'), isNull));
+    test('12 цифр в целой части — предел', () {
+      expect(parseAmountInput('999999999999,99'), 99999999999999);
+      expect(parseAmountInput('000001'), 100);
+    });
+    test('длиннее 12 цифр — null, без переполнения и исключений', () {
+      expect(parseAmountInput('1000000000000'), isNull);
+      expect(parseAmountInput('184467440737095517'), isNull);
+      expect(parseAmountInput('12345678901234567890'), isNull);
+    });
   });
 
   group('parseSignedAmountInput', () {

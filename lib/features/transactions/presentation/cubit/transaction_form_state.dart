@@ -1,6 +1,8 @@
 part of 'transaction_form_cubit.dart';
 
-enum TransactionField { amount, category, account, toAccount }
+/// Имена совпадают с полями `TransactionDraft` — по ним сервер называет поле в
+/// `ValidationFailure`.
+enum TransactionField { amount, categoryId, accountId, toAccountId }
 
 /// Сумма — строка ввода: разбирается только при сохранении.
 @freezed
