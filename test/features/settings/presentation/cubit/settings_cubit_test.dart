@@ -30,9 +30,9 @@ void main() {
   );
 
   blocTest<SettingsCubit, AppSettings>(
-    'setDarkTheme(true) → dark и сохранение',
+    'setThemeMode(dark) → dark и сохранение',
     build: build,
-    act: (cubit) => cubit.setDarkTheme(true),
+    act: (cubit) => cubit.setThemeMode(AppThemeMode.dark),
     expect: () => [const AppSettings(themeMode: AppThemeMode.dark)],
     verify: (_) => verify(
       () => repository.save(const AppSettings(themeMode: AppThemeMode.dark)),
@@ -40,10 +40,16 @@ void main() {
   );
 
   blocTest<SettingsCubit, AppSettings>(
-    'setDarkTheme(false) → light',
+    'после ручного выбора можно вернуть системную',
     build: build,
-    act: (cubit) => cubit.setDarkTheme(false),
-    expect: () => [const AppSettings(themeMode: AppThemeMode.light)],
+    act: (cubit) => cubit
+      ..setThemeMode(AppThemeMode.light)
+      ..setThemeMode(AppThemeMode.system),
+    expect: () => [
+      const AppSettings(themeMode: AppThemeMode.light),
+      const AppSettings(),
+    ],
+    verify: (_) => verify(() => repository.save(const AppSettings())).called(1),
   );
 
   blocTest<SettingsCubit, AppSettings>(

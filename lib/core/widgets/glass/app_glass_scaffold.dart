@@ -1,7 +1,7 @@
-import 'package:spendyholik/core/widgets/glass/large_title_scope.dart';
 import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:spendyholik/core/widgets/glass/large_title_controllers.dart';
+import 'package:spendyholik/core/widgets/glass/large_title_scope.dart';
 import 'package:spendyholik/core/widgets/glass/shell_scope.dart';
 
 /// [largeTitle] — iOS-заголовок: большой в контенте (`BaseLayout(largeTitle:)`

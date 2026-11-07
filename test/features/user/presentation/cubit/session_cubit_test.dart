@@ -97,4 +97,37 @@ void main() {
       const SessionState.unauthenticated(onboardingSeen: true),
     ],
   );
+
+  group('waitFor', () {
+    test('условие уже выполнено — текущее состояние сразу', () async {
+      final cubit = build();
+      userChanges.add(maria);
+      await Future<void>.delayed(Duration.zero);
+
+      expect(
+        await cubit.waitFor((s) => s is SessionAuthenticated),
+        const SessionState.authenticated(maria),
+      );
+    });
+
+    test('ждёт состояние из userChanges', () async {
+      final cubit = build();
+      final result = cubit.waitFor((s) => s is SessionAuthenticated);
+      userChanges.add(maria);
+
+      expect(await result, const SessionState.authenticated(maria));
+    });
+
+    test('состояние не пришло за таймаут — null', () async {
+      final cubit = build();
+
+      expect(
+        await cubit.waitFor(
+          (s) => s is SessionAuthenticated,
+          timeout: const Duration(milliseconds: 10),
+        ),
+        isNull,
+      );
+    });
+  });
 }

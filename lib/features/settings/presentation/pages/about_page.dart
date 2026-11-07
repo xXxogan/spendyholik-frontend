@@ -3,6 +3,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:spendyholik/app/router/app_router.gr.dart';
 import 'package:spendyholik/core/config/app_config.dart';
 import 'package:spendyholik/core/widgets/widgets.dart';
+import 'package:spendyholik/features/settings/presentation/widgets/widgets.dart';
 import 'package:spendyholik/l10n/l10n.dart';
 
 @RoutePage()
@@ -67,11 +68,11 @@ class AboutPage extends StatelessWidget {
                         child: Column(
                           spacing: 12,
                           children: [
-                            _InfoRow(
+                            AboutInfoRow(
                               label: l10n.aboutVersionLabel,
                               value: AppConfig.appVersion,
                             ),
-                            _InfoRow(
+                            AboutInfoRow(
                               label: l10n.aboutData,
                               value: l10n.aboutDataValue,
                             ),
@@ -87,38 +88,6 @@ class AboutPage extends StatelessWidget {
           const SliverToBoxAdapter(child: SizedBox(height: 120)),
         ],
       ),
-    );
-  }
-}
-
-class _InfoRow extends StatelessWidget {
-  const _InfoRow({required this.label, required this.value});
-
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Row(
-      crossAxisAlignment: .start,
-      spacing: 16,
-      children: [
-        Text(
-          label,
-          style: theme.textTheme.bodyMedium?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
-        ),
-        Expanded(
-          child: Text(
-            value,
-            textAlign: .end,
-            style: theme.textTheme.bodyMedium,
-          ),
-        ),
-      ],
     );
   }
 }

@@ -1,7 +1,6 @@
 import 'package:material_ui/material_ui.dart';
+import 'package:spendyholik/features/budgets/presentation/cubit/budgets_tab_cubit.dart';
 import 'package:spendyholik/l10n/l10n.dart';
-
-enum BudgetsTab { budgets, goals }
 
 class BudgetsSegment extends StatelessWidget {
   const BudgetsSegment({

@@ -1,7 +1,7 @@
-import 'package:spendyholik/core/widgets/glass/dialog_emphasis.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:spendyholik/core/widgets/glass/app_glass_dialog.dart';
 import 'package:spendyholik/core/widgets/glass/dialog_action.dart';
+import 'package:spendyholik/core/widgets/glass/dialog_emphasis.dart';
 
 /// Свой диалог вместо GlassDialog: тот всегда ставит две кнопки в ряд по половине
 /// ширины, и длинная подпись («Архивировать») не помещается.
@@ -15,7 +15,7 @@ Future<bool> showAppConfirmDialog(
 }) async {
   final confirmed = await showDialog<bool>(
     context: context,
-    barrierColor: Colors.black38,
+    barrierColor: Theme.of(context).colorScheme.scrim.withValues(alpha: 0.38),
     builder: (dialogContext) => AppGlassDialog(
       title: title,
       message: message,

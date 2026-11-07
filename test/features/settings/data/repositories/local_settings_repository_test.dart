@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:spendyholik/core/errors/failure.dart';
 import 'package:spendyholik/core/storage/preferences_storage.dart';
 import 'package:spendyholik/features/settings/data/models/app_settings.dart';
 import 'package:spendyholik/features/settings/data/repositories/local_settings_repository.dart';
@@ -20,6 +21,12 @@ class _MemoryStorage implements PreferencesStorage {
 
   @override
   Future<void> remove(String key) async => values.remove(key);
+}
+
+class _BrokenStorage implements PreferencesStorage {
+  @override
+  dynamic noSuchMethod(Invocation invocation) =>
+      Future<Never>.error(Exception('storage unavailable'));
 }
 
 void main() {
@@ -53,5 +60,20 @@ void main() {
     storage.values['settings.themeMode'] = 'purple';
 
     expect((await repository.load()).themeMode, AppThemeMode.system);
+  });
+
+  test('хранилище бросает при load — UnknownFailure', () async {
+    final broken = LocalSettingsRepository(_BrokenStorage());
+
+    await expectLater(broken.load(), throwsA(isA<UnknownFailure>()));
+  });
+
+  test('хранилище бросает при save — UnknownFailure', () async {
+    final broken = LocalSettingsRepository(_BrokenStorage());
+
+    await expectLater(
+      broken.save(const AppSettings()),
+      throwsA(isA<UnknownFailure>()),
+    );
   });
 }

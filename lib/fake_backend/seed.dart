@@ -9,8 +9,8 @@ import 'package:spendyholik/features/debts/data/models/models.dart';
 import 'package:spendyholik/features/goals/data/models/models.dart';
 import 'package:spendyholik/features/notifications/data/models/models.dart';
 import 'package:spendyholik/features/recurring/data/models/models.dart';
-import 'package:spendyholik/features/user/data/models/models.dart';
 import 'package:spendyholik/features/transactions/transactions.dart';
+import 'package:spendyholik/features/user/data/models/models.dart';
 
 abstract final class FakeSeed {
   /// Тестовый вход фазы 1 — не настоящие учётные данные.

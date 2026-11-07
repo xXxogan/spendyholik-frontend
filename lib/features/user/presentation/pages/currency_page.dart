@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:spendyholik/app/di/injection.dart';
 import 'package:spendyholik/app/router/app_router.gr.dart';
+import 'package:spendyholik/core/errors/failure.dart';
 import 'package:spendyholik/core/models/models.dart';
 import 'package:spendyholik/core/widgets/widgets.dart';
 import 'package:spendyholik/features/user/presentation/cubit/currency_cubit.dart';
@@ -36,13 +37,19 @@ class CurrencyView extends StatelessWidget {
   /// Пользователь с новой валютой приходит в сессию через userChanges, а не
   /// вместе с ответом: без ожидания guard Главной вернёт сюда же.
   static Future<void> _goHome(BuildContext context) async {
-    final session = getIt<SessionCubit>();
-    bool hasCurrency(SessionState s) =>
-        s is SessionAuthenticated && s.user.baseCurrency != null;
-    if (!hasCurrency(session.state)) {
-      await session.stream.firstWhere(hasCurrency);
+    final state = await getIt<SessionCubit>().waitFor(
+      (s) => s is SessionAuthenticated && s.user.baseCurrency != null,
+    );
+    if (!context.mounted) return;
+    if (state == null) {
+      showAppToast(
+        context,
+        failureMessage(context.l10n, const UnknownFailure()),
+        error: true,
+      );
+      return;
     }
-    if (context.mounted) await context.router.replaceAll([const HomeRoute()]);
+    await context.router.replaceAll([const HomeRoute()]);
   }
 
   @override
@@ -65,76 +72,88 @@ class CurrencyView extends StatelessWidget {
             break;
         }
       },
-      builder: (context, state) => Scaffold(
-        appBar: AppBar(title: Text(l10n.userCurrencyTitle)),
-        body: SafeArea(
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: _maxWidth),
-              child: Column(
-                crossAxisAlignment: .stretch,
-                children: [
-                  Padding(
-                    padding: const .fromLTRB(16, 8, 16, 8),
-                    child: Text(
-                      l10n.currencyHint,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: ListView(
-                      children: [
-                        for (final currency in Currency.values)
-                          ListTile(
-                            leading: SizedBox(
-                              width: 48,
-                              child: Text(
-                                currency.code,
-                                style: theme.textTheme.titleSmall,
+      builder: (context, state) {
+        final title = l10n.userCurrencyTitle;
+
+        return AppGlassScaffold(
+          title: title,
+          largeTitle: true,
+          body: BaseLayout.slivers(
+            largeTitle: title,
+            slivers: [
+              ContentSliverPadding(
+                sliver: SliverToBoxAdapter(
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: _maxWidth),
+                      child: Column(
+                        crossAxisAlignment: .stretch,
+                        children: [
+                          Padding(
+                            padding: const .symmetric(vertical: 8),
+                            child: Text(
+                              l10n.currencyHint,
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: theme.colorScheme.onSurfaceVariant,
                               ),
                             ),
-                            title: Text(
-                              '${currencyLabel(l10n, currency)} · '
-                              '${currency.symbol}',
-                            ),
-                            trailing: Icon(
-                              currency == state.selected
-                                  ? Icons.radio_button_checked
-                                  : Icons.radio_button_unchecked,
-                              color: currency == state.selected
-                                  ? theme.colorScheme.primary
-                                  : theme.colorScheme.outline,
-                            ),
-                            onTap: () => cubit.select(currency),
                           ),
-                      ],
-                    ),
-                  ),
-                  Padding(
-                    padding: const .all(16),
-                    child: FilledButton(
-                      onPressed: state.status == .submitting
-                          ? null
-                          : cubit.submit,
-                      style: FilledButton.styleFrom(
-                        minimumSize: const Size.fromHeight(52),
+                          for (final currency in Currency.values)
+                            ListTile(
+                              contentPadding: .zero,
+                              leading: SizedBox(
+                                width: 48,
+                                child: Text(
+                                  currency.code,
+                                  style: theme.textTheme.titleSmall,
+                                ),
+                              ),
+                              title: Text(
+                                '${currencyLabel(l10n, currency)} · '
+                                '${currency.symbol}',
+                              ),
+                              trailing: Icon(
+                                currency == state.selected
+                                    ? Icons.radio_button_checked
+                                    : Icons.radio_button_unchecked,
+                                color: currency == state.selected
+                                    ? theme.colorScheme.primary
+                                    : theme.colorScheme.outline,
+                              ),
+                              onTap: () => cubit.select(currency),
+                            ),
+                          const SizedBox(height: 16),
+                          FilledButton(
+                            onPressed: state.status == .submitting
+                                ? null
+                                : cubit.submit,
+                            style: FilledButton.styleFrom(
+                              minimumSize: const Size.fromHeight(52),
+                            ),
+                            child: state.status == .submitting
+                                ? const SizedBox.square(
+                                    dimension: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : Text(l10n.currencyContinue),
+                          ),
+                        ],
                       ),
-                      child: state.status == .submitting
-                          ? const SizedBox.square(
-                              dimension: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : Text(l10n.currencyContinue),
                     ),
                   ),
-                ],
+                ),
               ),
-            ),
+              SliverToBoxAdapter(
+                child: SizedBox(
+                  height: 24 + MediaQuery.paddingOf(context).bottom,
+                ),
+              ),
+            ],
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

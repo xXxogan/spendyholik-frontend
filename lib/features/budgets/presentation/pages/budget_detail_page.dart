@@ -69,27 +69,27 @@ class BudgetDetailView extends StatelessWidget {
           slivers: [
             switch (state) {
               BudgetDetailLoaded(:final budget) => ContentSliverPadding(
-                sliver: SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const .only(top: 12, bottom: 120),
-                    child: TwoColumnLayout(
-                      primary: [
-                        BudgetSummaryCard(
+                sliver: SliverPadding(
+                  padding: const .only(top: 12, bottom: 120),
+                  sliver: SliverTwoColumnLayout(
+                    primary: [
+                      SliverToBoxAdapter(
+                        child: BudgetSummaryCard(
                           budget: budget,
                           currency: CurrencyScope.of(context),
                         ),
-                      ],
-                      secondary: [
-                        TransactionsSection(
-                          filter: TransactionFilter(
-                            type: TransactionType.expense,
-                            categoryId: budget.category.id,
-                            period: budget.currentPeriod,
-                          ),
-                          title: l10n.budgetDetailTransactions,
+                      ),
+                    ],
+                    secondary: [
+                      TransactionsSection.sliver(
+                        filter: TransactionFilter(
+                          type: TransactionType.expense,
+                          categoryId: budget.category.id,
+                          period: budget.currentPeriod,
                         ),
-                      ],
-                    ),
+                        title: l10n.budgetDetailTransactions,
+                      ),
+                    ],
                   ),
                 ),
               ),

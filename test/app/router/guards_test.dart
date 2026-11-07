@@ -169,4 +169,45 @@ void main() {
       expect(routes.single.routeName, LoginRoute.name);
     });
   });
+
+  group('guestRedirect', () {
+    test('нет сессии — пропустить на вход и регистрацию', () {
+      expect(
+        guestRedirect(const SessionState.unauthenticated(onboardingSeen: true)),
+        isNull,
+      );
+    });
+
+    test('вошедший — на Главную', () {
+      expect(
+        guestRedirect(const SessionState.authenticated(withCurrency))
+            ?.routeName,
+        HomeRoute.name,
+      );
+    });
+
+    test('вошедший без валюты — на выбор валюты', () {
+      expect(
+        guestRedirect(const SessionState.authenticated(withoutCurrency))
+            ?.routeName,
+        CurrencyRoute.name,
+      );
+    });
+  });
+
+  group('canFollowNext', () {
+    test('на Главную — любой сохранённый адрес', () {
+      expect(canFollowNext(const HomeRoute(), '/accounts'), isTrue);
+    });
+
+    test('на вход — только регистрация', () {
+      expect(canFollowNext(const LoginRoute(), '/register'), isTrue);
+      expect(canFollowNext(const LoginRoute(), '/accounts'), isFalse);
+    });
+
+    test('онбординг и выбор валюты адрес не продолжают', () {
+      expect(canFollowNext(const OnboardingRoute(), '/register'), isFalse);
+      expect(canFollowNext(const CurrencyRoute(), '/accounts'), isFalse);
+    });
+  });
 }

@@ -5,7 +5,7 @@ import 'package:spendyholik/app/di/injection.dart';
 import 'package:spendyholik/app/router/app_router.gr.dart';
 import 'package:spendyholik/core/widgets/widgets.dart';
 import 'package:spendyholik/features/budgets/presentation/cubit/budgets_cubit.dart';
-import 'package:spendyholik/features/budgets/presentation/state/budgets_tab_notifier.dart';
+import 'package:spendyholik/features/budgets/presentation/cubit/budgets_tab_cubit.dart';
 import 'package:spendyholik/features/budgets/presentation/widgets/widgets.dart';
 import 'package:spendyholik/features/goals/goals.dart';
 import 'package:spendyholik/l10n/l10n.dart';
@@ -33,11 +33,11 @@ class BudgetsView extends StatelessWidget {
     final l10n = context.l10n;
     final cubit = context.read<BudgetsCubit>();
     final state = context.watch<BudgetsCubit>().state;
-    final tabs = getIt<BudgetsTabNotifier>();
+    final tabs = getIt<BudgetsTabCubit>();
 
-    return ValueListenableBuilder(
-      valueListenable: tabs,
-      builder: (context, tab, _) => BaseLayout.slivers(
+    return BlocBuilder<BudgetsTabCubit, BudgetsTab>(
+      bloc: tabs,
+      builder: (context, tab) => BaseLayout.slivers(
         largeTitle: l10n.navBudgets,
         slivers: [
           ContentSliverPadding(
@@ -52,7 +52,7 @@ class BudgetsView extends StatelessWidget {
                     ),
                     child: BudgetsSegment(
                       selected: tab,
-                      onSelected: (value) => tabs.value = value,
+                      onSelected: tabs.select,
                     ),
                   ),
                 ),

@@ -16,6 +16,12 @@ PageRouteInfo? sessionRedirect(SessionState state) => switch (state) {
   SessionUnauthenticated() || SessionUnknown() => const LoginRoute(),
 };
 
+/// Вход и регистрация — только без сессии; вошедшего уводим дальше по сессии.
+PageRouteInfo? guestRedirect(SessionState state) => switch (state) {
+  SessionAuthenticated() => splashRoute(state),
+  SessionUnauthenticated() || SessionUnknown() => null,
+};
+
 /// Куда уйти со Splash; null — сессия ещё восстанавливается.
 PageRouteInfo? splashRoute(SessionState state) => switch (state) {
   SessionUnknown() => null,
@@ -32,6 +38,13 @@ String? deepLinkNext(String path) {
   if (path.isEmpty || path == '/' || path.startsWith('/splash')) return null;
   return path;
 }
+
+/// Можно ли со Splash открыть сохранённый адрес [next] вместо [target].
+bool canFollowNext(PageRouteInfo target, String next) => switch (target) {
+  HomeRoute() => true,
+  LoginRoute() => Uri.parse(next).path == '/register',
+  _ => false,
+};
 
 abstract class _SessionAwareGuard extends AutoRouteGuard {
   _SessionAwareGuard(this._session);
@@ -72,4 +85,11 @@ class SessionGuard extends _SessionAwareGuard {
 
   @override
   PageRouteInfo? redirect(SessionState state) => sessionRedirect(state);
+}
+
+class GuestGuard extends _SessionAwareGuard {
+  GuestGuard(super.session);
+
+  @override
+  PageRouteInfo? redirect(SessionState state) => guestRedirect(state);
 }

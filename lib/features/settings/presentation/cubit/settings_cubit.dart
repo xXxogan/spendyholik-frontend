@@ -24,8 +24,8 @@ class SettingsCubit extends Cubit<AppSettings> with CubitLogging<AppSettings> {
     }
   }
 
-  void setDarkTheme(bool dark) =>
-      _update(state.copyWith(themeMode: dark ? .dark : .light));
+  void setThemeMode(AppThemeMode mode) =>
+      _update(state.copyWith(themeMode: mode));
 
   void setPush(bool value) => _update(state.copyWith(pushEnabled: value));
 

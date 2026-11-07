@@ -50,6 +50,23 @@ class SessionCubit extends Cubit<SessionState> with CubitLogging<SessionState> {
 
   Future<void> signOut() => _auth.signOut();
 
+  /// Ответ входа или смены валюты приходит раньше, чем пользователь — через
+  /// userChanges. null — не дождались: поток оборвался или сервер молчит.
+  Future<SessionState?> waitFor(
+    bool Function(SessionState state) test, {
+    Duration timeout = const Duration(seconds: 10),
+  }) async {
+    if (test(state)) return state;
+    try {
+      return await stream.firstWhere(test).timeout(timeout);
+    } on TimeoutException {
+      getIt<Talker>().warning('Session wait timed out');
+      return null;
+    } on StateError {
+      return null;
+    }
+  }
+
   /// Хранилище недоступно — покажем онбординг ещё раз, это безвредно.
   Future<bool> _onboardingSeen() async {
     try {

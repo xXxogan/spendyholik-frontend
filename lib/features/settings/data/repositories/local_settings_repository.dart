@@ -1,4 +1,5 @@
 import 'package:injectable/injectable.dart';
+import 'package:spendyholik/core/errors/failure.dart';
 import 'package:spendyholik/core/storage/preferences_storage.dart';
 import 'package:spendyholik/features/settings/data/models/models.dart';
 import 'package:spendyholik/features/settings/data/repositories/settings_repository.dart';
@@ -15,7 +16,7 @@ class LocalSettingsRepository implements SettingsRepository {
   static const _weeklyReport = 'settings.weeklyReport';
 
   @override
-  Future<AppSettings> load() async {
+  Future<AppSettings> load() => _guard(() async {
     const defaults = AppSettings();
     final themeMode = await _storage.getString(_themeMode);
     return AppSettings(
@@ -28,13 +29,21 @@ class LocalSettingsRepository implements SettingsRepository {
       weeklyReport:
           await _storage.getBool(_weeklyReport) ?? defaults.weeklyReport,
     );
-  }
+  });
 
   @override
-  Future<void> save(AppSettings settings) async {
+  Future<void> save(AppSettings settings) => _guard(() async {
     await _storage.setString(_themeMode, settings.themeMode.name);
     await _storage.setBool(_pushEnabled, settings.pushEnabled);
     await _storage.setBool(_budgetReminders, settings.budgetReminders);
     await _storage.setBool(_weeklyReport, settings.weeklyReport);
+  });
+
+  Future<T> _guard<T>(Future<T> Function() body) async {
+    try {
+      return await body();
+    } on Exception catch (error) {
+      throw UnknownFailure(error);
+    }
   }
 }

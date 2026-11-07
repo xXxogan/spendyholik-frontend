@@ -2,7 +2,6 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:spendyholik/app/di/injection.dart';
-import 'package:spendyholik/app/router/app_router.gr.dart';
 import 'package:spendyholik/app/router/guards.dart';
 import 'package:spendyholik/features/user/presentation/cubit/session_cubit.dart';
 import 'package:spendyholik/l10n/l10n.dart';
@@ -33,7 +32,7 @@ class _SplashPageState extends State<SplashPage> {
     final target = splashRoute(state);
     if (target == null) return;
     final next = widget.next;
-    if (target is HomeRoute && next != null) {
+    if (next != null && canFollowNext(target, next)) {
       context.router.replacePath(next);
     } else {
       context.router.replaceAll([target]);

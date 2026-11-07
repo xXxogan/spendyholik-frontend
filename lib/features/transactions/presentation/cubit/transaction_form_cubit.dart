@@ -6,7 +6,7 @@ import 'package:spendyholik/core/bloc/cubit_logging.dart';
 import 'package:spendyholik/core/errors/failure.dart';
 import 'package:spendyholik/core/format/format.dart';
 import 'package:spendyholik/core/models/models.dart';
-import 'package:spendyholik/features/accounts/data/repositories/repositories.dart';
+import 'package:spendyholik/features/accounts/accounts.dart';
 import 'package:spendyholik/features/transactions/data/models/models.dart';
 import 'package:spendyholik/features/transactions/data/repositories/repositories.dart';
 import 'package:talker_flutter/talker_flutter.dart';

@@ -1,7 +1,7 @@
-import 'package:spendyholik/core/widgets/glass/large_title_sliver.dart';
-import 'package:spendyholik/core/widgets/glass/large_title_scope.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:spendyholik/core/widgets/content_sliver_padding.dart';
+import 'package:spendyholik/core/widgets/glass/large_title_scope.dart';
+import 'package:spendyholik/core/widgets/glass/large_title_sliver.dart';
 import 'package:spendyholik/core/widgets/glass/shell_scope.dart';
 
 class BaseLayout extends StatelessWidget {

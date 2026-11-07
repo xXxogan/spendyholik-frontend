@@ -15,8 +15,16 @@ class AppRouter extends RootStackRouter {
   List<AutoRoute> get routes => [
     AutoRoute(page: SplashRoute.page, path: '/splash', initial: true),
     AutoRoute(page: OnboardingRoute.page, path: '/onboarding'),
-    AutoRoute(page: LoginRoute.page, path: '/login'),
-    AutoRoute(page: RegisterRoute.page, path: '/register'),
+    AutoRoute(
+      page: LoginRoute.page,
+      path: '/login',
+      guards: [GuestGuard(_session)],
+    ),
+    AutoRoute(
+      page: RegisterRoute.page,
+      path: '/register',
+      guards: [GuestGuard(_session)],
+    ),
     AutoRoute(
       page: CurrencyRoute.page,
       path: '/currency',

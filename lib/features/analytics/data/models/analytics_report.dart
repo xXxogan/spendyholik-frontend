@@ -1,5 +1,5 @@
 import 'package:spendyholik/core/models/date_period.dart';
-import 'package:spendyholik/features/categories/data/models/models.dart';
+import 'package:spendyholik/features/categories/categories.dart';
 
 class CategoryShare {
   const CategoryShare({

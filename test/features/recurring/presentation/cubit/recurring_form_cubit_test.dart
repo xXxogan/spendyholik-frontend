@@ -139,6 +139,17 @@ void main() {
       expect(state.nextExecution(now), DateTime(2027, 1, 31, 12));
     });
 
+    test('frequencyChanged пересчитывает превью', () {
+      final cubit = build()..anchorChanged(DateTime(2026, 1, 31));
+      expect(cubit.state.nextExecution(now), DateTime(2026, 2, 28, 12));
+
+      cubit.frequencyChanged(RecurrenceFrequency.weekly);
+      expect(cubit.state.nextExecution(now), DateTime(2026, 2, 14, 12));
+
+      cubit.frequencyChanged(RecurrenceFrequency.yearly);
+      expect(cubit.state.nextExecution(now), DateTime(2027, 1, 31, 12));
+    });
+
     test('без якоря — null', () {
       expect(const RecurringFormState().nextExecution(now), isNull);
     });

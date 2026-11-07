@@ -64,34 +64,39 @@ class AccountDetailView extends StatelessWidget {
               switch (state) {
                 AccountDetailLoaded(:final account, :final history) =>
                   ContentSliverPadding(
-                    sliver: SliverToBoxAdapter(
-                      child: Padding(
-                        padding: const .only(top: 12, bottom: 120),
-                        child: TwoColumnLayout(
-                          primary: [
-                            AccountBalanceCard(
+                    sliver: SliverPadding(
+                      padding: const .only(top: 12, bottom: 120),
+                      sliver: SliverTwoColumnLayout(
+                        primary: [
+                          SliverToBoxAdapter(
+                            child: AccountBalanceCard(
                               account: account,
                               currency: CurrencyScope.of(context),
                             ),
-                            if (account.isArchived)
-                              AccountUnarchiveButton(
-                                onUnarchive: cubit.unarchive,
-                              )
-                            else
-                              AccountArchiveButton(onArchive: cubit.archive),
-                          ],
-                          secondary: [
-                            AccountTrendCard(
+                          ),
+                          SliverToBoxAdapter(
+                            child: account.isArchived
+                                ? AccountUnarchiveButton(
+                                    onUnarchive: cubit.unarchive,
+                                  )
+                                : AccountArchiveButton(
+                                    onArchive: cubit.archive,
+                                  ),
+                          ),
+                        ],
+                        secondary: [
+                          SliverToBoxAdapter(
+                            child: AccountTrendCard(
                               account: account,
                               history: history,
                               currency: CurrencyScope.of(context),
                             ),
-                            TransactionsSection(
-                              filter: TransactionFilter(accountId: account.id),
-                              title: context.l10n.accountDetailTransactions,
-                            ),
-                          ],
-                        ),
+                          ),
+                          TransactionsSection.sliver(
+                            filter: TransactionFilter(accountId: account.id),
+                            title: context.l10n.accountDetailTransactions,
+                          ),
+                        ],
                       ),
                     ),
                   ),

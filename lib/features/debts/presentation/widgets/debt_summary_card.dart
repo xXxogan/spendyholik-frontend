@@ -6,6 +6,7 @@ import 'package:spendyholik/core/models/models.dart';
 import 'package:spendyholik/core/widgets/widgets.dart';
 import 'package:spendyholik/features/debts/data/models/models.dart';
 import 'package:spendyholik/features/debts/presentation/widgets/debt_amount.dart';
+import 'package:spendyholik/features/debts/presentation/widgets/debt_summary_row.dart';
 import 'package:spendyholik/l10n/l10n.dart';
 
 class DebtSummaryCard extends StatelessWidget {
@@ -81,49 +82,21 @@ class DebtSummaryCard extends StatelessWidget {
               style: muted?.copyWith(color: AppColors.negative(brightness)),
             ),
           const SizedBox(height: 16),
-          _Row(l10n.debtDetailTotal, formatMoney(debt.total, currency, locale)),
-          _Row(
+          DebtSummaryRow(
+            l10n.debtDetailTotal,
+            formatMoney(debt.total, currency, locale),
+          ),
+          DebtSummaryRow(
             l10n.debtDetailRemaining,
             formatMoney(debt.remaining, currency, locale),
           ),
           if (due != null)
-            _Row(l10n.debtDetailDue, DateFormat.yMMMMd(locale).format(due)),
+            DebtSummaryRow(
+              l10n.debtDetailDue,
+              DateFormat.yMMMMd(locale).format(due),
+            ),
           if (debt.note case final note? when note.isNotEmpty)
-            _Row(l10n.debtDetailNote, note),
-        ],
-      ),
-    );
-  }
-}
-
-class _Row extends StatelessWidget {
-  const _Row(this.label, this.value);
-
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Padding(
-      padding: const .symmetric(vertical: 6),
-      child: Row(
-        spacing: 12,
-        children: [
-          Text(
-            label,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-          ),
-          Expanded(
-            child: Text(
-              value,
-              textAlign: .end,
-              style: theme.textTheme.bodyLarge,
-            ),
-          ),
+            DebtSummaryRow(l10n.debtDetailNote, note),
         ],
       ),
     );

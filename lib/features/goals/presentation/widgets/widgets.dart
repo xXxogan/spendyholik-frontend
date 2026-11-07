@@ -1,5 +1,7 @@
 export 'goal_card.dart';
 export 'goal_contributions_list.dart';
+export 'goal_delete_button.dart';
+export 'goal_form.dart';
 export 'goal_progress_bar.dart';
 export 'goal_stat_tile.dart';
 export 'goal_summary_card.dart';

@@ -43,6 +43,7 @@ class _OnboardingViewState extends State<OnboardingView> {
 
   /// Онбординг виден и вошедшему (фаза 1, прямая ссылка) — тогда дальше по сессии.
   void _finish() {
+    if (!mounted) return;
     final session = getIt<SessionCubit>().state;
     context.router.replaceAll([
       if (session is SessionAuthenticated)

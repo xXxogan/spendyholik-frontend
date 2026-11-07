@@ -2,7 +2,7 @@ import 'package:injectable/injectable.dart';
 import 'package:spendyholik/core/errors/failure.dart';
 import 'package:spendyholik/core/events/data_change_bus.dart';
 import 'package:spendyholik/fake_backend/fake_backend.dart';
-import 'package:spendyholik/features/accounts/data/models/models.dart';
+import 'package:spendyholik/features/accounts/accounts.dart';
 import 'package:spendyholik/features/transactions/data/models/models.dart';
 import 'package:spendyholik/features/transactions/data/repositories/transaction_repository.dart';
 
