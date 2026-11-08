@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:spendyholik/app/di/injection.dart';
 import 'package:spendyholik/app/router/app_router.gr.dart';
+import 'package:spendyholik/core/network/network_status.dart';
 import 'package:spendyholik/core/layout/window_size.dart';
 import 'package:spendyholik/core/widgets/widgets.dart';
 import 'package:spendyholik/features/home/presentation/widgets/widgets.dart';
@@ -20,19 +21,25 @@ class HomeShell extends StatelessWidget {
   );
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => BlocProvider.value(
+    value: getIt<NetworkStatus>(),
+    child: _layout(context),
+  );
+
+  Widget _layout(BuildContext context) {
     final windowSize = context.windowSize;
-    if (windowSize == WindowSize.compact) return content;
+    if (windowSize == WindowSize.compact) {
+      return Stack(children: [content, const OfflineBanner()]);
+    }
 
     final extended = windowSize == WindowSize.expanded;
     final router = AutoRouter.of(context);
+    final contentInset = SideNavMetrics.contentInset(extended: extended);
 
     return Stack(
       children: [
-        ShellScope(
-          leftInset: SideNavMetrics.contentInset(extended: extended),
-          child: content,
-        ),
+        ShellScope(leftInset: contentInset, child: content),
+        OfflineBanner(leftInset: contentInset),
         Positioned(
           left: SideNavMetrics.gap,
           top: SideNavMetrics.gap,

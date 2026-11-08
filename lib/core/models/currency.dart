@@ -12,4 +12,9 @@ enum Currency {
 
   final String code;
   final String symbol;
+
+  /// null — валюты нет в приложении (API принимает любой код ISO 4217).
+  static Currency? fromCode(String? code) => code == null
+      ? null
+      : values.where((c) => c.code == code.toUpperCase()).firstOrNull;
 }

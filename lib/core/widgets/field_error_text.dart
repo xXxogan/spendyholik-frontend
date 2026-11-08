@@ -15,4 +15,6 @@ String fieldErrorText(AppLocalizations l10n, FieldError error) =>
       FieldError.alreadyExists => l10n.fieldErrorAlreadyExists,
       FieldError.belowRepaid => l10n.fieldErrorBelowRepaid,
       FieldError.emailTaken => l10n.fieldErrorEmailTaken,
+      FieldError.currencyMismatch => l10n.fieldErrorCurrencyMismatch,
+      FieldError.invalid => l10n.fieldErrorInvalid,
     };

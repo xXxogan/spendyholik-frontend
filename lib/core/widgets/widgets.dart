@@ -11,6 +11,7 @@ export 'failure_message.dart';
 export 'failure_view.dart';
 export 'field_error_text.dart';
 export 'glass/glass.dart';
+export 'offline_banner.dart';
 export 'section_header.dart';
 export 'skeleton_list.dart';
 export 'sliver_two_column_layout.dart';

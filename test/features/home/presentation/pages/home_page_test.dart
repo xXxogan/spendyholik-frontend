@@ -1,5 +1,6 @@
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:spendyholik/core/network/network_status.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:spendyholik/app/di/injection.dart';
@@ -121,7 +122,8 @@ void main() {
       ..registerFactory(() => BudgetsCubit(budgets, bus))
       ..registerFactory(() => GoalsCubit(goals, bus))
       ..registerFactory(() => UnreadCountCubit(notifications, bus))
-      ..registerSingleton<SessionCubit>(session);
+      ..registerSingleton<SessionCubit>(session)
+      ..registerSingleton(NetworkStatus());
   });
 
   tearDown(getIt.reset);

@@ -48,4 +48,6 @@ enum FieldError {
   alreadyExists,
   belowRepaid,
   emailTaken,
+  currencyMismatch,
+  invalid,
 }
