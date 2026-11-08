@@ -55,12 +55,50 @@ void main() {
     verify(() => repository.getTransactions(cafe)).called(1);
   });
 
+  testWidgets('операция — в валюте своего счёта, а не в базовой', (
+    tester,
+  ) async {
+    when(() => repository.getTransactions(any())).thenAnswer(
+      (_) async => [
+        TransactionModel(
+          id: 't1',
+          type: TransactionType.expense,
+          amount: 10000,
+          title: 'Кофе',
+          account: const AccountRef(
+            id: 'usd',
+            name: 'Доллары',
+            color: EntityColor.green,
+          ),
+          occurredAt: DateTime(2026, 11, 7, 12),
+          currency: Currency.usd,
+        ),
+      ],
+    );
+
+    await pumpPage(
+      tester,
+      const CurrencyScope(
+        currency: Currency.rub,
+        child: TransactionsSection(
+          filter: TransactionFilter(),
+          title: 'Операции',
+        ),
+      ),
+    );
+    await settle(tester);
+
+    expect(find.textContaining(r'$'), findsOneWidget);
+    expect(find.textContaining('₽'), findsNothing);
+  });
+
   testWidgets('sliver: длинный список строит только видимые строки', (
     tester,
   ) async {
     final transactions = [
       for (var i = 0; i < 200; i++)
         TransactionModel(
+          currency: Currency.rub,
           id: 't$i',
           type: TransactionType.expense,
           amount: 10000,

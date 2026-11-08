@@ -71,7 +71,7 @@ class AccountDetailView extends StatelessWidget {
                           SliverToBoxAdapter(
                             child: AccountBalanceCard(
                               account: account,
-                              currency: CurrencyScope.of(context),
+                              currency: account.currency,
                             ),
                           ),
                           SliverToBoxAdapter(
@@ -89,7 +89,7 @@ class AccountDetailView extends StatelessWidget {
                             child: AccountTrendCard(
                               account: account,
                               history: history,
-                              currency: CurrencyScope.of(context),
+                              currency: account.currency,
                             ),
                           ),
                           TransactionsSection.sliver(

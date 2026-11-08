@@ -1,7 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:spendyholik/core/models/currency.dart';
 import 'package:spendyholik/features/debts/data/models/debt_model.dart';
 
 DebtModel debt({int remaining = 100, DateTime? dueDate}) => DebtModel(
+  currency: Currency.rub,
   id: 'd',
   counterparty: 'Дмитрий',
   direction: DebtDirection.iOwe,

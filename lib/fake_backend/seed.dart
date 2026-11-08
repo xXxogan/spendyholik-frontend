@@ -27,6 +27,7 @@ abstract final class FakeSeed {
   /// Балансы здесь начальные: итоговые считает FakeBackend из операций.
   static List<AccountModel> initialAccounts() => const [
     AccountModel(
+      currency: Currency.rub,
       id: 'acc-tinkoff',
       name: 'Карта Тинькофф',
       type: AccountType.debit,
@@ -36,6 +37,7 @@ abstract final class FakeSeed {
       cardLast4: '4831',
     ),
     AccountModel(
+      currency: Currency.rub,
       id: 'acc-savings',
       name: 'Накопительный счёт',
       type: AccountType.savings,
@@ -45,6 +47,7 @@ abstract final class FakeSeed {
       interestRate: 6.2,
     ),
     AccountModel(
+      currency: Currency.rub,
       id: 'acc-cash',
       name: 'Наличные',
       type: AccountType.cash,
@@ -53,6 +56,7 @@ abstract final class FakeSeed {
       isArchived: false,
     ),
     AccountModel(
+      currency: Currency.rub,
       id: 'acc-credit',
       name: 'Кредитная карта',
       type: AccountType.credit,
@@ -62,6 +66,7 @@ abstract final class FakeSeed {
       creditLimit: 15000000,
     ),
     AccountModel(
+      currency: Currency.rub,
       id: 'acc-sber',
       name: 'Зарплатная карта Сбера',
       type: AccountType.debit,
@@ -311,12 +316,14 @@ abstract final class FakeSeed {
   /// `saved` здесь не важен: FakeBackend считает его из пополнений.
   static List<GoalModel> goals(DateTime now) => [
     const GoalModel(
+      currency: Currency.rub,
       id: 'goal-buffer',
       name: 'Подушка безопасности',
       target: 20000000,
       saved: 0,
     ),
     GoalModel(
+      currency: Currency.rub,
       id: 'goal-trip',
       name: 'Отпуск в Грузии',
       target: 9000000,
@@ -324,12 +331,14 @@ abstract final class FakeSeed {
       deadline: DateTime(now.year, now.month + 8),
     ),
     const GoalModel(
+      currency: Currency.rub,
       id: 'goal-laptop',
       name: 'MacBook Air',
       target: 18000000,
       saved: 0,
     ),
     GoalModel(
+      currency: Currency.rub,
       id: 'goal-phone',
       name: 'Новый телефон',
       target: 6000000,
@@ -352,6 +361,7 @@ abstract final class FakeSeed {
       DateTime? dueDate,
       String? note,
     }) => DebtModel(
+      currency: Currency.rub,
       id: id,
       counterparty: counterparty,
       direction: direction,
@@ -562,6 +572,7 @@ abstract final class FakeSeed {
     }) {
       n++;
       return TransactionModel(
+        currency: Currency.rub,
         id: 'tx-${n.toString().padLeft(3, '0')}',
         type: type,
         amount: amount,

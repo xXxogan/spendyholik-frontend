@@ -56,10 +56,7 @@ class DebtDetailView extends StatelessWidget {
                     padding: const .only(top: 12, bottom: 120),
                     child: TwoColumnLayout(
                       primary: [
-                        DebtSummaryCard(
-                          debt: debt,
-                          currency: CurrencyScope.of(context),
-                        ),
+                        DebtSummaryCard(debt: debt, currency: debt.currency),
                         if (!debt.isClosed)
                           FilledButton(
                             onPressed: () => showDebtRepaySheet(context, debt),
@@ -73,7 +70,7 @@ class DebtDetailView extends StatelessWidget {
                         DebtHistoryList(
                           debt: debt,
                           history: history,
-                          currency: CurrencyScope.of(context),
+                          currency: debt.currency,
                         ),
                       ],
                     ),

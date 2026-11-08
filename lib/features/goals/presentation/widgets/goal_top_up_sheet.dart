@@ -7,12 +7,17 @@ import 'package:spendyholik/features/accounts/accounts.dart';
 import 'package:spendyholik/features/goals/presentation/cubit/goal_top_up_cubit.dart';
 import 'package:spendyholik/l10n/l10n.dart';
 
-Future<void> showGoalTopUpSheet(BuildContext context, String goalId) async {
+/// Пополнение — в валюте цели.
+Future<void> showGoalTopUpSheet(
+  BuildContext context,
+  String goalId,
+  Currency currency,
+) async {
   final done = await showGlassSheet<bool>(
     context,
     builder: (_) => BlocProvider(
       create: (_) => getIt<GoalTopUpCubit>()..init(goalId),
-      child: const GoalTopUpView(),
+      child: GoalTopUpView(currency: currency),
     ),
   );
   if (done == true && context.mounted) {
@@ -21,7 +26,9 @@ Future<void> showGoalTopUpSheet(BuildContext context, String goalId) async {
 }
 
 class GoalTopUpView extends StatelessWidget {
-  const GoalTopUpView({super.key});
+  const GoalTopUpView({super.key, required this.currency});
+
+  final Currency currency;
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +61,7 @@ class GoalTopUpView extends StatelessWidget {
                 style: theme.textTheme.headlineMedium,
                 decoration: InputDecoration(
                   hintText: '0',
-                  suffixText: CurrencyScope.of(context).symbol,
+                  suffixText: currency.symbol,
                   errorText: error(.amount),
                 ),
               ),

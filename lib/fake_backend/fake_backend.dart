@@ -1,6 +1,8 @@
 import 'package:injectable/injectable.dart';
+import 'package:spendyholik/app/di/injection.dart';
 import 'package:spendyholik/core/config/app_config.dart';
 import 'package:spendyholik/core/errors/failure.dart';
+import 'package:spendyholik/core/models/currency.dart';
 import 'package:spendyholik/core/models/date_period.dart';
 import 'package:spendyholik/fake_backend/seed.dart';
 import 'package:spendyholik/features/accounts/accounts.dart';
@@ -12,6 +14,7 @@ import 'package:spendyholik/features/notifications/data/models/models.dart';
 import 'package:spendyholik/features/recurring/data/models/models.dart';
 import 'package:spendyholik/features/transactions/transactions.dart';
 import 'package:spendyholik/features/user/data/models/models.dart';
+import 'package:spendyholik/features/user/presentation/cubit/session_cubit.dart';
 
 /// «Сервер» фазы 1: данные в памяти до перезапуска. В фазе 2 удаляется
 /// вместе с фейковыми репозиториями.
@@ -19,7 +22,7 @@ import 'package:spendyholik/features/user/data/models/models.dart';
 class FakeBackend {
   FakeBackend() {
     _categories = List.of(FakeSeed.categories());
-    transactions = List.of(
+    _transactions = List.of(
       FakeSeed.transactions(DateTime.now(), _initialAccounts, _categories),
     );
     _budgets = FakeSeed.budgets(DateTime.now(), _spent);
@@ -37,7 +40,20 @@ class FakeBackend {
     FakeSeed.initialAccounts(),
   );
   late final List<CategoryModel> _categories;
-  late final List<TransactionModel> transactions;
+  late final List<TransactionModel> _transactions;
+
+  /// Валюта сущностей фейка — базовая валюта сессии: у фейка один «счёт в валюте»,
+  /// и смена валюты в профиле меняет символ везде, как до T-36.
+  Currency get currency => switch (getIt.isRegistered<SessionCubit>()
+      ? getIt<SessionCubit>().state
+      : null) {
+    SessionAuthenticated(:final user) => user.baseCurrency ?? Currency.rub,
+    _ => Currency.rub,
+  };
+
+  List<TransactionModel> get transactions => [
+    for (final t in _transactions) _retag(t, currency: currency),
+  ];
   late final List<(String, BudgetDraft)> _budgets;
   late final List<GoalModel> _goals;
   late final List<(String, GoalContribution)> _contributions;
@@ -55,13 +71,13 @@ class FakeBackend {
 
   List<AccountModel> get accounts => [
     for (final a in _initialAccounts)
-      a.copyWith(balance: a.balance + _delta(a.id)),
+      a.copyWith(balance: a.balance + _delta(a.id), currency: currency),
   ];
 
   List<CategoryModel> get categories => [
     for (final c in _categories)
       c.copyWith(
-        transactionCount: transactions
+        transactionCount: _transactions
             .where((t) => t.category?.id == c.id)
             .length,
       ),
@@ -90,6 +106,7 @@ class FakeBackend {
   List<GoalModel> get goals => [
     for (final goal in _goals)
       goal.copyWith(
+        currency: currency,
         saved: _contributions
             .where((c) => c.$1 == goal.id)
             .fold<int>(0, (sum, c) => sum + c.$2.amount),
@@ -115,6 +132,7 @@ class FakeBackend {
   List<DebtModel> get debts => [
     for (final d in _debts)
       DebtModel(
+        currency: currency,
         id: d.id,
         counterparty: d.counterparty,
         direction: d.direction,
@@ -195,6 +213,7 @@ class FakeBackend {
     return [
       for (final (id, draft, paused) in _recurring)
         RecurringModel(
+          currency: currency,
           id: id,
           title: draft.title,
           type: draft.type,
@@ -228,7 +247,24 @@ class FakeBackend {
     _recurring[index] = (id, _recurring[index].$2, paused);
   }
 
+  /// Счёт из настоящего API (после T-37) фейку неизвестен: без проверки
+  /// шаблон сохранился бы и ронял чтение всего списка.
+  void _requireAccount(String accountId) {
+    if (!_initialAccounts.any((a) => a.id == accountId)) {
+      throw const NotFoundFailure();
+    }
+  }
+
+  /// Категория из настоящего API (после T-38) — та же беда, что со счётом.
+  void _requireCategory(String? categoryId) {
+    if (categoryId != null && !_categories.any((c) => c.id == categoryId)) {
+      throw const NotFoundFailure();
+    }
+  }
+
   String addRecurring(RecurringDraft draft) {
+    _requireAccount(draft.accountId);
+    _requireCategory(draft.categoryId);
     final id = 'rec-${DateTime.now().microsecondsSinceEpoch}';
     _recurring.add((id, draft, false));
     return id;
@@ -237,12 +273,15 @@ class FakeBackend {
   void updateRecurring(String id, RecurringDraft draft) {
     final index = _recurring.indexWhere((r) => r.$1 == id);
     if (index == -1) throw const NotFoundFailure();
+    _requireAccount(draft.accountId);
+    _requireCategory(draft.categoryId);
     // Пауза — свойство шаблона, правка полей её не снимает.
     _recurring[index] = (id, draft, _recurring[index].$3);
   }
 
   GoalModel addGoal(GoalDraft draft) {
     final goal = GoalModel(
+      currency: currency,
       id: 'goal-${DateTime.now().microsecondsSinceEpoch}',
       name: draft.name,
       target: draft.target,
@@ -257,6 +296,7 @@ class FakeBackend {
     final index = _goals.indexWhere((g) => g.id == goalId);
     if (index == -1) throw const NotFoundFailure();
     _goals[index] = GoalModel(
+      currency: currency,
       id: goalId,
       name: draft.name,
       target: draft.target,
@@ -300,6 +340,7 @@ class FakeBackend {
 
   AccountModel addAccount(AccountDraft draft) {
     final account = AccountModel(
+      currency: currency,
       id: 'acc-${DateTime.now().microsecondsSinceEpoch}',
       name: draft.name,
       type: draft.type,
@@ -319,6 +360,7 @@ class FakeBackend {
   void updateAccount(String accountId, AccountDraft draft) {
     final index = _initialAccounts.indexWhere((a) => a.id == accountId);
     _initialAccounts[index] = AccountModel(
+      currency: currency,
       id: accountId,
       name: draft.name,
       type: draft.type,
@@ -360,10 +402,10 @@ class FakeBackend {
       transactionCount: 0,
     );
     final ref = _categories[index].toRef();
-    for (var i = 0; i < transactions.length; i++) {
-      final t = transactions[i];
+    for (var i = 0; i < _transactions.length; i++) {
+      final t = _transactions[i];
       if (t.category?.id == categoryId) {
-        transactions[i] = _retag(t, category: ref);
+        _transactions[i] = _retag(t, category: ref);
       }
     }
   }
@@ -371,10 +413,10 @@ class FakeBackend {
   /// Операции, пополнения и погашения хранят снимок счёта, как ответ сервера,
   /// — после правки счёта обновляем снимки.
   void _renameAccountRefs(AccountRef ref) {
-    for (var i = 0; i < transactions.length; i++) {
-      final t = transactions[i];
+    for (var i = 0; i < _transactions.length; i++) {
+      final t = _transactions[i];
       if (t.account.id == ref.id || t.toAccount?.id == ref.id) {
-        transactions[i] = _retag(
+        _transactions[i] = _retag(
           t,
           account: t.account.id == ref.id ? ref : null,
           toAccount: t.toAccount?.id == ref.id ? ref : null,
@@ -410,7 +452,9 @@ class FakeBackend {
     CategoryRef? category,
     AccountRef? account,
     AccountRef? toAccount,
+    Currency? currency,
   }) => TransactionModel(
+    currency: currency ?? t.currency,
     id: t.id,
     type: t.type,
     amount: t.amount,
@@ -423,6 +467,7 @@ class FakeBackend {
   );
 
   String addBudget(BudgetDraft draft) {
+    _requireCategory(draft.categoryId);
     final id = 'bud-${DateTime.now().microsecondsSinceEpoch}';
     _budgets.add((id, draft));
     return id;
@@ -431,6 +476,7 @@ class FakeBackend {
   void updateBudget(String budgetId, BudgetDraft draft) {
     final index = _budgets.indexWhere((b) => b.$1 == budgetId);
     if (index == -1) throw const NotFoundFailure();
+    _requireCategory(draft.categoryId);
     _budgets[index] = (budgetId, draft);
   }
 
@@ -441,18 +487,18 @@ class FakeBackend {
   }
 
   void addTransaction(TransactionModel transaction) =>
-      transactions.add(transaction);
+      _transactions.add(transaction);
 
   void replaceTransaction(TransactionModel transaction) {
-    final index = transactions.indexWhere((t) => t.id == transaction.id);
+    final index = _transactions.indexWhere((t) => t.id == transaction.id);
     if (index == -1) throw const NotFoundFailure();
-    transactions[index] = transaction;
+    _transactions[index] = transaction;
   }
 
   void deleteTransaction(String id) {
-    final index = transactions.indexWhere((t) => t.id == id);
+    final index = _transactions.indexWhere((t) => t.id == id);
     if (index == -1) throw const NotFoundFailure();
-    transactions.removeAt(index);
+    _transactions.removeAt(index);
   }
 
   DatePeriod _budgetPeriod(BudgetDraft draft, DateTime now) =>
@@ -472,7 +518,7 @@ class FakeBackend {
       for (final c in _categories)
         if (c.parentId == categoryId) c.id,
     };
-    return transactions
+    return _transactions
         .where(
           (t) =>
               t.type == TransactionType.expense &&
@@ -495,7 +541,7 @@ class FakeBackend {
       final direction = _debts.firstWhere((d) => d.id == debtId).direction;
       delta += direction == .iOwe ? -e.amount : e.amount;
     }
-    for (final t in transactions) {
+    for (final t in _transactions) {
       if (before != null && !t.occurredAt.isBefore(before)) continue;
       switch (t.type) {
         case TransactionType.expense:
@@ -514,7 +560,7 @@ class FakeBackend {
   void wipeAll() {
     _initialAccounts.clear();
     _categories.clear();
-    transactions.clear();
+    _transactions.clear();
     _budgets.clear();
     _goals.clear();
     _contributions.clear();

@@ -7,6 +7,7 @@ import 'package:spendyholik/core/network/cached_read.dart';
 import 'package:spendyholik/core/network/network_status.dart';
 import 'package:spendyholik/core/network/session_expiry.dart';
 import 'package:spendyholik/core/network/token_storage.dart';
+import 'package:spendyholik/core/session/session_currency.dart';
 import 'package:spendyholik/core/storage/api_cache.dart';
 import 'package:spendyholik/features/user/data/api/auth_api.dart';
 import 'package:spendyholik/features/user/data/models/auth_dtos.dart';
@@ -40,6 +41,7 @@ void main() {
   late MockTokenStorage tokens;
   late SessionExpiry expiry;
   late MockApiCache cache;
+  late SessionCurrency sessionCurrency;
   late RemoteAuthRepository repository;
 
   final stored = AuthTokens(
@@ -84,6 +86,7 @@ void main() {
       expiry,
       CachedReader(cache, NetworkStatus(), Talker()),
       cache,
+      sessionCurrency = SessionCurrency(),
     );
   });
 
@@ -188,6 +191,27 @@ void main() {
       expect(await repository.restoreSession(), isNull);
       verify(() => tokens.clear()).called(1);
     });
+
+    test(
+      'валюта пользователя — базовая валюта сессии для репозиториев',
+      () async {
+        when(() => tokens.read()).thenAnswer((_) async => stored);
+        when(() => api.profile()).thenAnswer(
+          (_) async => const ProfileOutDto(
+            userId: 'u1',
+            firstName: 'Мария',
+            email: 'm@example.com',
+            baseCurrency: 'USD',
+          ),
+        );
+        await repository.restoreSession();
+        expect(sessionCurrency.value, Currency.usd);
+
+        when(() => api.updateProfile(any())).thenAnswer((_) async => profile);
+        await repository.setBaseCurrency(Currency.rub);
+        expect(sessionCurrency.value, Currency.rub);
+      },
+    );
 
     test('профиль загружен — он в кэше', () async {
       when(() => tokens.read()).thenAnswer((_) async => stored);

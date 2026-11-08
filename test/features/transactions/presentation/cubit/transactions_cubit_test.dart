@@ -22,6 +22,7 @@ TransactionModel tx(
   DateTime at, {
   TransactionType type = .expense,
 }) => TransactionModel(
+  currency: Currency.rub,
   id: id,
   type: type,
   amount: 10000,

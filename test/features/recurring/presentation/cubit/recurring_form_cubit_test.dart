@@ -16,6 +16,7 @@ void main() {
   late MockRecurringRepository repository;
 
   final existing = RecurringModel(
+    currency: Currency.rub,
     id: 'r1',
     title: 'Интернет',
     type: TransactionType.expense,

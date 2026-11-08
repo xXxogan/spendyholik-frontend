@@ -1,3 +1,4 @@
+import 'package:spendyholik/core/models/currency.dart';
 import 'package:spendyholik/features/accounts/accounts.dart';
 import 'package:spendyholik/features/categories/categories.dart';
 import 'package:spendyholik/features/transactions/transactions.dart';
@@ -40,6 +41,7 @@ enum RecurrenceFrequency {
 class RecurringModel {
   const RecurringModel({
     required this.id,
+    required this.currency,
     required this.title,
     required this.type,
     required this.amount,
@@ -52,6 +54,9 @@ class RecurringModel {
   });
 
   final String id;
+
+  /// Валюта счёта шаблона.
+  final Currency currency;
   final String title;
 
   /// Только expense или income.

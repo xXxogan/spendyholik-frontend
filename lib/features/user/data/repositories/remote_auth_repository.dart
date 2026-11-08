@@ -10,6 +10,7 @@ import 'package:spendyholik/core/network/cached_read.dart';
 import 'package:spendyholik/core/network/failure_mapper.dart';
 import 'package:spendyholik/core/network/session_expiry.dart';
 import 'package:spendyholik/core/network/token_storage.dart';
+import 'package:spendyholik/core/session/session_currency.dart';
 import 'package:spendyholik/core/storage/api_cache.dart';
 import 'package:spendyholik/features/user/data/api/auth_api.dart';
 import 'package:spendyholik/features/user/data/models/auth_dtos.dart';
@@ -24,6 +25,7 @@ class RemoteAuthRepository implements AuthRepository {
     SessionExpiry expiry,
     this._reader,
     this._cache,
+    this._sessionCurrency,
   ) {
     // Токены уже стёрты интерсептором — остаётся вывести на вход.
     expiry.expired.listen((_) async {
@@ -44,6 +46,7 @@ class RemoteAuthRepository implements AuthRepository {
   final TokenStorage _tokens;
   final CachedReader _reader;
   final ApiCache _cache;
+  final SessionCurrency _sessionCurrency;
   final _changes = StreamController<UserModel?>.broadcast();
 
   @override
@@ -138,12 +141,19 @@ class RemoteAuthRepository implements AuthRepository {
     fromJson: (json) => ProfileOutDto.fromJson(json! as Map<String, dynamic>),
   );
 
-  UserModel _user(ProfileOutDto dto) => UserModel(
-    id: dto.userId,
-    name: dto.firstName,
-    email: dto.email,
-    baseCurrency: Currency.fromCode(dto.baseCurrency),
-  );
+  /// Каждый пользователь отсюда — текущий: его валюта нужна репозиториям.
+  UserModel _user(ProfileOutDto dto) {
+    final user = UserModel(
+      id: dto.userId,
+      name: dto.firstName,
+      email: dto.email,
+      baseCurrency: Currency.fromCode(dto.baseCurrency),
+    );
+    if (user.baseCurrency case final currency?) {
+      _sessionCurrency.value = currency;
+    }
+    return user;
+  }
 
   Future<T> _call<T>(Future<T> Function() request) async {
     try {

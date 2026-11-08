@@ -76,10 +76,7 @@ class GoalDetailView extends StatelessWidget {
                       padding: const .only(top: 12, bottom: 120),
                       child: TwoColumnLayout(
                         primary: [
-                          GoalSummaryCard(
-                            goal: goal,
-                            currency: CurrencyScope.of(context),
-                          ),
+                          GoalSummaryCard(goal: goal, currency: goal.currency),
                           Row(
                             spacing: 12,
                             crossAxisAlignment: .start,
@@ -88,7 +85,7 @@ class GoalDetailView extends StatelessWidget {
                                 child: GoalStatTile(
                                   value: formatMoney(
                                     goal.remaining,
-                                    CurrencyScope.of(context),
+                                    goal.currency,
                                     locale,
                                   ),
                                   label: l10n.goalRemainingLabel,
@@ -110,8 +107,11 @@ class GoalDetailView extends StatelessWidget {
                           ),
                           if (!goal.isReached)
                             FilledButton(
-                              onPressed: () =>
-                                  showGoalTopUpSheet(context, goal.id),
+                              onPressed: () => showGoalTopUpSheet(
+                                context,
+                                goal.id,
+                                goal.currency,
+                              ),
                               style: FilledButton.styleFrom(
                                 minimumSize: const Size.fromHeight(52),
                               ),
@@ -121,7 +121,7 @@ class GoalDetailView extends StatelessWidget {
                         secondary: [
                           GoalContributionsList(
                             contributions: contributions,
-                            currency: CurrencyScope.of(context),
+                            currency: goal.currency,
                           ),
                         ],
                       ),

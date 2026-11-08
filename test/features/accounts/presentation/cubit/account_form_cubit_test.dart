@@ -13,6 +13,7 @@ void main() {
   late MockAccountRepository repository;
 
   const credit = AccountModel(
+    currency: Currency.rub,
     id: 'credit',
     name: 'Кредитка',
     type: AccountType.credit,

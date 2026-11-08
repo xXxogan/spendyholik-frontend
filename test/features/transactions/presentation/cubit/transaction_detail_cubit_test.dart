@@ -1,3 +1,5 @@
+import 'package:spendyholik/core/models/currency.dart';
+
 import 'dart:async';
 
 import 'package:bloc_test/bloc_test.dart';
@@ -21,6 +23,7 @@ void main() {
   late StreamController<Set<DataTopic>> changes;
 
   final transaction = TransactionModel(
+    currency: Currency.rub,
     id: 't1',
     type: TransactionType.transfer,
     amount: 500000,

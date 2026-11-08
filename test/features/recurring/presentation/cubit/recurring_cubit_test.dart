@@ -18,6 +18,7 @@ class MockRecurringRepository extends Mock implements RecurringRepository {}
 class MockDataChangeBus extends Mock implements DataChangeBus {}
 
 RecurringModel template(String id, {bool paused = false}) => RecurringModel(
+  currency: Currency.rub,
   id: id,
   title: 'Шаблон $id',
   type: TransactionType.expense,

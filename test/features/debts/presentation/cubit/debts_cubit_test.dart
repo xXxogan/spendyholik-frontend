@@ -1,3 +1,5 @@
+import 'package:spendyholik/core/models/currency.dart';
+
 import 'dart:async';
 
 import 'package:bloc_test/bloc_test.dart';
@@ -14,6 +16,7 @@ class MockDebtRepository extends Mock implements DebtRepository {}
 class MockDataChangeBus extends Mock implements DataChangeBus {}
 
 DebtModel debt(String id, DebtDirection direction) => DebtModel(
+  currency: Currency.rub,
   id: id,
   counterparty: 'Контрагент $id',
   direction: direction,

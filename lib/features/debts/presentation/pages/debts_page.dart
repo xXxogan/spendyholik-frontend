@@ -91,7 +91,7 @@ class DebtsView extends StatelessWidget {
                 itemCount: visible.length,
                 itemBuilder: (context, index) => DebtCard(
                   debt: visible[index],
-                  currency: CurrencyScope.of(context),
+                  currency: visible[index].currency,
                   onTap: () => context.router.push(
                     DebtDetailRoute(debtId: visible[index].id),
                   ),

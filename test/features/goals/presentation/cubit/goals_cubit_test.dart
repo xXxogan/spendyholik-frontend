@@ -1,3 +1,5 @@
+import 'package:spendyholik/core/models/currency.dart';
+
 import 'dart:async';
 
 import 'package:bloc_test/bloc_test.dart';
@@ -14,6 +16,7 @@ class MockGoalRepository extends Mock implements GoalRepository {}
 class MockDataChangeBus extends Mock implements DataChangeBus {}
 
 GoalModel goal(String id, {int saved = 0, DateTime? deadline}) => GoalModel(
+  currency: Currency.rub,
   id: id,
   name: 'Цель $id',
   target: 1000000,

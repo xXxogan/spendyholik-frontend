@@ -15,6 +15,7 @@ class MockTransactionRepository extends Mock implements TransactionRepository {}
 class MockAccountRepository extends Mock implements AccountRepository {}
 
 AccountModel account(String id, {bool archived = false}) => AccountModel(
+  currency: Currency.rub,
   id: id,
   name: id,
   type: AccountType.debit,
@@ -29,6 +30,7 @@ void main() {
 
   final at = DateTime(2026, 10, 20, 18, 42);
   final shop = TransactionModel(
+    currency: Currency.rub,
     id: 'shop',
     type: .expense,
     amount: 124050,

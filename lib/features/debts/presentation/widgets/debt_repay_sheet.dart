@@ -14,7 +14,10 @@ Future<void> showDebtRepaySheet(BuildContext context, DebtModel debt) async {
     context,
     builder: (_) => BlocProvider(
       create: (_) => getIt<DebtRepayCubit>()..init(debt),
-      child: DebtRepayView(counterparty: debt.counterparty),
+      child: DebtRepayView(
+        counterparty: debt.counterparty,
+        currency: debt.currency,
+      ),
     ),
   );
   if (done == true && context.mounted) {
@@ -23,9 +26,16 @@ Future<void> showDebtRepaySheet(BuildContext context, DebtModel debt) async {
 }
 
 class DebtRepayView extends StatefulWidget {
-  const DebtRepayView({super.key, required this.counterparty});
+  const DebtRepayView({
+    super.key,
+    required this.counterparty,
+    required this.currency,
+  });
 
   final String counterparty;
+
+  /// Погашение — в валюте долга.
+  final Currency currency;
 
   @override
   State<DebtRepayView> createState() => _DebtRepayViewState();
@@ -62,7 +72,7 @@ class _DebtRepayViewState extends State<DebtRepayView> {
           final error? => fieldErrorText(l10n, error),
           null => null,
         };
-        final currency = CurrencyScope.of(context);
+        final currency = widget.currency;
 
         return SingleChildScrollView(
           child: Column(

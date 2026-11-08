@@ -32,7 +32,7 @@ class GoalsList extends StatelessWidget {
               itemCount: goals.length,
               itemBuilder: (context, index) => GoalCard(
                 goal: goals[index],
-                currency: CurrencyScope.of(context),
+                currency: goals[index].currency,
                 onTap: () => context.router.push(
                   GoalDetailRoute(goalId: goals[index].id),
                 ),

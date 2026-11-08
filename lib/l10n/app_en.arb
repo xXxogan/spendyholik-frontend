@@ -373,5 +373,6 @@
   "@aboutVersion": {"placeholders": {"version": {"type": "String"}}},
   "aboutVersionLabel": "Version",
   "aboutData": "Data",
-  "aboutDataValue": "Stored on this device until restart (demo)"
+  "aboutDataValue": "Stored on this device until restart (demo)",
+  "aboutRatesAttribution": "Rates By Exchange Rate API"
 }

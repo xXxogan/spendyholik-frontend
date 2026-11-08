@@ -1,3 +1,5 @@
+import 'package:spendyholik/core/models/currency.dart';
+
 import 'dart:async';
 
 import 'package:bloc_test/bloc_test.dart';
@@ -15,6 +17,7 @@ class MockAccountRepository extends Mock implements AccountRepository {}
 class MockDataChangeBus extends Mock implements DataChangeBus {}
 
 AccountModel account(String id, {bool archived = false}) => AccountModel(
+  currency: Currency.rub,
   id: id,
   name: 'Счёт $id',
   type: AccountType.debit,

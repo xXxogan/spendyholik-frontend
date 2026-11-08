@@ -1,3 +1,5 @@
+import 'package:spendyholik/core/models/currency.dart';
+
 import 'dart:async';
 
 import 'package:bloc_test/bloc_test.dart';
@@ -20,6 +22,7 @@ void main() {
   late StreamController<Set<DataTopic>> changes;
 
   const account = AccountModel(
+    currency: Currency.rub,
     id: 'card',
     name: 'Карта',
     type: AccountType.debit,

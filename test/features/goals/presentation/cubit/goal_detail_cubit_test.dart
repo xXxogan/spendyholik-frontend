@@ -29,6 +29,7 @@ GoalContribution contribution(int amount, DateTime date) => GoalContribution(
 );
 
 const _buffer = GoalModel(
+  currency: Currency.rub,
   id: 'buffer',
   name: 'Подушка',
   target: 20000000,
@@ -60,6 +61,7 @@ void main() {
 
     test('цель достигнута — 0', () {
       const reached = GoalModel(
+        currency: Currency.rub,
         id: 'phone',
         name: 'Телефон',
         target: 6000000,

@@ -33,6 +33,7 @@ class FakeDebtRepository implements DebtRepository {
     final created = await _backend(() {
       final now = DateTime.now();
       final debt = DebtModel(
+        currency: _backend.currency,
         id: 'debt-${now.microsecondsSinceEpoch}',
         counterparty: draft.counterparty,
         direction: draft.direction,
@@ -59,6 +60,7 @@ class FakeDebtRepository implements DebtRepository {
       // Погашения уже сдвинули балансы в сторону старого направления.
       _backend.updateDebt(
         DebtModel(
+          currency: _backend.currency,
           id: id,
           counterparty: draft.counterparty,
           direction: old.direction,

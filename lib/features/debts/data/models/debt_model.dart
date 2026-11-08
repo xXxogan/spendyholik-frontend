@@ -1,3 +1,4 @@
+import 'package:spendyholik/core/models/currency.dart';
 import 'package:spendyholik/features/accounts/accounts.dart';
 
 enum DebtDirection { iOwe, owedToMe }
@@ -7,6 +8,7 @@ enum DebtEventKind { opened, repayment }
 class DebtModel {
   const DebtModel({
     required this.id,
+    required this.currency,
     required this.counterparty,
     required this.direction,
     required this.total,
@@ -17,6 +19,7 @@ class DebtModel {
   });
 
   final String id;
+  final Currency currency;
   final String counterparty;
   final DebtDirection direction;
   final int total;

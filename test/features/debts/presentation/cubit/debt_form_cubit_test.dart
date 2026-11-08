@@ -13,6 +13,7 @@ void main() {
   late MockDebtRepository repository;
 
   final dmitry = DebtModel(
+    currency: Currency.rub,
     id: 'dmitry',
     counterparty: 'Дмитрий',
     direction: DebtDirection.owedToMe,

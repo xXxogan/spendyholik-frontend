@@ -26,6 +26,7 @@ CategoryModel category(String id, CategoryKind kind, {String? parentId}) =>
     );
 
 AccountModel account(String id, {bool archived = false}) => AccountModel(
+  currency: Currency.rub,
   id: id,
   name: id,
   type: AccountType.debit,

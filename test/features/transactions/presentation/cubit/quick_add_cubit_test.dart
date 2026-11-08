@@ -33,6 +33,7 @@ CategoryModel category(
 
 AccountModel account(String id, AccountType type, {bool archived = false}) =>
     AccountModel(
+      currency: Currency.rub,
       id: id,
       name: id,
       type: type,
@@ -80,6 +81,7 @@ void main() {
     );
     when(() => transactions.create(any())).thenAnswer(
       (invocation) async => TransactionModel(
+        currency: Currency.rub,
         id: 'new',
         type: .expense,
         amount: 1,

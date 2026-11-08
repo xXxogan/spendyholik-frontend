@@ -1,8 +1,10 @@
+import 'package:spendyholik/core/models/currency.dart';
 import 'package:spendyholik/features/accounts/accounts.dart';
 
 class GoalModel {
   const GoalModel({
     required this.id,
+    required this.currency,
     required this.name,
     required this.target,
     required this.saved,
@@ -10,6 +12,7 @@ class GoalModel {
   });
 
   final String id;
+  final Currency currency;
   final String name;
   final int target;
   final int saved;
@@ -22,8 +25,9 @@ class GoalModel {
 
   bool get isReached => saved >= target;
 
-  GoalModel copyWith({int? saved}) => GoalModel(
+  GoalModel copyWith({int? saved, Currency? currency}) => GoalModel(
     id: id,
+    currency: currency ?? this.currency,
     name: name,
     target: target,
     saved: saved ?? this.saved,

@@ -21,6 +21,7 @@ void main() {
   const deposit = AccountRef(id: 'b', name: 'Вклад', color: EntityColor.green);
 
   final expense = TransactionModel(
+    currency: Currency.rub,
     id: 't1',
     type: TransactionType.expense,
     amount: 124000,
@@ -36,6 +37,7 @@ void main() {
     note: 'К ужину',
   );
   final transfer = TransactionModel(
+    currency: Currency.rub,
     id: 't2',
     type: TransactionType.transfer,
     amount: 500000,

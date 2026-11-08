@@ -1,3 +1,4 @@
+import 'package:spendyholik/core/models/currency.dart';
 import 'package:spendyholik/features/accounts/accounts.dart';
 import 'package:spendyholik/features/categories/categories.dart';
 
@@ -6,6 +7,7 @@ enum TransactionType { expense, income, transfer }
 class TransactionModel {
   const TransactionModel({
     required this.id,
+    required this.currency,
     required this.type,
     required this.amount,
     required this.title,
@@ -17,6 +19,9 @@ class TransactionModel {
   });
 
   final String id;
+
+  /// Валюта счёта операции.
+  final Currency currency;
   final TransactionType type;
   final int amount;
   final String title;

@@ -73,11 +73,7 @@ class NearestGoalCard extends StatelessWidget {
                       ),
                       Text(
                         l10n.goalRemaining(
-                          formatMoney(
-                            goal.remaining,
-                            CurrencyScope.of(context),
-                            locale,
-                          ),
+                          formatMoney(goal.remaining, goal.currency, locale),
                         ),
                         style: theme.textTheme.titleMedium,
                       ),
@@ -93,11 +89,11 @@ class NearestGoalCard extends StatelessWidget {
               mainAxisAlignment: .spaceBetween,
               children: [
                 Text(
-                  formatMoney(goal.saved, CurrencyScope.of(context), locale),
+                  formatMoney(goal.saved, goal.currency, locale),
                   style: muted,
                 ),
                 Text(
-                  formatMoney(goal.target, CurrencyScope.of(context), locale),
+                  formatMoney(goal.target, goal.currency, locale),
                   style: muted,
                 ),
               ],

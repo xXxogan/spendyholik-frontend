@@ -37,7 +37,7 @@ class AccountsSection extends StatelessWidget {
                         height: 72,
                         child: AccountTile(
                           account: account,
-                          currency: CurrencyScope.of(context),
+                          currency: account.currency,
                           onTap: () => context.router.push(
                             AccountDetailRoute(accountId: account.id),
                           ),

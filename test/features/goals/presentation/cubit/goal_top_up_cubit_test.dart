@@ -79,9 +79,10 @@ void main() {
 
   blocTest<GoalTopUpCubit, GoalTopUpState>(
     'успех: contribute с суммой в копейках, затем success',
-    setUp: () => when(() => repository.contribute(any(), any(), any()))
-        .thenAnswer(
+    setUp: () =>
+        when(() => repository.contribute(any(), any(), any())).thenAnswer(
           (_) async => const GoalModel(
+            currency: Currency.rub,
             id: 'buffer',
             name: 'Подушка',
             target: 20000000,

@@ -604,5 +604,6 @@
   "@aboutVersion": {"placeholders": {"version": {"type": "String"}}},
   "aboutVersionLabel": "Версия",
   "aboutData": "Данные",
-  "aboutDataValue": "Хранятся на устройстве до перезапуска (демо)"
+  "aboutDataValue": "Хранятся на устройстве до перезапуска (демо)",
+  "aboutRatesAttribution": "Rates By Exchange Rate API"
 }

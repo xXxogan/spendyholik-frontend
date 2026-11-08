@@ -105,6 +105,7 @@ class FakeTransactionRepository implements TransactionRepository {
     }
 
     return TransactionModel(
+      currency: _backend.currency,
       id: id,
       type: draft.type,
       amount: draft.amount,

@@ -14,10 +14,14 @@ class AboutInfoRow extends StatelessWidget {
       crossAxisAlignment: .start,
       spacing: 16,
       children: [
-        Text(
-          label,
-          style: theme.textTheme.bodyMedium?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
+        // Длинная подпись (атрибуция курсов) должна переноситься, а не
+        // выдавливать значение.
+        Flexible(
+          child: Text(
+            label,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
           ),
         ),
         Expanded(

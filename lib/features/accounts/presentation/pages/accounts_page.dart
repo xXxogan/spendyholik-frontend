@@ -75,7 +75,7 @@ class AccountsView extends StatelessWidget {
                 itemCount: accounts.length,
                 itemBuilder: (context, index) => AccountTile(
                   account: accounts[index],
-                  currency: CurrencyScope.of(context),
+                  currency: accounts[index].currency,
                   onTap: () => context.router.push(
                     AccountDetailRoute(accountId: accounts[index].id),
                   ),

@@ -83,7 +83,7 @@ class TransactionDetailView extends StatelessWidget {
                             padding: const .only(top: 12, bottom: 120),
                             child: TransactionDetailContent(
                               transaction: transaction,
-                              currency: CurrencyScope.of(context),
+                              currency: transaction.currency,
                               onDelete: cubit.delete,
                             ),
                           ),

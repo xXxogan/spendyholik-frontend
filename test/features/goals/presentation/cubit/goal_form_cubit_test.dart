@@ -13,6 +13,7 @@ void main() {
   late MockGoalRepository repository;
 
   final trip = GoalModel(
+    currency: Currency.rub,
     id: 'trip',
     name: 'Отпуск',
     target: 9000000,

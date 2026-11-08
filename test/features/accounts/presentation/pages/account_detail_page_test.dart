@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:spendyholik/app/di/injection.dart';
 import 'package:spendyholik/core/events/data_change_bus.dart';
+import 'package:spendyholik/core/models/currency.dart';
 import 'package:spendyholik/core/models/entity_color.dart';
 import 'package:spendyholik/features/accounts/data/models/account_model.dart';
 import 'package:spendyholik/features/accounts/presentation/cubit/account_detail_cubit.dart';
@@ -25,6 +26,7 @@ void main() {
   late MockAccountDetailCubit cubit;
 
   const account = AccountModel(
+    currency: Currency.rub,
     id: 'card',
     name: 'Карта Тинькофф',
     type: AccountType.debit,

@@ -118,7 +118,7 @@ class TransactionsSection extends StatelessWidget {
 
     return TransactionTile(
       transaction: item,
-      currency: CurrencyScope.of(context),
+      currency: item.currency,
       onTap: () =>
           context.router.push(TransactionDetailRoute(transactionId: item.id)),
       subtitle: [

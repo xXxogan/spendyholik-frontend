@@ -66,7 +66,7 @@ class RecurringView extends StatelessWidget {
                   onTap: () => context.router.push(
                     RecurringEditRoute(recurringId: templates[index].id),
                   ),
-                  currency: CurrencyScope.of(context),
+                  currency: templates[index].currency,
                   onTogglePause: () => cubit.togglePause(templates[index].id),
                 ),
               ),

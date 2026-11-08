@@ -1,3 +1,4 @@
+import 'package:spendyholik/core/models/currency.dart';
 import 'package:spendyholik/core/models/entity_color.dart';
 
 enum AccountType { debit, cash, savings, credit }
@@ -5,6 +6,7 @@ enum AccountType { debit, cash, savings, credit }
 class AccountModel {
   const AccountModel({
     required this.id,
+    required this.currency,
     required this.name,
     required this.type,
     required this.balance,
@@ -16,6 +18,7 @@ class AccountModel {
   });
 
   final String id;
+  final Currency currency;
   final String name;
   final AccountType type;
   final int balance;
@@ -25,17 +28,19 @@ class AccountModel {
   final double? interestRate;
   final int? creditLimit;
 
-  AccountModel copyWith({int? balance, bool? isArchived}) => AccountModel(
-    id: id,
-    name: name,
-    type: type,
-    balance: balance ?? this.balance,
-    color: color,
-    isArchived: isArchived ?? this.isArchived,
-    cardLast4: cardLast4,
-    interestRate: interestRate,
-    creditLimit: creditLimit,
-  );
+  AccountModel copyWith({int? balance, bool? isArchived, Currency? currency}) =>
+      AccountModel(
+        id: id,
+        currency: currency ?? this.currency,
+        name: name,
+        type: type,
+        balance: balance ?? this.balance,
+        color: color,
+        isArchived: isArchived ?? this.isArchived,
+        cardLast4: cardLast4,
+        interestRate: interestRate,
+        creditLimit: creditLimit,
+      );
 }
 
 class AccountRef {

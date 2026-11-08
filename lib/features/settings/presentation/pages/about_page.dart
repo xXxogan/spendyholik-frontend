@@ -76,6 +76,12 @@ class AboutPage extends StatelessWidget {
                               label: l10n.aboutData,
                               value: l10n.aboutDataValue,
                             ),
+                            // Без перехода по ссылке: url_launcher не подключён,
+                            // адрес показываем текстом для полной атрибуции.
+                            AboutInfoRow(
+                              label: l10n.aboutRatesAttribution,
+                              value: 'exchangerate-api.com',
+                            ),
                           ],
                         ),
                       ),

@@ -48,6 +48,7 @@ void main() {
       day: today,
       items: [
         TransactionModel(
+          currency: Currency.rub,
           id: 'shop',
           type: .expense,
           amount: 124000,
@@ -62,6 +63,7 @@ void main() {
       day: yesterday,
       items: [
         TransactionModel(
+          currency: Currency.rub,
           id: 'pay',
           type: .income,
           amount: 11850000,
@@ -71,6 +73,7 @@ void main() {
           occurredAt: yesterday.add(const Duration(hours: 9)),
         ),
         TransactionModel(
+          currency: Currency.rub,
           id: 'move',
           type: .transfer,
           amount: 500000,

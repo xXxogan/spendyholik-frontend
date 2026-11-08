@@ -89,12 +89,8 @@ class TransactionsView extends StatelessWidget {
           TransactionsLoaded(:final groups) => ContentSliverPadding(
             sliver: SliverList.builder(
               itemCount: groups.length,
-              itemBuilder: (context, index) => constrained(
-                TransactionDaySection(
-                  group: groups[index],
-                  currency: CurrencyScope.of(context),
-                ),
-              ),
+              itemBuilder: (context, index) =>
+                  constrained(TransactionDaySection(group: groups[index])),
             ),
           ),
           TransactionsEmpty() => SliverFillRemaining(

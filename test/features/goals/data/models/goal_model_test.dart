@@ -1,8 +1,14 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:spendyholik/core/models/currency.dart';
 import 'package:spendyholik/features/goals/data/models/goal_model.dart';
 
-GoalModel goal({required int saved, int target = 20000000}) =>
-    GoalModel(id: 'g1', name: 'Подушка', target: target, saved: saved);
+GoalModel goal({required int saved, int target = 20000000}) => GoalModel(
+  currency: Currency.rub,
+  id: 'g1',
+  name: 'Подушка',
+  target: target,
+  saved: saved,
+);
 
 void main() {
   test('120 000 из 200 000 — 60%, осталось 80 000, не достигнута', () {

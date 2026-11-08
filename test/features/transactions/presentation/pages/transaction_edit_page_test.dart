@@ -54,6 +54,7 @@ void main() {
     when(() => accounts.getAccounts()).thenAnswer(
       (_) async => const [
         AccountModel(
+          currency: Currency.rub,
           id: 'card',
           name: 'Карта Тинькофф',
           type: AccountType.debit,

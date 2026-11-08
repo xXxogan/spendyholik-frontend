@@ -15,6 +15,7 @@ class MockAccountRepository extends Mock implements AccountRepository {}
 class MockDataChangeBus extends Mock implements DataChangeBus {}
 
 AccountModel account(String id, {bool archived = false}) => AccountModel(
+  currency: Currency.rub,
   id: id,
   name: id,
   type: AccountType.debit,

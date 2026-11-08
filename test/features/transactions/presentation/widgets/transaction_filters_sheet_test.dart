@@ -27,6 +27,7 @@ void main() {
     transactionCount: 0,
   );
   const card = AccountModel(
+    currency: Currency.rub,
     id: 'card',
     name: 'Карта Тинькофф',
     type: AccountType.debit,

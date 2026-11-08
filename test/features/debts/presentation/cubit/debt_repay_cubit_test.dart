@@ -10,6 +10,7 @@ import 'package:spendyholik/features/debts/presentation/cubit/debt_repay_cubit.d
 class MockDebtRepository extends Mock implements DebtRepository {}
 
 DebtModel debt({int remaining = 1200000}) => DebtModel(
+  currency: Currency.rub,
   id: 'dmitry',
   counterparty: 'Дмитрий',
   direction: DebtDirection.iOwe,

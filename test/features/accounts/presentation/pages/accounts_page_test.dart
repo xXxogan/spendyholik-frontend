@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:spendyholik/core/errors/failure.dart';
+import 'package:spendyholik/core/models/currency.dart';
 import 'package:spendyholik/core/models/entity_color.dart';
 import 'package:spendyholik/core/widgets/widgets.dart';
 import 'package:spendyholik/features/accounts/data/models/account_model.dart';
@@ -18,6 +19,7 @@ void main() {
   late MockAccountsCubit cubit;
 
   const card = AccountModel(
+    currency: Currency.rub,
     id: 'card',
     name: 'Карта Тинькофф',
     type: AccountType.debit,
@@ -27,6 +29,7 @@ void main() {
     cardLast4: '4831',
   );
   const credit = AccountModel(
+    currency: Currency.rub,
     id: 'credit',
     name: 'Кредитка',
     type: AccountType.credit,
@@ -70,6 +73,24 @@ void main() {
     expect(find.textContaining('4831'), findsOneWidget);
     expect(find.text('84\u00a0250\u00a0₽'), findsOneWidget);
     expect(find.text('\u221223\u00a0400\u00a0₽'), findsOneWidget);
+  });
+
+  testWidgets('счёт в своей валюте, а не в базовой', (tester) async {
+    const dollars = AccountModel(
+      id: 'usd',
+      name: 'Доллары',
+      type: AccountType.cash,
+      balance: 10000,
+      color: EntityColor.green,
+      isArchived: false,
+      currency: Currency.usd,
+    );
+    await pump(
+      tester,
+      const AccountsState.loaded([dollars], AccountsFilter.all),
+    );
+    expect(find.textContaining(r'$'), findsOneWidget);
+    expect(find.textContaining('₽'), findsNothing);
   });
 
   testWidgets('нажатие на чип фильтра вызывает setFilter', (tester) async {
