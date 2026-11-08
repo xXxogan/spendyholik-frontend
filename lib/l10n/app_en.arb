@@ -189,7 +189,6 @@
   "goalForecastLabel": "Forecast",
   "goalForecastNone": "No data",
   "goalReachedTitle": "Reached",
-  "goalForecastMonths": "{months, plural, one{{months} month} other{{months} months}}",
   "goalHistory": "Contribution history",
   "goalHistoryEmpty": "No contributions yet",
   "goalContribution": "Goal contribution",

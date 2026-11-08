@@ -340,14 +340,6 @@
   "goalForecastLabel": "Прогноз достижения",
   "goalForecastNone": "Нет данных",
   "goalReachedTitle": "Достигнута",
-  "goalForecastMonths": "{months, plural, one{{months} месяц} few{{months} месяца} many{{months} месяцев} other{{months} месяца}}",
-  "@goalForecastMonths": {
-    "placeholders": {
-      "months": {
-        "type": "int"
-      }
-    }
-  },
   "goalHistory": "История пополнений",
   "goalHistoryEmpty": "Пополнений пока нет",
   "goalContribution": "Пополнение цели",

@@ -49,7 +49,8 @@ class RecurringForm extends StatelessWidget {
           decoration: InputDecoration(
             labelText: l10n.recurringFormAmount,
             hintText: '0',
-            suffixText: CurrencyScope.of(context).symbol,
+            suffixText:
+                (state.accountCurrency ?? CurrencyScope.of(context)).symbol,
             errorText: error(.amount),
           ),
         ),
@@ -66,7 +67,10 @@ class RecurringForm extends StatelessWidget {
           ],
           selected: {state.type},
           showSelectedIcon: false,
-          onSelectionChanged: (selection) => cubit.typeChanged(selection.first),
+          // В правке тип зафиксирован (см. RecurringFormCubit.typeChanged).
+          onSelectionChanged: state.recurringId == null
+              ? (selection) => cubit.typeChanged(selection.first)
+              : null,
         ),
         Text(l10n.recurringFormCategory, style: theme.textTheme.titleSmall),
         CategoryPicker(

@@ -10,6 +10,10 @@ abstract interface class GoalRepository {
   /// По дате, новые первыми.
   Future<List<GoalContribution>> getContributions(String goalId);
 
+  /// Дата достижения по темпу пополнений (считает сервер); null — пополнений
+  /// нет, прогноза нет.
+  Future<DateTime?> getForecast(String goalId);
+
   /// Начальный взнос списывается с `initialAccountId`:
   /// `ValidationFailure('initialContribution', exceedsBalance)`, если на счёте меньше.
   Future<GoalModel> create(GoalDraft draft);

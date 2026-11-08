@@ -6,6 +6,7 @@ import 'package:spendyholik/core/bloc/cubit_logging.dart';
 import 'package:spendyholik/core/errors/failure.dart';
 import 'package:spendyholik/core/format/format.dart';
 import 'package:spendyholik/core/models/models.dart';
+import 'package:spendyholik/features/accounts/accounts.dart';
 import 'package:spendyholik/features/recurring/data/models/models.dart';
 import 'package:spendyholik/features/recurring/data/repositories/repositories.dart';
 import 'package:spendyholik/features/transactions/transactions.dart';
@@ -17,9 +18,13 @@ part 'recurring_form_state.dart';
 @injectable
 class RecurringFormCubit extends Cubit<RecurringFormState>
     with CubitLogging<RecurringFormState> {
-  RecurringFormCubit(this._repository) : super(const RecurringFormState());
+  RecurringFormCubit(this._repository, this._accounts)
+    : super(const RecurringFormState());
 
   final RecurringRepository _repository;
+  final AccountRepository _accounts;
+
+  final _currencies = <String, Currency>{};
 
   /// Полдень, чтобы сдвиг часового пояса не переносил дату выполнения.
   static DateTime _atNoon(DateTime day) =>
@@ -36,14 +41,19 @@ class RecurringFormCubit extends Cubit<RecurringFormState>
         (t) => t.id == recurringId,
         orElse: () => throw const NotFoundFailure(),
       );
+      _currencies[template.account.id] = template.currency;
       emit(
         RecurringFormState(
           recurringId: recurringId,
           title: template.title,
           type: template.type,
           amount: formatAmountInput(template.amount),
-          categoryId: template.category.id,
+          // Пустой id — у шаблона без категории: пользователь выберет заново.
+          categoryId: template.category.id.isEmpty
+              ? null
+              : template.category.id,
           accountId: template.account.id,
+          accountCurrency: template.currency,
           frequency: template.frequency,
           anchor: template.anchor,
         ),
@@ -61,8 +71,14 @@ class RecurringFormCubit extends Cubit<RecurringFormState>
       emit(state.copyWith(amount: value, fieldErrors: _without(.amount)));
 
   /// Категории расходов и доходов разные, поэтому смена типа сбрасывает выбор.
+  /// В правке тип не меняется: сервер не принимает `type` в PATCH — как
+  /// у операций (решение 2026-11-08).
   void typeChanged(TransactionType value) {
-    if (value == state.type || value == TransactionType.transfer) return;
+    if (value == state.type ||
+        value == TransactionType.transfer ||
+        state.recurringId != null) {
+      return;
+    }
     emit(
       state.copyWith(
         type: value,
@@ -76,8 +92,28 @@ class RecurringFormCubit extends Cubit<RecurringFormState>
     state.copyWith(categoryId: value, fieldErrors: _without(.categoryId)),
   );
 
-  void accountChanged(String? value) =>
-      emit(state.copyWith(accountId: value, fieldErrors: _without(.accountId)));
+  Future<void> accountChanged(String? value) async {
+    emit(
+      state.copyWith(
+        accountId: value,
+        accountCurrency: _currencies[value],
+        fieldErrors: _without(.accountId),
+      ),
+    );
+    if (value == null || _currencies.containsKey(value)) return;
+    try {
+      for (final account in await _accounts.getAccounts()) {
+        _currencies[account.id] = account.currency;
+      }
+    } on Failure catch (failure, stackTrace) {
+      // Суффикс остаётся базовой валютой, сохранению это не мешает.
+      getIt<Talker>().handle(failure, stackTrace);
+      return;
+    }
+    if (state.accountId == value) {
+      emit(state.copyWith(accountCurrency: _currencies[value]));
+    }
+  }
 
   void frequencyChanged(RecurrenceFrequency value) =>
       emit(state.copyWith(frequency: value));

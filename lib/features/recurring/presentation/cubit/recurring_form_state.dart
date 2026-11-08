@@ -13,6 +13,9 @@ abstract class RecurringFormState with _$RecurringFormState {
     @Default('') String amount,
     String? categoryId,
     String? accountId,
+
+    /// Валюта выбранного счёта; null — счёт не выбран или валюта ещё не известна.
+    Currency? accountCurrency,
     @Default(RecurrenceFrequency.monthly) RecurrenceFrequency frequency,
 
     /// Первое выполнение; null, пока форма не инициализирована.

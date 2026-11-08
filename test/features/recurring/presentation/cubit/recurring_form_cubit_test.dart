@@ -12,8 +12,11 @@ import 'package:spendyholik/features/transactions/transactions.dart';
 
 class MockRecurringRepository extends Mock implements RecurringRepository {}
 
+class MockAccountRepository extends Mock implements AccountRepository {}
+
 void main() {
   late MockRecurringRepository repository;
+  late MockAccountRepository accounts;
 
   final existing = RecurringModel(
     currency: Currency.rub,
@@ -52,9 +55,25 @@ void main() {
     ),
   );
 
-  setUp(() => repository = MockRecurringRepository());
+  setUp(() {
+    repository = MockRecurringRepository();
+    accounts = MockAccountRepository();
+    when(() => accounts.getAccounts()).thenAnswer(
+      (_) async => const [
+        AccountModel(
+          currency: Currency.usd,
+          id: 'acc-usd',
+          name: 'Доллары',
+          type: AccountType.cash,
+          balance: 0,
+          color: EntityColor.green,
+          isArchived: false,
+        ),
+      ],
+    );
+  });
 
-  RecurringFormCubit build() => RecurringFormCubit(repository);
+  RecurringFormCubit build() => RecurringFormCubit(repository, accounts);
 
   final filled = RecurringFormState(
     title: ' Интернет ',
@@ -170,10 +189,70 @@ void main() {
         amount: '800',
         categoryId: 'cat-home',
         accountId: 'acc-1',
+        accountCurrency: Currency.rub,
         frequency: RecurrenceFrequency.weekly,
         anchor: DateTime(2026, 1, 5, 12),
       ),
     ],
+  );
+
+  test('валюта счёта: правка — у шаблона, другой счёт — из списка', () async {
+    when(() => repository.getAll()).thenAnswer((_) async => [existing]);
+    final cubit = build();
+    await cubit.init('r1');
+    expect(cubit.state.accountCurrency, Currency.rub);
+
+    await cubit.accountChanged('acc-usd');
+    expect(cubit.state.accountId, 'acc-usd');
+    expect(cubit.state.accountCurrency, Currency.usd);
+  });
+
+  test('правка: тип не меняется — сервер не принимает type в PATCH', () async {
+    when(() => repository.getAll()).thenAnswer((_) async => [existing]);
+    final cubit = build();
+    await cubit.init('r1');
+    final type = cubit.state.type;
+
+    cubit.typeChanged(type == TransactionType.expense ? .income : .expense);
+
+    expect(cubit.state.type, type);
+  });
+
+  test('создание: валюта появляется после выбора счёта', () async {
+    final cubit = build()..start(DateTime(2026, 11, 3));
+    expect(cubit.state.accountCurrency, isNull);
+
+    await cubit.accountChanged('acc-usd');
+    expect(cubit.state.accountCurrency, Currency.usd);
+  });
+
+  blocTest<RecurringFormCubit, RecurringFormState>(
+    'правка шаблона без категории: категория не выбрана',
+    setUp: () => when(() => repository.getAll()).thenAnswer(
+      (_) async => [
+        RecurringModel(
+          currency: Currency.rub,
+          id: 'r2',
+          title: 'Без категории',
+          type: TransactionType.expense,
+          amount: 100,
+          category: const CategoryRef(
+            id: '',
+            name: '',
+            icon: EntityIcon.other,
+            color: EntityColor.gray,
+          ),
+          account: existing.account,
+          frequency: RecurrenceFrequency.monthly,
+          anchor: DateTime(2026, 1, 5, 12),
+          nextDate: DateTime(2026, 11, 9, 12),
+          isPaused: false,
+        ),
+      ],
+    ),
+    build: build,
+    act: (cubit) => cubit.init('r2'),
+    verify: (cubit) => expect(cubit.state.categoryId, isNull),
   );
 
   blocTest<RecurringFormCubit, RecurringFormState>(

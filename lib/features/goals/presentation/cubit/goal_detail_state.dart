@@ -4,11 +4,12 @@ part of 'goal_detail_cubit.dart';
 sealed class GoalDetailState with _$GoalDetailState {
   const factory GoalDetailState.loading() = GoalDetailLoading;
 
-  /// [forecastMonths]: null — пополнений за 3 месяца нет, прогноза нет.
+  /// [forecast] — дата достижения от сервера; null — пополнений нет или
+  /// прогноз не загрузился.
   const factory GoalDetailState.loaded(
     GoalModel goal,
     List<GoalContribution> contributions,
-    int? forecastMonths,
+    DateTime? forecast,
   ) = GoalDetailLoaded;
   const factory GoalDetailState.deleted() = GoalDetailDeleted;
   const factory GoalDetailState.error(Failure failure) = GoalDetailError;

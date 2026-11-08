@@ -25,30 +25,9 @@ class GoalDetailCubit extends Cubit<GoalDetailState>
         .listen((_) => reload());
   }
 
-  static const _forecastWindowMonths = 3;
-
   final GoalRepository _repository;
   late final StreamSubscription<Set<DataTopic>> _changes;
   late String _goalId;
-
-  /// Месяцев до цели при среднем пополнении за последние 3 месяца.
-  static int? forecastMonths(
-    GoalModel goal,
-    List<GoalContribution> contributions,
-    DateTime now,
-  ) {
-    if (goal.isReached) return 0;
-    final since = DateTime(
-      now.year,
-      now.month - _forecastWindowMonths,
-      now.day,
-    );
-    final recent = contributions
-        .where((c) => !c.date.isBefore(since) && !c.date.isAfter(now))
-        .fold(0, (sum, c) => sum + c.amount);
-    if (recent == 0) return null;
-    return (goal.remaining * _forecastWindowMonths / recent).ceil();
-  }
 
   Future<void> load(String goalId) async {
     _goalId = goalId;
@@ -57,11 +36,7 @@ class GoalDetailCubit extends Cubit<GoalDetailState>
       final goal = await _repository.getGoal(goalId);
       final contributions = await _repository.getContributions(goalId);
       emit(
-        GoalDetailState.loaded(
-          goal,
-          contributions,
-          forecastMonths(goal, contributions, DateTime.now()),
-        ),
+        GoalDetailState.loaded(goal, contributions, await _forecast(goalId)),
       );
     } on Failure catch (failure, stackTrace) {
       // Открытая цель пропала — её удалили (в том числе формой поверх деталей).
@@ -75,6 +50,16 @@ class GoalDetailCubit extends Cubit<GoalDetailState>
   }
 
   Future<void> reload() => load(_goalId);
+
+  /// Прогноз — дополнение к экрану: без него цель и история всё равно видны.
+  Future<DateTime?> _forecast(String goalId) async {
+    try {
+      return await _repository.getForecast(goalId);
+    } on Failure catch (failure, stackTrace) {
+      getIt<Talker>().handle(failure, stackTrace, 'Goal forecast failed');
+      return null;
+    }
+  }
 
   @override
   Future<void> close() async {

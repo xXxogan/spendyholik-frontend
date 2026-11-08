@@ -16,3 +16,7 @@ String formatDayLabel(
   final pattern = date.year == now.year ? 'd MMMM' : 'd MMMM y';
   return DateFormat(pattern, locale).format(date);
 }
+
+/// «12 мар. 2027 г.» / «Mar 12, 2027».
+String formatDate(DateTime date, String locale) =>
+    DateFormat.yMMMd(locale).format(date);

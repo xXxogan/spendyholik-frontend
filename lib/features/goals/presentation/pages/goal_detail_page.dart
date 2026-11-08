@@ -68,7 +68,7 @@ class GoalDetailView extends StatelessWidget {
               GoalDetailLoaded(
                 :final goal,
                 :final contributions,
-                :final forecastMonths,
+                :final forecast,
               ) =>
                 ContentSliverPadding(
                   sliver: SliverToBoxAdapter(
@@ -93,12 +93,11 @@ class GoalDetailView extends StatelessWidget {
                               ),
                               Expanded(
                                 child: GoalStatTile(
-                                  value: switch (forecastMonths) {
+                                  value: switch (forecast) {
+                                    _ when goal.isReached =>
+                                      l10n.goalReachedTitle,
+                                    final date? => formatDate(date, locale),
                                     null => l10n.goalForecastNone,
-                                    0 => l10n.goalReachedTitle,
-                                    final months => l10n.goalForecastMonths(
-                                      months,
-                                    ),
                                   },
                                   label: l10n.goalForecastLabel,
                                 ),
