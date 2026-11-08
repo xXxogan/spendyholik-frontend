@@ -9,6 +9,9 @@ abstract class QuickAddState with _$QuickAddState {
     @Default('') String amount,
     String? categoryId,
 
+    /// Валюта счёта, на который уйдёт операция; null, пока он неизвестен.
+    Currency? accountCurrency,
+
     /// Самые используемые категории верхнего уровня выбранного типа.
     @Default([]) List<CategoryModel> categories,
     @Default(true) bool isLoading,

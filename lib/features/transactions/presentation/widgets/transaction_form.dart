@@ -47,7 +47,10 @@ class TransactionForm extends StatelessWidget {
           ],
           selected: {type},
           showSelectedIcon: false,
-          onSelectionChanged: (selection) => cubit.typeChanged(selection.first),
+          // В правке тип зафиксирован (см. TransactionFormCubit.typeChanged).
+          onSelectionChanged: state.transactionId == null
+              ? (selection) => cubit.typeChanged(selection.first)
+              : null,
         ),
         TextFormField(
           initialValue: state.amount,
@@ -58,7 +61,8 @@ class TransactionForm extends StatelessWidget {
           decoration: InputDecoration(
             labelText: l10n.transactionFormAmount,
             hintText: '0',
-            suffixText: CurrencyScope.of(context).symbol,
+            suffixText:
+                (state.accountCurrency ?? CurrencyScope.of(context)).symbol,
             errorText: error(.amount),
           ),
         ),

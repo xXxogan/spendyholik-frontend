@@ -31,16 +31,20 @@ CategoryModel category(
   transactionCount: count,
 );
 
-AccountModel account(String id, AccountType type, {bool archived = false}) =>
-    AccountModel(
-      currency: Currency.rub,
-      id: id,
-      name: id,
-      type: type,
-      balance: 0,
-      color: EntityColor.blue,
-      isArchived: archived,
-    );
+AccountModel account(
+  String id,
+  AccountType type, {
+  bool archived = false,
+  Currency currency = Currency.rub,
+}) => AccountModel(
+  currency: currency,
+  id: id,
+  name: id,
+  type: type,
+  balance: 0,
+  color: EntityColor.blue,
+  isArchived: archived,
+);
 
 void main() {
   late MockTransactionRepository transactions;
@@ -75,7 +79,7 @@ void main() {
       (_) async => [
         account('cash', .cash),
         account('old', .debit, archived: true),
-        account('card', .debit),
+        account('card', .debit, currency: Currency.usd),
         account('card2', .debit),
       ],
     );
@@ -101,6 +105,12 @@ void main() {
     await cubit.init();
     return cubit;
   }
+
+  test('валюта счёта для суммы — у карты, на которую уйдёт операция', () async {
+    final cubit = await ready();
+
+    expect(cubit.state.accountCurrency, Currency.usd);
+  });
 
   test(
     'короткий список: 6 самых используемых категорий верхнего уровня',

@@ -55,6 +55,12 @@ void main() {
     verify(() => cubit.categoryChanged('food')).called(1);
   });
 
+  testWidgets('суффикс суммы — валюта счёта', (tester) async {
+    await pump(tester, ready.copyWith(accountCurrency: Currency.usd));
+
+    expect(find.text(r'$'), findsOneWidget);
+  });
+
   testWidgets('«Доход» меняет тип', (tester) async {
     when(() => cubit.typeChanged(any())).thenAnswer((_) async {});
     await pump(tester, ready);

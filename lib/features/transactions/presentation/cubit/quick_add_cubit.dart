@@ -27,7 +27,9 @@ class QuickAddCubit extends Cubit<QuickAddState>
 
   static const _shortListSize = 6;
 
-  Future<void> init() => _loadCategories(state.type);
+  Future<void> init() async {
+    await Future.wait([_loadCategories(state.type), _loadAccountCurrency()]);
+  }
 
   Future<void> typeChanged(TransactionType value) async {
     if (value == state.type) return;
@@ -55,9 +57,7 @@ class QuickAddCubit extends Cubit<QuickAddState>
     emit(state.copyWith(status: .submitting, failure: null));
     try {
       final accounts = await _accounts.getAccounts();
-      final card = accounts
-          .where((a) => !a.isArchived && a.type == AccountType.debit)
-          .firstOrNull;
+      final card = _card(accounts);
       if (card == null) {
         emit(
           state.copyWith(
@@ -81,6 +81,20 @@ class QuickAddCubit extends Cubit<QuickAddState>
     } on Failure catch (failure, stackTrace) {
       getIt<Talker>().handle(failure, stackTrace);
       emit(state.copyWith(status: .failure, failure: failure));
+    }
+  }
+
+  AccountModel? _card(List<AccountModel> accounts) => accounts
+      .where((a) => !a.isArchived && a.type == AccountType.debit)
+      .firstOrNull;
+
+  /// Не критично для сохранения: без валюты суффикс остаётся базовым.
+  Future<void> _loadAccountCurrency() async {
+    try {
+      final card = _card(await _accounts.getAccounts());
+      emit(state.copyWith(accountCurrency: card?.currency));
+    } on Failure catch (failure, stackTrace) {
+      getIt<Talker>().handle(failure, stackTrace);
     }
   }
 

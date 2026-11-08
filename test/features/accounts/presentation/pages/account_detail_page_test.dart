@@ -48,7 +48,8 @@ void main() {
     final transactions = MockTransactionRepository();
     final bus = MockDataChangeBus();
     when(() => bus.changes).thenAnswer((_) => const Stream.empty());
-    when(() => transactions.getTransactions(any())).thenAnswer((_) async => []);
+    when(() => transactions.getPage(any()))
+        .thenAnswer((_) async => TransactionPage(items: []));
     getIt.registerFactory(() => TransactionsCubit(transactions, bus));
   });
 

@@ -2,7 +2,12 @@ import 'package:spendyholik/features/transactions/data/models/models.dart';
 
 /// Все методы бросают только [Failure] из `core/errors`.
 abstract interface class TransactionRepository {
-  /// По убыванию [TransactionModel.occurredAt].
+  /// Страница по убыванию [TransactionModel.occurredAt]; [cursor] — из
+  /// [TransactionPage.nextCursor] предыдущей. Размер — [TransactionFilter.limit]
+  /// или `AppConfig.transactionsPageSize`.
+  Future<TransactionPage> getPage(TransactionFilter filter, {String? cursor});
+
+  /// Первая страница целиком — там, где подгрузки нет.
   Future<List<TransactionModel>> getTransactions(TransactionFilter filter);
 
   /// [NotFoundFailure], если операции нет.

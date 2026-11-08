@@ -23,6 +23,8 @@ class TransactionFormCubit extends Cubit<TransactionFormState>
   final TransactionRepository _transactions;
   final AccountRepository _accounts;
 
+  final _currencies = <String, Currency>{};
+
   Future<void> init(
     String? transactionId, {
     TransactionType type = TransactionType.expense,
@@ -37,17 +39,22 @@ class TransactionFormCubit extends Cubit<TransactionFormState>
     try {
       if (transactionId == null) {
         final accounts = await _accounts.getAccounts();
+        for (final account in accounts) {
+          _currencies[account.id] = account.currency;
+        }
         final active = accounts.where((account) => !account.isArchived);
         emit(
           TransactionFormState(
             type: type,
             accountId: active.firstOrNull?.id,
+            accountCurrency: active.firstOrNull?.currency,
             occurredAt: DateTime.now(),
           ),
         );
         return;
       }
       final t = await _transactions.getTransaction(transactionId);
+      _currencies[t.account.id] = t.currency;
       emit(
         TransactionFormState(
           transactionId: transactionId,
@@ -56,6 +63,7 @@ class TransactionFormCubit extends Cubit<TransactionFormState>
           title: t.title,
           categoryId: t.category?.id,
           accountId: t.account.id,
+          accountCurrency: t.currency,
           toAccountId: t.toAccount?.id,
           occurredAt: t.occurredAt,
           note: t.note ?? '',
@@ -70,8 +78,10 @@ class TransactionFormCubit extends Cubit<TransactionFormState>
   }
 
   /// Категории у типов разные, а получатель есть только у перевода.
+  /// В правке тип не меняется: сервер не принимает `type` в PATCH
+  /// (решение 2026-11-08) — другой тип = удалить и создать заново.
   void typeChanged(TransactionType value) {
-    if (value == state.type) return;
+    if (value == state.type || state.transactionId != null) return;
     emit(
       state.copyWith(
         type: value,
@@ -91,12 +101,29 @@ class TransactionFormCubit extends Cubit<TransactionFormState>
     state.copyWith(categoryId: value, fieldErrors: _without(.categoryId)),
   );
 
-  void accountChanged(String? value) => emit(
-    state.copyWith(
-      accountId: value,
-      fieldErrors: _without(.accountId)..remove(TransactionField.toAccountId),
-    ),
-  );
+  Future<void> accountChanged(String? value) async {
+    emit(
+      state.copyWith(
+        accountId: value,
+        accountCurrency: _currencies[value],
+        fieldErrors: _without(.accountId)..remove(TransactionField.toAccountId),
+      ),
+    );
+    // В правке список счетов ещё не грузился.
+    if (value == null || _currencies.containsKey(value)) return;
+    try {
+      for (final account in await _accounts.getAccounts()) {
+        _currencies[account.id] = account.currency;
+      }
+    } on Failure catch (failure, stackTrace) {
+      // Суффикс остаётся базовой валютой, сохранению это не мешает.
+      getIt<Talker>().handle(failure, stackTrace);
+      return;
+    }
+    if (state.accountId == value) {
+      emit(state.copyWith(accountCurrency: _currencies[value]));
+    }
+  }
 
   void toAccountChanged(String? value) => emit(
     state.copyWith(toAccountId: value, fieldErrors: _without(.toAccountId)),

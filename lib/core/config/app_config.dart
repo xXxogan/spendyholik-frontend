@@ -8,4 +8,7 @@ abstract final class AppConfig {
   // sendTimeout не задаётся: на Web без тела запроса Dio на нём падает.
   static const connectTimeout = Duration(seconds: 10);
   static const receiveTimeout = Duration(seconds: 20);
+
+  /// limit API операций: 1–100.
+  static const transactionsPageSize = 50;
 }

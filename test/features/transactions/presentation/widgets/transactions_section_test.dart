@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:spendyholik/app/di/injection.dart';
+import 'package:spendyholik/core/errors/failure.dart';
 import 'package:spendyholik/core/events/data_change_bus.dart';
 import 'package:spendyholik/core/models/models.dart';
 import 'package:spendyholik/core/widgets/widgets.dart';
@@ -27,7 +28,8 @@ void main() {
     repository = MockTransactionRepository();
     final bus = MockDataChangeBus();
     when(() => bus.changes).thenAnswer((_) => const Stream.empty());
-    when(() => repository.getTransactions(any())).thenAnswer((_) async => []);
+    when(() => repository.getPage(any()))
+        .thenAnswer((_) async => TransactionPage(items: []));
     getIt.registerFactory(() => TransactionsCubit(repository, bus));
   });
 
@@ -52,28 +54,30 @@ void main() {
     );
     await settle(tester);
 
-    verify(() => repository.getTransactions(cafe)).called(1);
+    verify(() => repository.getPage(cafe)).called(1);
   });
 
   testWidgets('операция — в валюте своего счёта, а не в базовой', (
     tester,
   ) async {
-    when(() => repository.getTransactions(any())).thenAnswer(
-      (_) async => [
-        TransactionModel(
-          id: 't1',
-          type: TransactionType.expense,
-          amount: 10000,
-          title: 'Кофе',
-          account: const AccountRef(
-            id: 'usd',
-            name: 'Доллары',
-            color: EntityColor.green,
+    when(() => repository.getPage(any())).thenAnswer(
+      (_) async => TransactionPage(
+        items: [
+          TransactionModel(
+            id: 't1',
+            type: TransactionType.expense,
+            amount: 10000,
+            title: 'Кофе',
+            account: const AccountRef(
+              id: 'usd',
+              name: 'Доллары',
+              color: EntityColor.green,
+            ),
+            occurredAt: DateTime(2026, 11, 7, 12),
+            currency: Currency.usd,
           ),
-          occurredAt: DateTime(2026, 11, 7, 12),
-          currency: Currency.usd,
-        ),
-      ],
+        ],
+      ),
     );
 
     await pumpPage(
@@ -111,8 +115,8 @@ void main() {
           occurredAt: DateTime(2026, 11, 7, 12).subtract(Duration(hours: i)),
         ),
     ];
-    when(() => repository.getTransactions(any()))
-        .thenAnswer((_) async => transactions);
+    when(() => repository.getPage(any()))
+        .thenAnswer((_) async => TransactionPage(items: transactions));
 
     await pumpPage(
       tester,
@@ -133,5 +137,107 @@ void main() {
     final built = find.byType(TransactionTile).evaluate().length;
     expect(built, greaterThan(0));
     expect(built, lessThan(50));
+  });
+
+  group('подгрузка', () {
+    final first = [
+      for (var i = 0; i < 60; i++)
+        TransactionModel(
+          currency: Currency.rub,
+          id: 't$i',
+          type: TransactionType.expense,
+          amount: 10000,
+          title: 't$i',
+          account: const AccountRef(
+            id: 'card',
+            name: 'Карта',
+            color: EntityColor.blue,
+          ),
+          occurredAt: DateTime(2026, 11, 7, 12).subtract(Duration(hours: i)),
+        ),
+    ];
+
+    Future<void> pumpSection(
+      WidgetTester tester, {
+      required bool sliver,
+      bool moreFails = false,
+    }) async {
+      when(
+        () => repository.getPage(any()),
+      ).thenAnswer((_) async => TransactionPage(items: first, nextCursor: 'c'));
+      final more = when(
+        () => repository.getPage(
+          any(),
+          cursor: any(named: 'cursor', that: isNotNull),
+        ),
+      );
+      if (moreFails) {
+        more.thenThrow(const NetworkFailure());
+      } else {
+        more.thenAnswer((_) async => TransactionPage(items: []));
+      }
+      const filter = TransactionFilter(accountId: 'card');
+      await pumpPage(
+        tester,
+        CurrencyScope(
+          currency: Currency.rub,
+          child: sliver
+              ? const CustomScrollView(
+                  slivers: [
+                    TransactionsSection.sliver(
+                      filter: filter,
+                      title: 'Операции',
+                    ),
+                  ],
+                )
+              : const SingleChildScrollView(
+                  child: TransactionsSection(filter: filter, title: 'Операции'),
+                ),
+        ),
+      );
+      await settle(tester);
+    }
+
+    testWidgets('sliver: прокрутка к концу грузит следующую страницу', (
+      tester,
+    ) async {
+      await pumpSection(tester, sliver: true);
+      verifyNever(
+        () => repository.getPage(
+          any(),
+          cursor: any(named: 'cursor', that: isNotNull),
+        ),
+      );
+
+      await tester.drag(find.byType(CustomScrollView), const Offset(0, -3000));
+      await settle(tester);
+
+      verify(() => repository.getPage(any(), cursor: 'c')).called(1);
+    });
+
+    testWidgets('sliver: страница не загрузилась — повтор только по кнопке', (
+      tester,
+    ) async {
+      await pumpSection(tester, sliver: true, moreFails: true);
+      await tester.drag(find.byType(CustomScrollView), const Offset(0, -3000));
+      await settle(tester);
+      await settle(tester);
+
+      verify(() => repository.getPage(any(), cursor: 'c')).called(1);
+      expect(find.text('Не удалось загрузить'), findsOneWidget);
+    });
+
+    testWidgets('плоская секция Главной страницы не подгружает', (
+      tester,
+    ) async {
+      await pumpSection(tester, sliver: false);
+
+      verifyNever(
+        () => repository.getPage(
+          any(),
+          cursor: any(named: 'cursor', that: isNotNull),
+        ),
+      );
+    });
   });
 }

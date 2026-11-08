@@ -1,6 +1,7 @@
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:spendyholik/app/di/injection.dart';
 import 'package:spendyholik/core/errors/failure.dart';
@@ -102,6 +103,26 @@ void main() {
     expect(find.text('Куда'), findsNothing);
   });
 
+  testWidgets('суффикс суммы — валюта выбранного счёта', (tester) async {
+    await pump(
+      tester,
+      TransactionFormState(
+        accountId: 'card',
+        accountCurrency: Currency.usd,
+        occurredAt: now,
+      ),
+    );
+
+    expect(find.text(r'$'), findsOneWidget);
+    expect(find.text('₽'), findsNothing);
+  });
+
+  testWidgets('счёт не выбран — суффикс из базовой валюты', (tester) async {
+    await pump(tester, TransactionFormState(occurredAt: now));
+
+    expect(find.text('₽'), findsOneWidget);
+  });
+
   testWidgets('перевод: «Куда» вместо категорий', (tester) async {
     await pump(
       tester,
@@ -118,6 +139,21 @@ void main() {
     await tester.tap(find.text('Доход'));
 
     verify(() => cubit.typeChanged(TransactionType.income)).called(1);
+  });
+
+  testWidgets('правка: сегменты типа неактивны', (tester) async {
+    await pump(
+      tester,
+      TransactionFormState(transactionId: 'shop', occurredAt: now),
+    );
+
+    await tester.tap(find.text('Доход'));
+
+    verifyNever(() => cubit.typeChanged(any()));
+    final segments = tester.widget<SegmentedButton<TransactionType>>(
+      find.byType(SegmentedButton<TransactionType>),
+    );
+    expect(segments.onSelectionChanged, isNull);
   });
 
   testWidgets('тап по категории вызывает categoryChanged', (tester) async {

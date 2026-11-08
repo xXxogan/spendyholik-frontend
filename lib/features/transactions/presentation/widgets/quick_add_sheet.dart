@@ -78,7 +78,9 @@ class QuickAddView extends StatelessWidget {
                 style: theme.textTheme.headlineMedium,
                 decoration: InputDecoration(
                   hintText: '0',
-                  suffixText: CurrencyScope.of(context).symbol,
+                  suffixText:
+                      (state.accountCurrency ?? CurrencyScope.of(context))
+                          .symbol,
                   errorText: error(.amount),
                 ),
               ),

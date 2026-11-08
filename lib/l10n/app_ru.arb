@@ -123,6 +123,7 @@
   "transactionsNothingFound": "Ничего не найдено",
   "transactionsReset": "Сбросить",
   "transactionsNone": "Операций пока нет",
+  "transactionsLoadMoreFailed": "Не удалось загрузить",
   "dashboardRecentTransactions": "Последние операции",
   "dashboardAllTransactions": "Все",
   "accountDetailTransactions": "Операции по счёту",

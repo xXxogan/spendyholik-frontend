@@ -7,4 +7,5 @@ export 'transaction_form.dart';
 export 'transaction_info_row.dart';
 export 'transaction_tile.dart';
 export 'transaction_type_chips.dart';
+export 'transactions_load_more_row.dart';
 export 'transactions_section.dart';

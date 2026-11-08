@@ -96,7 +96,8 @@ void main() {
         trend: const [],
       ),
     );
-    when(() => transactions.getTransactions(any())).thenAnswer((_) async => []);
+    when(() => transactions.getPage(any()))
+        .thenAnswer((_) async => TransactionPage(items: []));
     final budgets = MockBudgetRepository();
     when(budgets.getBudgets).thenAnswer((_) async => []);
     final goals = MockGoalRepository();

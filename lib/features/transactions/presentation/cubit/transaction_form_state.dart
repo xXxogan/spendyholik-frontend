@@ -14,6 +14,9 @@ abstract class TransactionFormState with _$TransactionFormState {
     @Default('') String title,
     String? categoryId,
     String? accountId,
+
+    /// Валюта выбранного счёта — для суффикса суммы; null, пока она неизвестна.
+    Currency? accountCurrency,
     String? toAccountId,
 
     /// null только до init.

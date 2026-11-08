@@ -14,8 +14,12 @@ class MockTransactionRepository extends Mock implements TransactionRepository {}
 
 class MockAccountRepository extends Mock implements AccountRepository {}
 
-AccountModel account(String id, {bool archived = false}) => AccountModel(
-  currency: Currency.rub,
+AccountModel account(
+  String id, {
+  bool archived = false,
+  Currency currency = Currency.rub,
+}) => AccountModel(
+  currency: currency,
   id: id,
   name: id,
   type: AccountType.debit,
@@ -69,7 +73,7 @@ void main() {
       (_) async => [
         account('old', archived: true),
         account('card'),
-        account('cash'),
+        account('cash', currency: Currency.usd),
       ],
     );
     when(() => transactions.create(any())).thenAnswer((_) async => shop);
@@ -90,6 +94,23 @@ void main() {
   TransactionDraft createdDraft() =>
       verify(() => transactions.create(captureAny())).captured.single
           as TransactionDraft;
+
+  test('валюта счёта: у первого счёта, затем у выбранного', () async {
+    final cubit = await ready();
+    expect(cubit.state.accountCurrency, Currency.rub);
+
+    cubit.accountChanged('cash');
+    expect(cubit.state.accountCurrency, Currency.usd);
+  });
+
+  test('правка: валюта счёта операции; другой счёт — из списка', () async {
+    final cubit = await ready('shop');
+    expect(cubit.state.accountCurrency, Currency.rub);
+
+    cubit.accountChanged('cash');
+    await Future<void>.delayed(Duration.zero);
+    expect(cubit.state.accountCurrency, Currency.usd);
+  });
 
   test('новая: первый активный счёт и текущий момент', () async {
     final before = DateTime.now();
@@ -250,6 +271,15 @@ void main() {
     await cubit.save();
     verify(() => transactions.update('shop', any())).called(1);
     verifyNever(() => transactions.create(any()));
+  });
+
+  test('правка: тип не меняется — сервер не принимает type в PATCH', () async {
+    final cubit = await ready('shop');
+
+    cubit.typeChanged(.income);
+
+    expect(cubit.state.type, TransactionType.expense);
+    expect(cubit.state.categoryId, 'food', reason: 'категория не сброшена');
   });
 
   test('init(id) неизвестной — loadFailed', () async {

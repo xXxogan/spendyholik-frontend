@@ -8,6 +8,7 @@ import 'package:spendyholik/core/widgets/widgets.dart';
 import 'package:spendyholik/features/transactions/data/models/models.dart';
 import 'package:spendyholik/features/transactions/presentation/cubit/transactions_cubit.dart';
 import 'package:spendyholik/features/transactions/presentation/widgets/transaction_tile.dart';
+import 'package:spendyholik/features/transactions/presentation/widgets/transactions_load_more_row.dart';
 import 'package:spendyholik/l10n/l10n.dart';
 
 /// Плоский список для Главной, счёта, бюджета: день — в подписи строки.
@@ -37,6 +38,7 @@ class TransactionsSection extends StatelessWidget {
 
   static const _cardPadding = 20.0;
   static const _cardRadius = 24.0;
+  static const _loadMoreThreshold = 5;
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +49,7 @@ class TransactionsSection extends StatelessWidget {
     );
     final body = BlocBuilder<TransactionsCubit, TransactionsState>(
       builder: (context, state) => switch (state) {
-        TransactionsLoaded(:final groups) => _rows(context, groups),
+        TransactionsLoaded() => _rows(context, state),
         _ => _box(_placeholder(context, state)),
       },
     );
@@ -82,9 +84,9 @@ class TransactionsSection extends StatelessWidget {
         TransactionsLoaded() => const SkeletonList(itemCount: 3),
       };
 
-  Widget _rows(BuildContext context, List<TransactionDayGroup> groups) {
+  Widget _rows(BuildContext context, TransactionsLoaded state) {
     final rows = [
-      for (final group in groups)
+      for (final group in state.groups)
         for (final transaction in group.items) (group.day, transaction),
     ];
     Widget tile(int index) => _tile(context, rows[index].$1, rows[index].$2);
@@ -96,6 +98,7 @@ class TransactionsSection extends StatelessWidget {
         ),
       );
     }
+    final showFooter = state.loadingMore || state.moreFailure != null;
     // Тот же вид, что у ContentCard, но список внутри ленивый.
     return DecoratedSliver(
       decoration: BoxDecoration(
@@ -105,8 +108,26 @@ class TransactionsSection extends StatelessWidget {
       sliver: SliverPadding(
         padding: const .all(_cardPadding),
         sliver: SliverList.builder(
-          itemCount: rows.length,
-          itemBuilder: (_, index) => tile(index),
+          itemCount: rows.length + (showFooter ? 1 : 0),
+          itemBuilder: (_, index) {
+            if (index == rows.length) {
+              return TransactionsLoadMoreRow(
+                failed: !state.loadingMore,
+                onRetry: context.read<TransactionsCubit>().loadMore,
+              );
+            }
+            // Cubit сам игнорирует повторы и конец списка; emit прямо во время
+            // сборки сломал бы BlocBuilder. После ошибки — только по
+            // «Повторить», иначе без сети каждая перестройка — новый запрос.
+            if (state.moreFailure == null &&
+                index >= rows.length - _loadMoreThreshold) {
+              final cubit = context.read<TransactionsCubit>();
+              WidgetsBinding.instance.addPostFrameCallback(
+                (_) => cubit.autoLoadMore(),
+              );
+            }
+            return tile(index);
+          },
         ),
       ),
     );

@@ -6,6 +6,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:spendyholik/app/theme/app_colors.dart';
 import 'package:spendyholik/core/errors/failure.dart';
 import 'package:spendyholik/core/models/models.dart';
+import 'package:spendyholik/core/widgets/widgets.dart';
 import 'package:spendyholik/features/accounts/accounts.dart';
 import 'package:spendyholik/features/categories/categories.dart';
 import 'package:spendyholik/features/transactions/data/models/models.dart';
@@ -205,4 +206,88 @@ void main() {
 
     expect(find.byType(Badge), findsOneWidget);
   });
+
+  testWidgets('есть nextCursor — показ последней группы зовёт loadMore', (
+    tester,
+  ) async {
+    when(() => cubit.loadMore()).thenAnswer((_) async {});
+    when(() => cubit.autoLoadMore()).thenAnswer((_) async {});
+    await pump(
+      tester,
+      TransactionsState.loaded(
+        groups,
+        const TransactionFilter(),
+        nextCursor: 'c',
+      ),
+    );
+
+    verify(() => cubit.autoLoadMore()).called(greaterThanOrEqualTo(1));
+  });
+
+  testWidgets('нет nextCursor — loadMore не зовётся', (tester) async {
+    when(() => cubit.loadMore()).thenAnswer((_) async {});
+    when(() => cubit.autoLoadMore()).thenAnswer((_) async {});
+    await pump(
+      tester,
+      TransactionsState.loaded(groups, const TransactionFilter()),
+    );
+
+    verifyNever(() => cubit.autoLoadMore());
+    verifyNever(() => cubit.loadMore());
+  });
+
+  testWidgets('loadingMore — внизу скелетон', (tester) async {
+    when(() => cubit.loadMore()).thenAnswer((_) async {});
+    when(() => cubit.autoLoadMore()).thenAnswer((_) async {});
+    await pump(
+      tester,
+      TransactionsState.loaded(
+        groups,
+        const TransactionFilter(),
+        nextCursor: 'c',
+        loadingMore: true,
+      ),
+    );
+
+    expect(find.byType(SkeletonList), findsOneWidget);
+  });
+
+  testWidgets('moreFailure — «Повторить» зовёт loadMore', (tester) async {
+    when(() => cubit.loadMore()).thenAnswer((_) async {});
+    when(() => cubit.autoLoadMore()).thenAnswer((_) async {});
+    await pump(
+      tester,
+      TransactionsState.loaded(
+        groups,
+        const TransactionFilter(),
+        nextCursor: 'c',
+        moreFailure: const NetworkFailure(),
+      ),
+    );
+    clearInteractions(cubit);
+
+    expect(find.text('Не удалось загрузить'), findsOneWidget);
+    await tester.tap(find.text('Повторить'));
+
+    verify(() => cubit.loadMore()).called(1);
+  });
+
+  testWidgets(
+    'moreFailure — сама не повторяет: без сети был бы цикл запросов',
+    (tester) async {
+      when(() => cubit.loadMore()).thenAnswer((_) async {});
+      when(() => cubit.autoLoadMore()).thenAnswer((_) async {});
+      await pump(
+        tester,
+        TransactionsState.loaded(
+          groups,
+          const TransactionFilter(),
+          nextCursor: 'c',
+          moreFailure: const NetworkFailure(),
+        ),
+      );
+
+      verifyNever(() => cubit.loadMore());
+    },
+  );
 }

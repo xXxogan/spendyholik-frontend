@@ -26,6 +26,7 @@ class TransactionsView extends StatelessWidget {
   const TransactionsView({super.key});
 
   static const _maxWidth = 720.0;
+  static const _loadMoreThreshold = 5;
 
   @override
   Widget build(BuildContext context) {
@@ -86,13 +87,47 @@ class TransactionsView extends StatelessWidget {
           TransactionsLoading() => const SliverToBoxAdapter(
             child: SkeletonList(),
           ),
-          TransactionsLoaded(:final groups) => ContentSliverPadding(
-            sliver: SliverList.builder(
-              itemCount: groups.length,
-              itemBuilder: (context, index) =>
-                  constrained(TransactionDaySection(group: groups[index])),
+          TransactionsLoaded(
+            :final groups,
+            :final nextCursor,
+            :final loadingMore,
+            :final moreFailure,
+          ) =>
+            ContentSliverPadding(
+              sliver: SliverList.builder(
+                itemCount:
+                    groups.length +
+                    (loadingMore || moreFailure != null ? 1 : 0),
+                itemBuilder: (context, index) {
+                  if (index == groups.length) {
+                    return constrained(
+                      TransactionsLoadMoreRow(
+                        failed: !loadingMore,
+                        onRetry: cubit.loadMore,
+                      ),
+                    );
+                  }
+                  // Группа строится целиком, поэтому считаем строки-операции
+                  // после неё: осталось ≤ 5 — пора подгружать. После ошибки —
+                  // только по «Повторить»: иначе каждая перестройка снова
+                  // запрашивала бы страницу, и без сети это цикл.
+                  if (nextCursor != null && moreFailure == null) {
+                    final after = groups
+                        .skip(index + 1)
+                        .fold(0, (sum, g) => sum + g.items.length);
+                    if (after <= _loadMoreThreshold) {
+                      // emit прямо во время сборки сломал бы BlocBuilder.
+                      WidgetsBinding.instance.addPostFrameCallback(
+                        (_) => cubit.autoLoadMore(),
+                      );
+                    }
+                  }
+                  return constrained(
+                    TransactionDaySection(group: groups[index]),
+                  );
+                },
+              ),
             ),
-          ),
           TransactionsEmpty() => SliverFillRemaining(
             hasScrollBody: false,
             child: Center(

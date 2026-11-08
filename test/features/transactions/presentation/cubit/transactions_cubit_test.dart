@@ -54,13 +54,15 @@ void main() {
 
   blocTest<TransactionsCubit, TransactionsState>(
     'группы по дням: дни по убыванию, внутри дня — по убыванию времени',
-    setUp: () => when(() => repository.getTransactions(any())).thenAnswer(
-      (_) async => [
-        tx('morning', DateTime(2026, 10, 22, 9)),
-        tx('older', DateTime(2026, 10, 20, 12)),
-        tx('evening', DateTime(2026, 10, 22, 21)),
-        tx('midnight', DateTime(2026, 10, 21)),
-      ],
+    setUp: () => when(() => repository.getPage(any())).thenAnswer(
+      (_) async => TransactionPage(
+        items: [
+          tx('morning', DateTime(2026, 10, 22, 9)),
+          tx('older', DateTime(2026, 10, 20, 12)),
+          tx('evening', DateTime(2026, 10, 22, 21)),
+          tx('midnight', DateTime(2026, 10, 21)),
+        ],
+      ),
     ),
     build: build,
     act: (cubit) => cubit.load(const TransactionFilter()),
@@ -79,9 +81,9 @@ void main() {
 
   blocTest<TransactionsCubit, TransactionsState>(
     'setType — запрос с типом, остальной фильтр сохранён',
-    setUp: () =>
-        when(() => repository.getTransactions(any()))
-            .thenAnswer((_) async => [tx('a', DateTime(2026, 10, 22))]),
+    setUp: () => when(() => repository.getPage(any())).thenAnswer(
+      (_) async => TransactionPage(items: [tx('a', DateTime(2026, 10, 22))]),
+    ),
     build: build,
     act: (cubit) async {
       await cubit.load(const TransactionFilter(accountId: 'card'));
@@ -92,7 +94,7 @@ void main() {
         type: TransactionType.income,
         accountId: 'card',
       );
-      verify(() => repository.getTransactions(expected)).called(1);
+      verify(() => repository.getPage(expected)).called(1);
       expect((cubit.state as TransactionsLoaded).filter, expected);
     },
   );
@@ -100,8 +102,8 @@ void main() {
   blocTest<TransactionsCubit, TransactionsState>(
     'пусто — empty с фильтром',
     setUp: () =>
-        when(() => repository.getTransactions(any()))
-            .thenAnswer((_) async => []),
+        when(() => repository.getPage(any()))
+            .thenAnswer((_) async => TransactionPage(items: [])),
     build: build,
     act: (cubit) => cubit.load(const TransactionFilter(type: .transfer)),
     expect: () => [
@@ -113,8 +115,7 @@ void main() {
   blocTest<TransactionsCubit, TransactionsState>(
     'ошибка — error',
     setUp: () =>
-        when(() => repository.getTransactions(any()))
-            .thenThrow(const NetworkFailure()),
+        when(() => repository.getPage(any())).thenThrow(const NetworkFailure()),
     build: build,
     act: (cubit) => cubit.load(const TransactionFilter()),
     expect: () => [
@@ -129,9 +130,9 @@ void main() {
 
   blocTest<TransactionsCubit, TransactionsState>(
     'изменились счета — тихая перезагрузка с тем же фильтром',
-    setUp: () =>
-        when(() => repository.getTransactions(any()))
-            .thenAnswer((_) async => [tx('a', DateTime(2026, 10, 22))]),
+    setUp: () => when(() => repository.getPage(any())).thenAnswer(
+      (_) async => TransactionPage(items: [tx('a', DateTime(2026, 10, 22))]),
+    ),
     build: build,
     act: (cubit) async {
       await cubit.load(const TransactionFilter(limit: 5));
@@ -140,16 +141,16 @@ void main() {
     },
     skip: 2,
     expect: () => [isA<TransactionsLoaded>()],
-    verify: (_) => verify(
-      () => repository.getTransactions(const TransactionFilter(limit: 5)),
-    ).called(2),
+    verify: (_) =>
+        verify(() => repository.getPage(const TransactionFilter(limit: 5)))
+            .called(2),
   );
 
   blocTest<TransactionsCubit, TransactionsState>(
     'applyFilter заменяет фильтр целиком',
     setUp: () =>
-        when(() => repository.getTransactions(any()))
-            .thenAnswer((_) async => []),
+        when(() => repository.getPage(any()))
+            .thenAnswer((_) async => TransactionPage(items: [])),
     build: build,
     act: (cubit) async {
       await cubit.load(const TransactionFilter(type: .expense));
@@ -164,9 +165,9 @@ void main() {
 
   blocTest<TransactionsCubit, TransactionsState>(
     'applyFilter с комбинацией фильтров передаёт её в репозиторий целиком',
-    setUp: () =>
-        when(() => repository.getTransactions(any()))
-            .thenAnswer((_) async => [tx('a', DateTime(2026, 10, 22))]),
+    setUp: () => when(() => repository.getPage(any())).thenAnswer(
+      (_) async => TransactionPage(items: [tx('a', DateTime(2026, 10, 22))]),
+    ),
     build: build,
     act: (cubit) => cubit.applyFilter(
       TransactionFilter(
@@ -178,7 +179,7 @@ void main() {
     ),
     verify: (cubit) {
       final passed =
-          verify(() => repository.getTransactions(captureAny())).captured.single
+          verify(() => repository.getPage(captureAny())).captured.single
               as TransactionFilter;
       expect(passed.type, TransactionType.expense);
       expect(passed.period?.start, DateTime(2026, 10));
@@ -187,4 +188,191 @@ void main() {
       expect((cubit.state as TransactionsLoaded).filter, passed);
     },
   );
+
+  group('страницы', () {
+    const all = TransactionFilter();
+    final first = [
+      tx('t1', DateTime(2026, 11, 8, 20)),
+      tx('t2', DateTime(2026, 11, 7, 12)),
+    ];
+    // Тот же день, что последний на первой странице: стык не должен рвать день.
+    final second = [
+      tx('t3', DateTime(2026, 11, 7, 9)),
+      tx('t4', DateTime(2026, 11, 6, 9)),
+    ];
+
+    void stubPages({Object? moreError}) {
+      when(() => repository.getPage(any())).thenAnswer(
+        (_) async => TransactionPage(items: first, nextCursor: 'c2'),
+      );
+      if (moreError != null) {
+        when(() => repository.getPage(any(), cursor: 'c2'))
+            .thenThrow(moreError);
+      } else {
+        when(() => repository.getPage(any(), cursor: 'c2'))
+            .thenAnswer((_) async => TransactionPage(items: second));
+      }
+    }
+
+    test('load — первая страница, курсор сохранён', () async {
+      stubPages();
+      final cubit = build();
+      await cubit.load(all);
+
+      final state = cubit.state as TransactionsLoaded;
+      expect(state.nextCursor, 'c2');
+      expect(state.loadingMore, isFalse);
+      await cubit.close();
+    });
+
+    test('loadMore добавляет страницу, день на стыке — одна группа', () async {
+      stubPages();
+      final cubit = build();
+      await cubit.load(all);
+      await cubit.loadMore();
+
+      final state = cubit.state as TransactionsLoaded;
+      expect(state.nextCursor, isNull);
+      expect(state.groups.map((g) => g.day), [
+        DateTime(2026, 11, 8),
+        DateTime(2026, 11, 7),
+        DateTime(2026, 11, 6),
+      ]);
+      expect(state.groups[1].items.map((t) => t.id), ['t2', 't3']);
+      verify(() => repository.getPage(all, cursor: 'c2')).called(1);
+      await cubit.close();
+    });
+
+    test('loadMore показывает подгрузку внизу, пока страница идёт', () async {
+      stubPages();
+      final cubit = build();
+      await cubit.load(all);
+      final states = <TransactionsState>[];
+      final sub = cubit.stream.listen(states.add);
+
+      await cubit.loadMore();
+      await pumpEventQueue();
+      await sub.cancel();
+
+      expect((states.first as TransactionsLoaded).loadingMore, isTrue);
+      expect((states.last as TransactionsLoaded).loadingMore, isFalse);
+      await cubit.close();
+    });
+
+    test('конец списка — loadMore ничего не запрашивает', () async {
+      when(() => repository.getPage(any()))
+          .thenAnswer((_) async => TransactionPage(items: first));
+      final cubit = build();
+      await cubit.load(all);
+      await cubit.loadMore();
+
+      verify(() => repository.getPage(all)).called(1);
+      verifyNoMoreInteractions(repository);
+      await cubit.close();
+    });
+
+    test('повторный loadMore во время подгрузки — один запрос', () async {
+      final gate = Completer<TransactionPage>();
+      when(() => repository.getPage(any())).thenAnswer(
+        (_) async => TransactionPage(items: first, nextCursor: 'c2'),
+      );
+      when(() => repository.getPage(any(), cursor: 'c2'))
+          .thenAnswer((_) => gate.future);
+      final cubit = build();
+      await cubit.load(all);
+
+      final a = cubit.loadMore();
+      final b = cubit.loadMore();
+      gate.complete(TransactionPage(items: second));
+      await Future.wait([a, b]);
+
+      verify(() => repository.getPage(all, cursor: 'c2')).called(1);
+      await cubit.close();
+    });
+
+    test('ошибка loadMore — moreFailure, загруженное на месте', () async {
+      stubPages(moreError: const NetworkFailure());
+      final cubit = build();
+      await cubit.load(all);
+      await cubit.loadMore();
+
+      final state = cubit.state as TransactionsLoaded;
+      expect(state.moreFailure, isA<NetworkFailure>());
+      expect(state.loadingMore, isFalse);
+      expect(state.nextCursor, 'c2', reason: '«Повторить» — та же страница');
+      expect(state.groups.expand((g) => g.items).map((t) => t.id), [
+        't1',
+        't2',
+      ]);
+      await cubit.close();
+    });
+
+    test('шина во время loadMore — старая страница не дописывается', () async {
+      final gate = Completer<TransactionPage>();
+      when(() => repository.getPage(any())).thenAnswer(
+        (_) async => TransactionPage(items: first, nextCursor: 'c2'),
+      );
+      when(() => repository.getPage(any(), cursor: 'c2'))
+          .thenAnswer((_) => gate.future);
+      final cubit = build();
+      await cubit.load(all);
+
+      final more = cubit.loadMore();
+      changes.add({DataTopic.transactions});
+      await pumpEventQueue();
+      gate.complete(TransactionPage(items: second));
+      await more;
+
+      final state = cubit.state as TransactionsLoaded;
+      expect(state.groups.expand((g) => g.items).map((t) => t.id), [
+        't1',
+        't2',
+      ]);
+      expect(state.loadingMore, isFalse);
+      await cubit.close();
+    });
+
+    test('autoLoadMore после ошибки молчит, loadMore — повторяет', () async {
+      stubPages(moreError: const NetworkFailure());
+      final cubit = build();
+      await cubit.load(all);
+      await cubit.loadMore();
+      clearInteractions(repository);
+
+      await cubit.autoLoadMore();
+      verifyNever(() => repository.getPage(any(), cursor: 'c2'));
+
+      await cubit.loadMore();
+      verify(() => repository.getPage(all, cursor: 'c2')).called(1);
+      await cubit.close();
+    });
+
+    test('autoLoadMore без ошибки — следующая страница', () async {
+      stubPages();
+      final cubit = build();
+      await cubit.load(all);
+      await cubit.autoLoadMore();
+
+      verify(() => repository.getPage(all, cursor: 'c2')).called(1);
+      await cubit.close();
+    });
+
+    test('шина — снова первая страница', () async {
+      stubPages();
+      final cubit = build();
+      await cubit.load(all);
+      await cubit.loadMore();
+
+      changes.add({DataTopic.transactions});
+      await pumpEventQueue();
+
+      final state = cubit.state as TransactionsLoaded;
+      expect(state.nextCursor, 'c2');
+      expect(state.groups.expand((g) => g.items).map((t) => t.id), [
+        't1',
+        't2',
+      ]);
+      await cubit.close();
+    });
+  });
 }
