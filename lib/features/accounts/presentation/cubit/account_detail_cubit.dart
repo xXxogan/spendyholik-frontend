@@ -39,9 +39,13 @@ class AccountDetailCubit extends Cubit<AccountDetailState>
     try {
       final account = await _repository.getAccount(accountId);
       final history = await _repository.getBalanceHistory(accountId);
+      // Перезагрузка, начатая шиной до ответа архивации, приходит позже —
+      // экран уже закрывается, «архивирован» не перетираем (B-17).
+      if (state is AccountDetailArchived) return;
       emit(AccountDetailState.loaded(account, history));
     } on Failure catch (failure, stackTrace) {
       getIt<Talker>().handle(failure, stackTrace);
+      if (state is AccountDetailArchived) return;
       emit(AccountDetailState.error(failure));
     }
   }

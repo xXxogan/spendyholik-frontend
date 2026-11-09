@@ -170,4 +170,29 @@ void main() {
     skip: 2,
     expect: () => [const AccountDetailState.error(NetworkFailure())],
   );
+
+  test(
+    'перезагрузка по шине во время архивации не отменяет archived (B-17)',
+    () async {
+      stubLoaded();
+      final cubit = build();
+      await cubit.load('card');
+
+      // Шина пришла раньше ответа архивации: перезагрузка повисла на сети.
+      final slow = Completer<AccountModel>();
+      when(() => repository.getAccount('card')).thenAnswer((_) => slow.future);
+      changes.add({DataTopic.accounts});
+      await pumpEventQueue();
+
+      when(() => repository.archive('card')).thenAnswer((_) async {});
+      await cubit.archive();
+      expect(cubit.state, const AccountDetailState.archived());
+
+      slow.complete(account);
+      await pumpEventQueue();
+
+      expect(cubit.state, const AccountDetailState.archived());
+      await cubit.close();
+    },
+  );
 }

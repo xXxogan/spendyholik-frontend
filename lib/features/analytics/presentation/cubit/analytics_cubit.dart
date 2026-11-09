@@ -26,11 +26,19 @@ class AnalyticsCubit extends Cubit<AnalyticsState>
               topics.contains(DataTopic.transactions) ||
               topics.contains(DataTopic.categories),
         )
-        .listen((_) => load());
+        .listen((_) {
+          // Отчёты других периодов устарели: при переключении — снова с сервера.
+          _shown.clear();
+          load();
+        });
   }
 
   final AnalyticsRepository _repository;
   late final StreamSubscription<Set<DataTopic>> _changes;
+
+  /// Последний показанный отчёт каждого периода: повторное переключение
+  /// показывает его сразу и обновляет тихо, без скелетона.
+  final _shown = <PeriodPreset, AnalyticsState>{};
 
   PeriodPreset get _preset => switch (state) {
     AnalyticsLoading(:final preset) ||
@@ -42,25 +50,33 @@ class AnalyticsCubit extends Cubit<AnalyticsState>
   /// Перезагрузка текущего периода: по шине — тихо, без скелетона.
   Future<void> load() => _load(_preset, silent: state is AnalyticsLoaded);
 
-  Future<void> selectPeriod(PeriodPreset preset) =>
-      _load(preset, silent: false);
+  Future<void> selectPeriod(PeriodPreset preset) {
+    final shown = _shown[preset];
+    if (shown != null) emit(shown);
+    return _load(preset, silent: shown != null);
+  }
 
   Future<void> _load(PeriodPreset preset, {required bool silent}) async {
     if (!silent) emit(AnalyticsState.loading(preset));
     try {
       final report = await _repository.getReport(preset);
       if (preset != _preset) return;
-      emit(
-        report.income == 0 && report.expense == 0
-            ? AnalyticsState.empty(preset)
-            : AnalyticsState.loaded(
-                report,
-                preset,
-                _percents([for (final s in report.expenseByCategory) s.share]),
-              ),
-      );
+      final next = report.income == 0 && report.expense == 0
+          ? AnalyticsState.empty(preset)
+          : AnalyticsState.loaded(
+              report,
+              preset,
+              _percents([for (final s in report.expenseByCategory) s.share]),
+            );
+      _shown[preset] = next;
+      emit(next);
     } on Failure catch (failure, stackTrace) {
       getIt<Talker>().handle(failure, stackTrace);
+      if (preset != _preset) return;
+      // Отчёт уже на экране — ошибка тихого обновления его не прячет.
+      if (silent && (state is AnalyticsLoaded || state is AnalyticsEmpty)) {
+        return;
+      }
       emit(AnalyticsState.error(failure, preset));
     }
   }

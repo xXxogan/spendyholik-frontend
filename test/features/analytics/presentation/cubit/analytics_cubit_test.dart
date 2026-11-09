@@ -178,4 +178,74 @@ void main() {
     verify: (_) =>
         verify(() => repository.getReport(PeriodPreset.year)).called(2),
   );
+
+  group('повторное переключение', () {
+    test('период уже открывали — сразу показан, без скелетона', () async {
+      when(() => repository.getReport(any())).thenAnswer((_) async => report());
+      final cubit = build();
+      await cubit.selectPeriod(PeriodPreset.month);
+      await cubit.selectPeriod(PeriodPreset.week);
+
+      final states = <AnalyticsState>[];
+      final sub = cubit.stream.listen(states.add);
+      await cubit.selectPeriod(PeriodPreset.month);
+      await pumpEventQueue();
+      await sub.cancel();
+
+      expect(states, isNotEmpty);
+      expect(states.whereType<AnalyticsLoading>(), isEmpty);
+      expect(states.first, isA<AnalyticsLoaded>());
+      expect((states.first as AnalyticsLoaded).preset, PeriodPreset.month);
+      await cubit.close();
+    });
+
+    test('показанный из памяти отчёт тихо обновляется с сервера', () async {
+      var calls = 0;
+      when(() => repository.getReport(PeriodPreset.month))
+          .thenAnswer((_) async => report(expense: ++calls == 1 ? 1000 : 2000));
+      when(() => repository.getReport(PeriodPreset.week))
+          .thenAnswer((_) async => report());
+      final cubit = build();
+      await cubit.selectPeriod(PeriodPreset.month);
+      await cubit.selectPeriod(PeriodPreset.week);
+      await cubit.selectPeriod(PeriodPreset.month);
+
+      expect((cubit.state as AnalyticsLoaded).report.expense, 2000);
+      await cubit.close();
+    });
+
+    test('тихое обновление не удалось — остаётся показанный отчёт', () async {
+      var calls = 0;
+      when(() => repository.getReport(PeriodPreset.month)).thenAnswer(
+        (_) async => ++calls == 1 ? report() : throw const NetworkFailure(),
+      );
+      when(() => repository.getReport(PeriodPreset.week))
+          .thenAnswer((_) async => report());
+      final cubit = build();
+      await cubit.selectPeriod(PeriodPreset.month);
+      await cubit.selectPeriod(PeriodPreset.week);
+      await cubit.selectPeriod(PeriodPreset.month);
+
+      expect(cubit.state, isA<AnalyticsLoaded>());
+      await cubit.close();
+    });
+
+    test('шина сбрасывает запомненные периоды — снова скелетон', () async {
+      when(() => repository.getReport(any())).thenAnswer((_) async => report());
+      final cubit = build();
+      await cubit.selectPeriod(PeriodPreset.month);
+      await cubit.selectPeriod(PeriodPreset.week);
+      changes.add({DataTopic.transactions});
+      await pumpEventQueue();
+
+      final states = <AnalyticsState>[];
+      final sub = cubit.stream.listen(states.add);
+      await cubit.selectPeriod(PeriodPreset.month);
+      await pumpEventQueue();
+      await sub.cancel();
+
+      expect(states.first, const AnalyticsState.loading(PeriodPreset.month));
+      await cubit.close();
+    });
+  });
 }

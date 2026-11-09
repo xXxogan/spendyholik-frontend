@@ -17,4 +17,17 @@ void main() {
       expect(find.text('exchangerate-api.com'), findsOneWidget);
     });
   }
+
+  testWidgets('«Данные» — на сервере, а не «до перезапуска (демо)»', (
+    tester,
+  ) async {
+    await pumpPage(tester, const AboutPage());
+    await settle(tester);
+
+    expect(
+      find.text('На сервере, последние — в кэше устройства'),
+      findsOneWidget,
+    );
+    expect(find.textContaining('демо'), findsNothing);
+  });
 }
