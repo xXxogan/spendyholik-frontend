@@ -99,7 +99,7 @@ class AccountPatchBody {
   const AccountPatchBody({
     required this.name,
     required this.type,
-    required this.balanceMinor,
+    this.balanceMinor,
     required this.color,
     required this.interestRate,
     this.last4,
@@ -108,7 +108,10 @@ class AccountPatchBody {
 
   final String name;
   final String type;
-  final int balanceMinor;
+
+  /// Не шлётся, если баланс не меняли.
+  @JsonKey(includeIfNull: false)
+  final int? balanceMinor;
   final String color;
   final String? last4;
   final int? creditLimitMinor;

@@ -49,9 +49,10 @@ class TransactionDetailView extends StatelessWidget {
         };
         final title = transaction == null
             ? null
-            : transaction.title.isEmpty
-            ? transaction.category?.name
-            : transaction.title;
+            : transaction.title.isNotEmpty
+            ? transaction.title
+            : transaction.category?.name ??
+                  context.l10n.transactionTypeTransfer;
 
         return AppGlassScaffold(
           leading: const AppBackButton(fallback: _fallback),

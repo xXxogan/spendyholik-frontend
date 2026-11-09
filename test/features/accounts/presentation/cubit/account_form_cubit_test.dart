@@ -261,7 +261,24 @@ void main() {
               as AccountDraft;
       expect(draft.balance, -1240050);
       expect(draft.creditLimit, 15000000);
+      expect(draft.balanceChanged, isFalse, reason: 'баланс не трогали');
       verifyNever(() => repository.create(any()));
     },
   );
+
+  test('правка баланса — balanceChanged', () async {
+    when(() => repository.getAccount('credit')).thenAnswer((_) async => credit);
+    when(() => repository.update('credit', any()))
+        .thenAnswer((_) async => credit);
+    final cubit = build();
+    await cubit.init('credit');
+    cubit.balanceChanged('-100');
+    await cubit.save();
+
+    final draft =
+        verify(() => repository.update('credit', captureAny())).captured.single
+            as AccountDraft;
+    expect(draft.balanceChanged, isTrue);
+    await cubit.close();
+  });
 }

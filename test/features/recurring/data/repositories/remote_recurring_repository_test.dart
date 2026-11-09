@@ -96,6 +96,7 @@ void main() {
   setUp(() {
     api = MockRecurringApi();
     cache = MockApiCache();
+    when(() => cache.generation).thenReturn(0);
     bus = MockDataChangeBus();
     when(() => cache.read(any())).thenAnswer((_) async => null);
     when(() => cache.write(any(), any())).thenAnswer((_) async {});

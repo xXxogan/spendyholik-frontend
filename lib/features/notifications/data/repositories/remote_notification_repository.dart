@@ -1,8 +1,7 @@
-import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 import 'package:spendyholik/core/events/data_change_bus.dart';
+import 'package:spendyholik/core/network/api_call.dart';
 import 'package:spendyholik/core/network/cached_read.dart';
-import 'package:spendyholik/core/network/failure_mapper.dart';
 import 'package:spendyholik/features/notifications/data/api/notifications_api.dart';
 import 'package:spendyholik/features/notifications/data/models/models.dart';
 import 'package:spendyholik/features/notifications/data/models/notification_dtos.dart';
@@ -78,11 +77,5 @@ class RemoteNotificationRepository implements NotificationRepository {
     );
   }
 
-  Future<T> _call<T>(Future<T> Function() request) async {
-    try {
-      return await request();
-    } on DioException catch (e) {
-      throw mapDioException(e);
-    }
-  }
+  Future<T> _call<T>(Future<T> Function() request) => callApi(request);
 }

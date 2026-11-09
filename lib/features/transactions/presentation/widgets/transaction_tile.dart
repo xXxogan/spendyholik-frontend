@@ -4,6 +4,7 @@ import 'package:spendyholik/core/models/models.dart';
 import 'package:spendyholik/core/widgets/widgets.dart';
 import 'package:spendyholik/features/transactions/data/models/models.dart';
 import 'package:spendyholik/features/transactions/presentation/widgets/transaction_amount.dart';
+import 'package:spendyholik/l10n/l10n.dart';
 
 class TransactionTile extends StatelessWidget {
   const TransactionTile({
@@ -29,7 +30,10 @@ class TransactionTile extends StatelessWidget {
     final t = transaction;
     final category = t.category;
 
-    final title = t.title.isEmpty ? category?.name ?? '' : t.title;
+    // Без названия сервер отдаёт пустое (см. RemoteTransactionRepository).
+    final title = t.title.isNotEmpty
+        ? t.title
+        : category?.name ?? context.l10n.transactionTypeTransfer;
     final (amount, amountColor) = transactionAmount(
       t,
       currency,

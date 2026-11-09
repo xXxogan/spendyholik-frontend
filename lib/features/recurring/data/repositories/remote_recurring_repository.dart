@@ -1,10 +1,9 @@
-import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 import 'package:intl/intl.dart';
 import 'package:spendyholik/core/events/data_change_bus.dart';
 import 'package:spendyholik/core/models/models.dart';
+import 'package:spendyholik/core/network/api_call.dart';
 import 'package:spendyholik/core/network/cached_read.dart';
-import 'package:spendyholik/core/network/failure_mapper.dart';
 import 'package:spendyholik/core/session/session_currency.dart';
 import 'package:spendyholik/features/accounts/accounts.dart';
 import 'package:spendyholik/features/categories/categories.dart';
@@ -172,11 +171,5 @@ class RemoteRecurringRepository implements RecurringRepository {
   Future<T> _call<T>(
     Future<T> Function() request, [
     Map<String, String> fields = const {},
-  ]) async {
-    try {
-      return await request();
-    } on DioException catch (e) {
-      throw mapDioException(e, fields: fields);
-    }
-  }
+  ]) => callApi(request, fields: fields);
 }

@@ -199,4 +199,17 @@ void main() {
     );
     expect(server.refreshCalls, 0);
   });
+
+  test(
+    'выход — без Bearer: просроченный access не должен запускать refresh',
+    () async {
+      server.validAccess = 'new';
+      await expectLater(
+        dio.post<void>('auth/logout/', data: {'refresh_token': 'ref'}),
+        throwsA(isA<DioException>()),
+      );
+      expect(server.seen['auth/logout/'], isNull);
+      expect(server.refreshCalls, 0);
+    },
+  );
 }

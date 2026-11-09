@@ -72,6 +72,7 @@ void main() {
   setUp(() {
     api = MockAccountsApi();
     cache = MockApiCache();
+    when(() => cache.generation).thenReturn(0);
     bus = MockDataChangeBus();
     when(() => cache.read(any())).thenAnswer((_) async => null);
     when(() => cache.write(any(), any())).thenAnswer((_) async {});
@@ -230,6 +231,27 @@ void main() {
           DataTopic.recurring,
         }),
       ).called(1);
+    });
+
+    test('update без смены баланса — balance_minor не шлётся', () async {
+      when(() => api.update(any(), any())).thenAnswer((_) async => account());
+
+      await repository.update(
+        'a1',
+        const AccountDraft(
+          name: 'Карта',
+          type: AccountType.debit,
+          balance: 500000,
+          color: EntityColor.blue,
+          balanceChanged: false,
+        ),
+      );
+
+      final body =
+          verify(() => api.update('a1', captureAny())).captured.single
+              as AccountPatchBody;
+      // Иначе правка имени вернула бы баланс к значению на момент открытия формы.
+      expect(body.toJson().containsKey('balance_minor'), isFalse);
     });
 
     test('archive и unarchive — свои эндпоинты, emit accounts', () async {

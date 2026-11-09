@@ -1,10 +1,9 @@
-import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 import 'package:intl/intl.dart';
 import 'package:spendyholik/core/events/data_change_bus.dart';
 import 'package:spendyholik/core/models/models.dart';
+import 'package:spendyholik/core/network/api_call.dart';
 import 'package:spendyholik/core/network/cached_read.dart';
-import 'package:spendyholik/core/network/failure_mapper.dart';
 import 'package:spendyholik/core/session/session_currency.dart';
 import 'package:spendyholik/features/accounts/accounts.dart';
 import 'package:spendyholik/features/goals/data/api/goals_api.dart';
@@ -136,7 +135,7 @@ class RemoteGoalRepository implements GoalRepository {
   }
 
   @override
-  Future<GoalModel> contribute(
+  Future<void> contribute(
     String goalId,
     int amount,
     String accountId,
@@ -152,10 +151,9 @@ class RemoteGoalRepository implements GoalRepository {
       ),
       _topUpFields,
     );
-    // Ответ — само пополнение, а интерфейс отдаёт цель с новой суммой.
-    final goal = await _call(() => _api.get(goalId));
+    // Шина сразу после записи: перечитывание цели здесь могло упасть уже после
+    // списания — пользователь увидел бы ошибку, а повтор пополнил бы дважды.
     _bus.emit({DataTopic.goals, DataTopic.accounts});
-    return _goal(goal);
   }
 
   GoalModel _goal(GoalOutDto dto) => GoalModel(
@@ -201,11 +199,5 @@ class RemoteGoalRepository implements GoalRepository {
   Future<T> _call<T>(
     Future<T> Function() request, [
     Map<String, String> fields = const {},
-  ]) async {
-    try {
-      return await request();
-    } on DioException catch (e) {
-      throw mapDioException(e, fields: fields);
-    }
-  }
+  ]) => callApi(request, fields: fields);
 }

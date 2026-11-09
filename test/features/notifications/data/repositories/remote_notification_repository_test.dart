@@ -55,6 +55,7 @@ void main() {
   setUp(() {
     api = MockNotificationsApi();
     cache = MockApiCache();
+    when(() => cache.generation).thenReturn(0);
     bus = MockDataChangeBus();
     talker = MockTalker();
     when(() => cache.read(any())).thenAnswer((_) async => null);

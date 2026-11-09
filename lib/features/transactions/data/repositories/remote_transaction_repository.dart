@@ -1,11 +1,10 @@
-import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 import 'package:intl/intl.dart';
 import 'package:spendyholik/core/config/app_config.dart';
 import 'package:spendyholik/core/events/data_change_bus.dart';
 import 'package:spendyholik/core/models/models.dart';
+import 'package:spendyholik/core/network/api_call.dart';
 import 'package:spendyholik/core/network/cached_read.dart';
-import 'package:spendyholik/core/network/failure_mapper.dart';
 import 'package:spendyholik/core/session/session_currency.dart';
 import 'package:spendyholik/features/accounts/accounts.dart';
 import 'package:spendyholik/features/categories/categories.dart';
@@ -168,6 +167,8 @@ class RemoteTransactionRepository implements TransactionRepository {
   }
 
   TransactionModel _transaction(TransactionOutDto dto) {
+    final type =
+        TransactionType.values.asNameMap()[dto.type] ?? TransactionType.expense;
     final day = DateTime.parse(dto.date);
     // Без времени — полдень, чтобы операция не уезжала на соседний день.
     final parts = (dto.time ?? '12:00:00').split(':');
@@ -175,11 +176,9 @@ class RemoteTransactionRepository implements TransactionRepository {
     return TransactionModel(
       id: dto.id,
       currency: _currency(dto.amount.currency),
-      type:
-          TransactionType.values.asNameMap()[dto.type] ??
-          TransactionType.expense,
+      type: type,
       amount: dto.amount.minor,
-      title: dto.title,
+      title: _ownTitle(dto, type),
       category: switch (dto.category) {
         final ref? => CategoryRef(
           id: ref.id,
@@ -206,6 +205,18 @@ class RemoteTransactionRepository implements TransactionRepository {
     );
   }
 
+  /// Без своего названия сервер отдаёт имя категории (у перевода — счёта или
+  /// «Перевод», renderers.py). Это не название пользователя: иначе форма правки
+  /// вернула бы его на сервер навсегда, и переименование категории до операции
+  /// уже не дошло бы (аудит 2026-11-09). Пустое название плитка показывает
+  /// именем категории или «откуда → куда» сама.
+  static String _ownTitle(TransactionOutDto dto, TransactionType type) {
+    final fallbacks = type == TransactionType.transfer
+        ? {dto.account.name, 'Перевод'}
+        : {dto.category?.name ?? ''};
+    return fallbacks.contains(dto.title) ? '' : dto.title;
+  }
+
   AccountRef _accountRef(AccountRefDto dto) => AccountRef(
     id: dto.id,
     name: dto.name,
@@ -219,11 +230,6 @@ class RemoteTransactionRepository implements TransactionRepository {
     return _session.value;
   }
 
-  Future<T> _call<T>(Future<T> Function() request) async {
-    try {
-      return await request();
-    } on DioException catch (e) {
-      throw mapDioException(e, fields: _fields);
-    }
-  }
+  Future<T> _call<T>(Future<T> Function() request) =>
+      callApi(request, fields: _fields);
 }

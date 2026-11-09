@@ -66,6 +66,7 @@ void main() {
   setUp(() {
     api = MockAnalyticsApi();
     cache = MockApiCache();
+    when(() => cache.generation).thenReturn(0);
     when(() => cache.read(any())).thenAnswer((_) async => null);
     when(() => cache.write(any(), any())).thenAnswer((_) async {});
     repository = RemoteAnalyticsRepository(

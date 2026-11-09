@@ -25,5 +25,6 @@ abstract interface class GoalRepository {
   Future<void> delete(String id);
 
   /// `ValidationFailure('amount', exceedsBalance)`, если на счёте меньше [amount].
-  Future<GoalModel> contribute(String goalId, int amount, String accountId);
+  /// Новую сумму цели экраны получают по шине — без перечитывания здесь.
+  Future<void> contribute(String goalId, int amount, String accountId);
 }

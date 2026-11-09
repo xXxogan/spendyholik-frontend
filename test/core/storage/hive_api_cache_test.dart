@@ -46,4 +46,10 @@ void main() {
     expect(await cache.read('accounts'), isNull);
     expect(await cache.read('dashboard'), isNull);
   });
+
+  test('clear увеличивает поколение', () async {
+    final before = cache.generation;
+    await cache.clear();
+    expect(cache.generation, before + 1);
+  });
 }

@@ -25,6 +25,7 @@ void main() {
     cache = MockApiCache();
     when(() => cache.write(any(), any())).thenAnswer((_) async {});
     when(() => cache.read(any())).thenAnswer((_) async => null);
+    when(() => cache.generation).thenReturn(0);
     status = NetworkStatus();
     reader = CachedReader(cache, status, Talker());
   });
@@ -91,4 +92,20 @@ void main() {
     verifyNever(() => cache.read(any()));
     expect(status.state, isTrue);
   });
+
+  test(
+    'кэш очистили, пока шёл запрос (выход) — ответ в кэш не пишется',
+    () async {
+      var generation = 0;
+      when(() => cache.generation).thenAnswer((_) => generation);
+
+      final result = await read(() async {
+        generation++; // выход во время запроса
+        return ['Чужое'];
+      });
+
+      expect(result, ['Чужое']);
+      verifyNever(() => cache.write(any(), any()));
+    },
+  );
 }

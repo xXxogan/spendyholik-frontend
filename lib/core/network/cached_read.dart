@@ -32,10 +32,13 @@ class CachedReader {
     required Object? Function(T value) toJson,
     required T Function(Object? json) fromJson,
   }) async {
+    final generation = _cache.generation;
     try {
       final value = await fetch();
       _status.reportOnline();
-      await _cache.write(key, jsonEncode(toJson(value)));
+      if (_cache.generation == generation) {
+        await _cache.write(key, jsonEncode(toJson(value)));
+      }
       return value;
     } on NetworkFailure catch (failure) {
       _status.reportOffline();

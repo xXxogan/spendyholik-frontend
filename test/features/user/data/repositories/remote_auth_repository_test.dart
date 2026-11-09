@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:spendyholik/core/errors/failure.dart';
+import 'package:spendyholik/core/events/data_change_bus.dart';
 import 'package:spendyholik/core/models/models.dart';
 import 'package:spendyholik/core/network/auth_tokens.dart';
 import 'package:spendyholik/core/network/cached_read.dart';
@@ -22,6 +23,8 @@ class MockTokenStorage extends Mock implements TokenStorage {}
 
 class MockApiCache extends Mock implements ApiCache {}
 
+class MockDataChangeBus extends Mock implements DataChangeBus {}
+
 final auth = AuthOutDto(
   access: 'acc',
   refresh: 'ref',
@@ -42,6 +45,7 @@ void main() {
   late SessionExpiry expiry;
   late MockApiCache cache;
   late SessionCurrency sessionCurrency;
+  late MockDataChangeBus bus;
   late RemoteAuthRepository repository;
 
   final stored = AuthTokens(
@@ -52,6 +56,7 @@ void main() {
   );
 
   setUpAll(() {
+    registerFallbackValue(<DataTopic>{});
     registerFallbackValue(const LoginBody(email: '', password: ''));
     registerFallbackValue(
       const RegisterBody(email: '', password: '', firstName: ''),
@@ -80,6 +85,7 @@ void main() {
     when(() => cache.read(any())).thenAnswer((_) async => null);
     when(() => cache.write(any(), any())).thenAnswer((_) async {});
     when(() => cache.clear()).thenAnswer((_) async {});
+    when(() => cache.generation).thenReturn(0);
     repository = RemoteAuthRepository(
       api,
       tokens,
@@ -87,6 +93,8 @@ void main() {
       CachedReader(cache, NetworkStatus(), Talker()),
       cache,
       sessionCurrency = SessionCurrency(),
+      Talker(settings: TalkerSettings(useConsoleLogs: false)),
+      bus = MockDataChangeBus(),
     );
   });
 
@@ -328,5 +336,84 @@ void main() {
             .having((f) => f.reason, 'reason', FieldError.wrongPassword),
       ),
     );
+  });
+
+  test(
+    'changePassword: сервер отозвал все сессии — новый вход с новым паролем',
+    () async {
+      when(() => tokens.read()).thenAnswer((_) async => stored);
+      await repository.restoreSession();
+      when(() => api.changePassword(any())).thenAnswer((_) async {});
+      when(() => api.login(any())).thenAnswer((_) async => auth);
+
+      await repository.changePassword('old', 'new-secret');
+
+      final body =
+          verify(() => api.login(captureAny())).captured.single as LoginBody;
+      expect(body.email, 'maria@example.com');
+      expect(body.password, 'new-secret');
+      final saved =
+          verify(() => tokens.write(captureAny())).captured.last as AuthTokens;
+      expect(saved.refresh, 'ref');
+    },
+  );
+
+  test(
+    'смена базовой валюты — итоги перезагружаются (сервер их пересчитал)',
+    () async {
+      when(() => api.updateProfile(any())).thenAnswer((_) async => profile);
+
+      await repository.setBaseCurrency(Currency.usd);
+
+      verify(
+        () => bus.emit({
+          DataTopic.accounts,
+          DataTopic.budgets,
+          DataTopic.transactions,
+        }),
+      ).called(1);
+    },
+  );
+
+  test('смена имени и email — итоги не трогаются', () async {
+    when(() => api.updateProfile(any())).thenAnswer((_) async => profile);
+
+    await repository.updateProfile(name: 'Мария', email: 'm@example.com');
+
+    verifyNever(() => bus.emit(any()));
+  });
+
+  test('профиль не того формата — UnknownFailure (Splash не висит)', () async {
+    when(() => tokens.read()).thenAnswer((_) async => stored);
+    when(() => api.profile()).thenThrow(TypeError());
+
+    await expectLater(
+      repository.restoreSession(),
+      throwsA(isA<UnknownFailure>()),
+    );
+  });
+
+  test('вход — кэш прежнего пользователя стёрт до записи токенов', () async {
+    when(() => api.login(any())).thenAnswer((_) async => auth);
+
+    await repository.signIn('maria@example.com', 'secret-1');
+
+    verifyInOrder([() => cache.clear(), () => tokens.write(any())]);
+  });
+
+  test('регистрация — кэш стёрт', () async {
+    when(() => api.register(any())).thenAnswer((_) async => auth);
+
+    await repository.register('Мария', 'maria@example.com', 'secret-12');
+
+    verify(() => cache.clear()).called(1);
+  });
+
+  test('токенов нет — кэш стёрт: без сессии чужие данные не нужны', () async {
+    when(() => tokens.read()).thenAnswer((_) async => null);
+
+    await repository.restoreSession();
+
+    verify(() => cache.clear()).called(1);
   });
 }

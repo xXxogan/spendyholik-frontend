@@ -43,11 +43,12 @@ TransactionOutDto tx({
     'color': 'green',
   },
   Map<String, dynamic>? transferTo,
+  String title = 'Пятёрочка',
 }) => TransactionOutDto.fromJson({
   'id': id,
   'type': type,
   'amount': _money(120000, currency),
-  'title': 'Пятёрочка',
+  'title': title,
   'subtitle': 'Продукты · Карта',
   'category': category,
   'account': {'id': 'a1', 'name': 'Карта', 'color': 'blue'},
@@ -104,6 +105,7 @@ void main() {
   setUp(() {
     api = MockTransactionsApi();
     cache = MockApiCache();
+    when(() => cache.generation).thenReturn(0);
     bus = MockDataChangeBus();
     when(() => cache.read(any())).thenAnswer((_) async => null);
     when(() => cache.write(any(), any())).thenAnswer((_) async {});
@@ -423,6 +425,42 @@ void main() {
         repository.create(draft),
         throwsA(isA<ValidationFailure>().having((f) => f.field, 'f', 'amount')),
       );
+    });
+  });
+
+  group('подставное название сервера', () {
+    Future<String> titleOf(TransactionOutDto dto) async {
+      when(() => api.get('t1')).thenAnswer((_) async => dto);
+      return (await repository.getTransaction('t1')).title;
+    }
+
+    test('совпадает с именем категории — названия нет', () async {
+      expect(await titleOf(tx(title: 'Продукты')), '');
+    });
+
+    test('перевод: имя счёта или «Перевод» — названия нет', () async {
+      final to = {'id': 'a2', 'name': 'Наличные', 'color': 'green'};
+      expect(
+        await titleOf(
+          tx(type: 'transfer', category: null, transferTo: to, title: 'Карта'),
+        ),
+        '',
+      );
+      expect(
+        await titleOf(
+          tx(
+            type: 'transfer',
+            category: null,
+            transferTo: to,
+            title: 'Перевод',
+          ),
+        ),
+        '',
+      );
+    });
+
+    test('своё название остаётся', () async {
+      expect(await titleOf(tx()), 'Пятёрочка');
     });
   });
 }

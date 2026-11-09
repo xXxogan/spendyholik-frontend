@@ -75,6 +75,7 @@ void main() {
   setUp(() {
     api = MockDebtsApi();
     cache = MockApiCache();
+    when(() => cache.generation).thenReturn(0);
     bus = MockDataChangeBus();
     when(() => cache.read(any())).thenAnswer((_) async => null);
     when(() => cache.write(any(), any())).thenAnswer((_) async {});
@@ -242,17 +243,14 @@ void main() {
       verifyNever(() => bus.emit(any()));
     });
 
-    test('repay — POST, затем долг заново, emit долгов и счетов', () async {
+    test('repay — только POST и шина: перечитывание долга могло бы упасть после списания', () async {
       when(() => api.repay(any(), any())).thenAnswer(
         (_) async =>
             DebtPaymentOutDto.fromJson({'id': 'p1', 'amount': money(500000)}),
       );
-      when(() => api.get('d1'))
-          .thenAnswer((_) async => debt(remaining: 700000));
+      await repository.repay('d1', 500000, 'a1');
 
-      final updated = await repository.repay('d1', 500000, 'a1');
-
-      expect(updated.remaining, 700000);
+      verifyNever(() => api.get(any()));
       final body =
           verify(() => api.repay('d1', captureAny())).captured.single
               as RepayBody;

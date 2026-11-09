@@ -67,6 +67,7 @@ void main() {
   setUp(() {
     api = MockGoalsApi();
     cache = MockApiCache();
+    when(() => cache.generation).thenReturn(0);
     bus = MockDataChangeBus();
     when(() => cache.read(any())).thenAnswer((_) async => null);
     when(() => cache.write(any(), any())).thenAnswer((_) async {});
@@ -206,7 +207,7 @@ void main() {
       verify(() => bus.emit({DataTopic.goals})).called(1);
     });
 
-    test('contribute — POST, затем цель заново', () async {
+    test('contribute — только POST и шина: перечитывание могло бы упасть после списания', () async {
       when(() => api.contribute(any(), any())).thenAnswer(
         (_) async => ContributionOutDto.fromJson({
           'id': 'c1',
@@ -217,11 +218,9 @@ void main() {
           'date': '2026-11-08',
         }),
       );
-      when(() => api.get('g1')).thenAnswer((_) async => goal(saved: 15000000));
+      await repository.contribute('g1', 3000000, 'a1');
 
-      final updated = await repository.contribute('g1', 3000000, 'a1');
-
-      expect(updated.saved, 15000000);
+      verifyNever(() => api.get(any()));
       final body =
           verify(() => api.contribute('g1', captureAny())).captured.single
               as ContributeBody;

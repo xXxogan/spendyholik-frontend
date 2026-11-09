@@ -1,9 +1,8 @@
-import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 import 'package:spendyholik/core/events/data_change_bus.dart';
 import 'package:spendyholik/core/models/models.dart';
+import 'package:spendyholik/core/network/api_call.dart';
 import 'package:spendyholik/core/network/cached_read.dart';
-import 'package:spendyholik/core/network/failure_mapper.dart';
 import 'package:spendyholik/features/categories/data/api/categories_api.dart';
 import 'package:spendyholik/features/categories/data/models/category_dtos.dart';
 import 'package:spendyholik/features/categories/data/models/models.dart';
@@ -90,11 +89,6 @@ class RemoteCategoryRepository implements CategoryRepository {
     transactionCount: dto.transactionCount,
   );
 
-  Future<T> _call<T>(Future<T> Function() request) async {
-    try {
-      return await request();
-    } on DioException catch (e) {
-      throw mapDioException(e, fields: _fields);
-    }
-  }
+  Future<T> _call<T>(Future<T> Function() request) =>
+      callApi(request, fields: _fields);
 }

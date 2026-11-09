@@ -1,13 +1,13 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 import 'package:spendyholik/core/errors/failure.dart';
+import 'package:spendyholik/core/events/data_change_bus.dart';
 import 'package:spendyholik/core/models/currency.dart';
+import 'package:spendyholik/core/network/api_call.dart';
 import 'package:spendyholik/core/network/auth_tokens.dart';
 import 'package:spendyholik/core/network/cached_read.dart';
-import 'package:spendyholik/core/network/failure_mapper.dart';
 import 'package:spendyholik/core/network/session_expiry.dart';
 import 'package:spendyholik/core/network/token_storage.dart';
 import 'package:spendyholik/core/session/session_currency.dart';
@@ -16,6 +16,7 @@ import 'package:spendyholik/features/user/data/api/auth_api.dart';
 import 'package:spendyholik/features/user/data/models/auth_dtos.dart';
 import 'package:spendyholik/features/user/data/models/models.dart';
 import 'package:spendyholik/features/user/data/repositories/auth_repository.dart';
+import 'package:talker/talker.dart';
 
 @LazySingleton(as: AuthRepository)
 class RemoteAuthRepository implements AuthRepository {
@@ -26,6 +27,8 @@ class RemoteAuthRepository implements AuthRepository {
     this._reader,
     this._cache,
     this._sessionCurrency,
+    this._talker,
+    this._bus,
   ) {
     // Токены уже стёрты интерсептором — остаётся вывести на вход.
     expiry.expired.listen((_) async {
@@ -47,6 +50,11 @@ class RemoteAuthRepository implements AuthRepository {
   final CachedReader _reader;
   final ApiCache _cache;
   final SessionCurrency _sessionCurrency;
+  final Talker _talker;
+  final DataChangeBus _bus;
+
+  /// Email текущего пользователя — для нового входа после смены пароля.
+  String? _email;
   final _changes = StreamController<UserModel?>.broadcast();
 
   @override
@@ -54,7 +62,12 @@ class RemoteAuthRepository implements AuthRepository {
 
   @override
   Future<UserModel?> restoreSession() async {
-    if (await _tokens.read() == null) return null;
+    if (await _tokens.read() == null) {
+      // Токены не прочитались (Web OperationError, S-02) — кэш принадлежит
+      // сессии, которой больше нет.
+      await _cache.clear();
+      return null;
+    }
     try {
       return _user(await _profile());
     } on UnauthorizedFailure {
@@ -83,8 +96,9 @@ class RemoteAuthRepository implements AuthRepository {
     if (tokens != null) {
       try {
         await _api.logout(RefreshBody(refreshToken: tokens.refresh));
-      } on DioException {
-        // Без сети refresh доживёт до своего срока на сервере — это допустимо.
+      } on Object {
+        // Без сети refresh доживёт до своего срока на сервере — это допустимо;
+        // локальный выход не должен зависеть от ответа.
       }
     }
     await _tokens.clear();
@@ -99,18 +113,44 @@ class RemoteAuthRepository implements AuthRepository {
   }) => _patch(ProfilePatchBody(firstName: name, email: email));
 
   @override
-  Future<UserModel> setBaseCurrency(Currency currency) =>
-      _patch(ProfilePatchBody(baseCurrency: currency.code));
+  Future<UserModel> setBaseCurrency(Currency currency) async {
+    final user = await _patch(ProfilePatchBody(baseCurrency: currency.code));
+    // Итоги (общий баланс, бюджеты, аналитика) сервер пересчитал в новую
+    // валюту — без этого показывались бы старые числа с новым символом.
+    _bus.emit({DataTopic.accounts, DataTopic.budgets, DataTopic.transactions});
+    return user;
+  }
 
   @override
-  Future<void> changePassword(String current, String next) => _call(
-    () => _api.changePassword(
-      PasswordBody(oldPassword: current, newPassword: next),
-    ),
-  );
+  Future<void> changePassword(String current, String next) async {
+    await _call(
+      () => _api.changePassword(
+        PasswordBody(oldPassword: current, newPassword: next),
+      ),
+    );
+    // Сервер отзывает все сессии при смене пароля, включая эту: без нового
+    // входа через 15 минут (срок access) пользователя выкинуло бы на экран входа.
+    final email = _email;
+    if (email == null) return;
+    try {
+      await _signInWith(
+        () => _api.login(LoginBody(email: email, password: next)),
+      );
+    } on Failure catch (error, stackTrace) {
+      // Пароль уже сменён — не ошибка формы; сессия просто истечёт как обычно.
+      _talker.handle(
+        error,
+        stackTrace,
+        'Re-login after password change failed',
+      );
+    }
+  }
 
   Future<UserModel> _signInWith(Future<AuthOutDto> Function() request) async {
     final auth = await _call(request);
+    // Новый пользователь мог войти на том же устройстве: без очистки без сети
+    // показались бы чужие данные, а профиль — прежнего пользователя.
+    await _cache.clear();
     await _tokens.write(
       AuthTokens(
         access: auth.access,
@@ -152,14 +192,10 @@ class RemoteAuthRepository implements AuthRepository {
     if (user.baseCurrency case final currency?) {
       _sessionCurrency.value = currency;
     }
+    _email = user.email;
     return user;
   }
 
-  Future<T> _call<T>(Future<T> Function() request) async {
-    try {
-      return await request();
-    } on DioException catch (e) {
-      throw mapDioException(e, fields: _fields);
-    }
-  }
+  Future<T> _call<T>(Future<T> Function() request) =>
+      callApi(request, fields: _fields);
 }

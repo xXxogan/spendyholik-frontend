@@ -1,9 +1,8 @@
-import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 import 'package:spendyholik/core/events/data_change_bus.dart';
 import 'package:spendyholik/core/models/models.dart';
+import 'package:spendyholik/core/network/api_call.dart';
 import 'package:spendyholik/core/network/cached_read.dart';
-import 'package:spendyholik/core/network/failure_mapper.dart';
 import 'package:spendyholik/core/session/session_currency.dart';
 import 'package:spendyholik/features/accounts/data/api/accounts_api.dart';
 import 'package:spendyholik/features/accounts/data/models/account_dtos.dart';
@@ -124,7 +123,7 @@ class RemoteAccountRepository implements AccountRepository {
         AccountPatchBody(
           name: draft.name,
           type: draft.type.name,
-          balanceMinor: draft.balance,
+          balanceMinor: draft.balanceChanged ? draft.balance : null,
           color: draft.color.name,
           last4: draft.cardLast4,
           creditLimitMinor: draft.creditLimit,
@@ -188,11 +187,6 @@ class RemoteAccountRepository implements AccountRepository {
         : value.toString();
   }
 
-  Future<T> _call<T>(Future<T> Function() request) async {
-    try {
-      return await request();
-    } on DioException catch (e) {
-      throw mapDioException(e, fields: _fields);
-    }
-  }
+  Future<T> _call<T>(Future<T> Function() request) =>
+      callApi(request, fields: _fields);
 }

@@ -16,6 +16,9 @@ class HiveApiCache implements ApiCache {
   Future<Box<CacheEntry>>? _box;
 
   @override
+  int generation = 0;
+
+  @override
   Future<String?> read(String key) =>
       _guard('read', () async => (await _open()).get(key)?.json, orElse: null);
 
@@ -27,8 +30,10 @@ class HiveApiCache implements ApiCache {
   );
 
   @override
-  Future<void> clear() =>
-      _guard('clear', () async => (await _open()).clear(), orElse: null);
+  Future<void> clear() {
+    generation++;
+    return _guard('clear', () async => (await _open()).clear(), orElse: null);
+  }
 
   Future<Box<CacheEntry>> _open() =>
       _box ??= _hive.openBox<CacheEntry>(_boxName);

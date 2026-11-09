@@ -1,10 +1,9 @@
-import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 import 'package:intl/intl.dart';
 import 'package:spendyholik/core/events/data_change_bus.dart';
 import 'package:spendyholik/core/models/models.dart';
+import 'package:spendyholik/core/network/api_call.dart';
 import 'package:spendyholik/core/network/cached_read.dart';
-import 'package:spendyholik/core/network/failure_mapper.dart';
 import 'package:spendyholik/features/budgets/data/api/budgets_api.dart';
 import 'package:spendyholik/features/budgets/data/models/budget_dtos.dart';
 import 'package:spendyholik/features/budgets/data/models/models.dart';
@@ -154,11 +153,6 @@ class RemoteBudgetRepository implements BudgetRepository {
     );
   }
 
-  Future<T> _call<T>(Future<T> Function() request) async {
-    try {
-      return await request();
-    } on DioException catch (e) {
-      throw mapDioException(e, fields: _fields);
-    }
-  }
+  Future<T> _call<T>(Future<T> Function() request) =>
+      callApi(request, fields: _fields);
 }

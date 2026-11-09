@@ -1,11 +1,10 @@
 import 'dart:async';
 
-import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 import 'package:intl/intl.dart';
 import 'package:spendyholik/core/models/models.dart';
+import 'package:spendyholik/core/network/api_call.dart';
 import 'package:spendyholik/core/network/cached_read.dart';
-import 'package:spendyholik/core/network/failure_mapper.dart';
 import 'package:spendyholik/features/analytics/data/api/analytics_api.dart';
 import 'package:spendyholik/features/analytics/data/models/analytics_dtos.dart';
 import 'package:spendyholik/features/analytics/data/models/models.dart';
@@ -178,11 +177,5 @@ class RemoteAnalyticsRepository implements AnalyticsRepository {
     );
   }
 
-  Future<T> _call<T>(Future<T> Function() request) async {
-    try {
-      return await request();
-    } on DioException catch (e) {
-      throw mapDioException(e);
-    }
-  }
+  Future<T> _call<T>(Future<T> Function() request) => callApi(request);
 }

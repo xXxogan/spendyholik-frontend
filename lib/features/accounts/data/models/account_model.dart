@@ -75,6 +75,7 @@ class AccountDraft {
     this.cardLast4,
     this.interestRate,
     this.creditLimit,
+    this.balanceChanged = true,
   });
 
   final String name;
@@ -87,4 +88,8 @@ class AccountDraft {
   final String? cardLast4;
   final double? interestRate;
   final int? creditLimit;
+
+  /// Только для правки: false — баланс не трогали, на сервер он не уходит,
+  /// иначе операция между открытием формы и сохранением была бы откатана.
+  final bool balanceChanged;
 }

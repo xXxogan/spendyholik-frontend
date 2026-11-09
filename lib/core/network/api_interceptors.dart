@@ -14,7 +14,16 @@ class AuthInterceptor extends QueuedInterceptor {
 
   static const refreshDioName = 'refreshDio';
   static const _refreshPath = 'auth/refresh/';
-  static const _public = {'auth/login/', 'auth/register/', _refreshPath};
+
+  /// Выход — тоже без Bearer: с просроченным access сервер ответил бы 401,
+  /// refresh ротировал бы пару, а повтор ушёл бы со старым refresh в теле —
+  /// и новый остался бы жить на сервере (аудит 2026-11-09).
+  static const _public = {
+    'auth/login/',
+    'auth/register/',
+    'auth/logout/',
+    _refreshPath,
+  };
 
   /// Каким access ушёл запрос: по нему видно, обновили ли пару, пока он летел.
   static const _sentWith = 'auth.sentWith';

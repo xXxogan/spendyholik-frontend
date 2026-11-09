@@ -15,5 +15,6 @@ abstract interface class DebtRepository {
   Future<DebtModel> update(String id, DebtDraft draft);
 
   /// `ValidationFailure('amount', exceedsRemaining)`, если сумма больше остатка.
-  Future<DebtModel> repay(String id, int amount, String accountId);
+  /// Новый остаток экраны получают по шине — без перечитывания здесь.
+  Future<void> repay(String id, int amount, String accountId);
 }

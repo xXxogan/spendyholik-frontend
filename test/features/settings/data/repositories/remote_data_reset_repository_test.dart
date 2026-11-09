@@ -25,6 +25,7 @@ void main() {
   setUp(() {
     api = MockDataResetApi();
     cache = MockApiCache();
+    when(() => cache.generation).thenReturn(0);
     bus = MockDataChangeBus();
     when(() => cache.clear()).thenAnswer((_) async {});
     repository = RemoteDataResetRepository(api, cache, bus);

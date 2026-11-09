@@ -20,11 +20,15 @@ class AccountFormCubit extends Cubit<AccountFormState>
 
   final AccountRepository _repository;
 
+  /// Баланс на момент открытия правки: сравнивается при сохранении.
+  int? _loadedBalance;
+
   Future<void> init(String? accountId) async {
     if (accountId == null) return;
     emit(AccountFormState(accountId: accountId, isLoading: true));
     try {
       final account = await _repository.getAccount(accountId);
+      _loadedBalance = account.balance;
       emit(
         AccountFormState(
           accountId: accountId,
@@ -116,6 +120,7 @@ class AccountFormCubit extends Cubit<AccountFormState>
       cardLast4: cardLast4,
       interestRate: interestRate,
       creditLimit: creditLimit,
+      balanceChanged: state.accountId == null || balance != _loadedBalance,
     );
     emit(state.copyWith(status: .submitting, failure: null));
     try {

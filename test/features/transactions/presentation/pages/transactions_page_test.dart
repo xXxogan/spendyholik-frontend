@@ -135,6 +135,33 @@ void main() {
     },
   );
 
+  testWidgets('перевод без названия — «Перевод», а не пустая строка', (
+    tester,
+  ) async {
+    await pump(
+      tester,
+      TransactionsState.loaded([
+        TransactionDayGroup(
+          day: DateTime(2026, 11, 1),
+          items: [
+            TransactionModel(
+              currency: Currency.rub,
+              id: 'bare',
+              type: .transfer,
+              amount: 100,
+              title: '',
+              account: card,
+              toAccount: cash,
+              occurredAt: DateTime(2026, 11, 1, 12),
+            ),
+          ],
+        ),
+      ], const TransactionFilter()),
+    );
+
+    expect(find.text('Перевод'), findsOneWidget);
+  });
+
   testWidgets('пустой заголовок — имя категории; перевод — откуда и куда', (
     tester,
   ) async {

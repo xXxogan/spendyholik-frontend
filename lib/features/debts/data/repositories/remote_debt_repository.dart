@@ -1,10 +1,9 @@
-import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 import 'package:intl/intl.dart';
 import 'package:spendyholik/core/events/data_change_bus.dart';
 import 'package:spendyholik/core/models/models.dart';
+import 'package:spendyholik/core/network/api_call.dart';
 import 'package:spendyholik/core/network/cached_read.dart';
-import 'package:spendyholik/core/network/failure_mapper.dart';
 import 'package:spendyholik/core/session/session_currency.dart';
 import 'package:spendyholik/features/accounts/accounts.dart';
 import 'package:spendyholik/features/debts/data/api/debts_api.dart';
@@ -120,7 +119,7 @@ class RemoteDebtRepository implements DebtRepository {
   }
 
   @override
-  Future<DebtModel> repay(String id, int amount, String accountId) async {
+  Future<void> repay(String id, int amount, String accountId) async {
     await _call(
       () => _api.repay(
         id,
@@ -132,10 +131,9 @@ class RemoteDebtRepository implements DebtRepository {
       ),
       _repayFields,
     );
-    // Ответ — само погашение, а интерфейс отдаёт долг с новым остатком.
-    final debt = await _call(() => _api.get(id));
+    // Шина сразу после записи: перечитывание долга здесь могло упасть уже после
+    // списания — пользователь увидел бы ошибку, а повтор погасил бы дважды.
     _bus.emit({DataTopic.debts, DataTopic.accounts});
-    return _debt(debt);
   }
 
   DebtModel _debt(DebtOutDto dto) => DebtModel(
@@ -194,11 +192,5 @@ class RemoteDebtRepository implements DebtRepository {
   Future<T> _call<T>(
     Future<T> Function() request, [
     Map<String, String> fields = const {},
-  ]) async {
-    try {
-      return await request();
-    } on DioException catch (e) {
-      throw mapDioException(e, fields: fields);
-    }
-  }
+  ]) => callApi(request, fields: fields);
 }
