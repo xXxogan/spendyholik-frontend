@@ -22,7 +22,8 @@ void main() {
       cubit
         ..nameChanged('Иван')
         ..emailChanged('ivan@example.com')
-        ..passwordChanged(password);
+        ..passwordChanged(password)
+        ..consentChanged(true);
 
   blocTest<RegisterCubit, RegisterState>(
     'пусто — required у имени, invalidEmail, tooShort; без запроса',
@@ -34,24 +35,37 @@ void main() {
           RegisterField.name: FieldError.required,
           RegisterField.email: FieldError.invalidEmail,
           RegisterField.password: FieldError.tooShort,
+          RegisterField.consent: FieldError.required,
         },
       ),
     ],
-    verify: (_) => verifyNever(() => auth.register(any(), any(), any())),
+    verify: (_) => verifyNever(
+      () => auth.register(
+        any(),
+        any(),
+        any(),
+        personalDataConsent: any(named: 'personalDataConsent'),
+      ),
+    ),
   );
 
   blocTest<RegisterCubit, RegisterState>(
     'пароль из 7 символов — tooShort, из 8 — уже нет',
-    setUp: () =>
-        when(() => auth.register(any(), any(), any()))
-            .thenAnswer((_) async => ivan),
+    setUp: () => when(
+      () => auth.register(
+        any(),
+        any(),
+        any(),
+        personalDataConsent: any(named: 'personalDataConsent'),
+      ),
+    ).thenAnswer((_) async => ivan),
     build: build,
     act: (cubit) async {
       await filled(cubit, password: '1234567').submit();
       cubit.passwordChanged('12345678');
       await cubit.submit();
     },
-    skip: 3,
+    skip: 4,
     expect: () => [
       isA<RegisterState>().having((s) => s.fieldErrors, 'errors', {
         RegisterField.password: FieldError.tooShort,
@@ -68,27 +82,70 @@ void main() {
         FormStatus.success,
       ),
     ],
-    verify: (_) =>
-        verify(() => auth.register('Иван', 'ivan@example.com', '12345678'))
-            .called(1),
+    verify: (_) => verify(
+      () => auth.register(
+        'Иван',
+        'ivan@example.com',
+        '12345678',
+        personalDataConsent: true,
+      ),
+    ).called(1),
   );
 
   blocTest<RegisterCubit, RegisterState>(
     'email занят — ошибка у email, остальное на месте',
-    setUp: () =>
-        when(() => auth.register(any(), any(), any()))
-            .thenThrow(const EmailTakenFailure()),
+    setUp: () => when(
+      () => auth.register(
+        any(),
+        any(),
+        any(),
+        personalDataConsent: any(named: 'personalDataConsent'),
+      ),
+    ).thenThrow(const EmailTakenFailure()),
     build: build,
     act: (cubit) => filled(cubit).submit(),
-    skip: 4,
+    skip: 5,
     expect: () => [
       const RegisterState(
         name: 'Иван',
         email: 'ivan@example.com',
         password: '12345678',
+        consent: true,
         status: FormStatus.failure,
         fieldErrors: {RegisterField.email: FieldError.emailTaken},
       ),
     ],
+  );
+
+  blocTest<RegisterCubit, RegisterState>(
+    'без согласия на обработку ПДн — ошибка у галочки, запрос не уходит',
+    build: build,
+    act: (cubit) => (filled(cubit)..consentChanged(false)).submit(),
+    verify: (cubit) {
+      expect(cubit.state.fieldErrors, {
+        RegisterField.consent: FieldError.required,
+      });
+      verifyNever(
+        () => auth.register(
+          any(),
+          any(),
+          any(),
+          personalDataConsent: any(named: 'personalDataConsent'),
+        ),
+      );
+    },
+  );
+
+  blocTest<RegisterCubit, RegisterState>(
+    'галочка снимает свою ошибку',
+    build: build,
+    act: (cubit) async {
+      await cubit.submit();
+      cubit.consentChanged(true);
+    },
+    verify: (cubit) => expect(
+      cubit.state.fieldErrors.containsKey(RegisterField.consent),
+      isFalse,
+    ),
   );
 }

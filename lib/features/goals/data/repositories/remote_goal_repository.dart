@@ -135,11 +135,7 @@ class RemoteGoalRepository implements GoalRepository {
   }
 
   @override
-  Future<void> contribute(
-    String goalId,
-    int amount,
-    String accountId,
-  ) async {
+  Future<void> contribute(String goalId, int amount, String accountId) async {
     await _call(
       () => _api.contribute(
         goalId,

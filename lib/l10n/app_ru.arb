@@ -565,7 +565,6 @@
     }
   },
   "registerSubmit": "Создать аккаунт",
-  "registerTerms": "Создавая аккаунт, вы принимаете условия и политику конфиденциальности",
   "profileEditTitle": "Профиль",
   "profileSaved": "Профиль сохранён",
   "profileCurrency": "Базовая валюта",
@@ -598,5 +597,22 @@
   "aboutVersionLabel": "Версия",
   "aboutData": "Данные",
   "aboutDataValue": "На сервере, последние — в кэше устройства",
-  "aboutRatesAttribution": "Rates By Exchange Rate API"
+  "aboutRatesAttribution": "Rates By Exchange Rate API",
+  "fieldErrorInvalidCode": "Неверный код",
+  "fieldErrorCodeExpired": "Код устарел, запросите новый",
+  "fieldErrorTooManyAttempts": "Слишком много попыток, запросите новый код",
+  "errorRateLimitedDaily": "Слишком много кодов, попробуйте завтра",
+  "errorRateLimitedSoon": "Подождите минуту перед новой отправкой",
+  "errorEmailNotVerified": "Подтвердите почту",
+  "registerConsent": "Даю согласие на обработку персональных данных в соответствии с ",
+  "registerConsentPolicy": "политикой обработки персональных данных",
+  "privacyTitle": "Политика обработки персональных данных",
+  "privacyPlaceholder": "Текст готовится.",
+  "codeResend": "Отправить снова",
+  "codeResendIn": "Отправить снова через {seconds} с",
+  "@codeResendIn": {"placeholders": {"seconds": {"type": "int"}}},
+  "emailConfirmTitle": "Подтвердите почту",
+  "emailConfirmSubtitle": "Мы отправили код из 6 цифр на {email}. Введите его, чтобы продолжить.",
+  "@emailConfirmSubtitle": {"placeholders": {"email": {"type": "String"}}},
+  "emailConfirmSignOut": "Выйти"
 }

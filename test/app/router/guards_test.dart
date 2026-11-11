@@ -28,6 +28,13 @@ const withoutCurrency = UserModel(
   email: 'maria@example.com',
 );
 
+const unverified = UserModel(
+  id: 'u2',
+  name: 'Иван',
+  email: 'ivan@example.com',
+  emailVerified: false,
+);
+
 void main() {
   group('authRedirect', () {
     test('нет сессии — login', () {
@@ -208,6 +215,31 @@ void main() {
     test('онбординг и выбор валюты адрес не продолжают', () {
       expect(canFollowNext(const OnboardingRoute(), '/register'), isFalse);
       expect(canFollowNext(const CurrencyRoute(), '/accounts'), isFalse);
+    });
+  });
+
+  group('почта не подтверждена (круг 3)', () {
+    const state = SessionState.authenticated(unverified);
+
+    test('вкладки, выбор валюты, Splash и гостевые — на экран кода', () {
+      expect(authRedirect(state), isA<EmailConfirmRoute>());
+      expect(sessionRedirect(state), isA<EmailConfirmRoute>());
+      expect(splashRoute(state), isA<EmailConfirmRoute>());
+      expect(guestRedirect(state), isA<EmailConfirmRoute>());
+    });
+
+    test('экран кода: неподтверждённого пропускает, подтверждённого — дальше, без сессии — вход', () {
+      expect(emailConfirmRedirect(state), isNull);
+      expect(
+        emailConfirmRedirect(const SessionState.authenticated(withCurrency)),
+        isA<HomeRoute>(),
+      );
+      expect(
+        emailConfirmRedirect(
+          const SessionState.unauthenticated(onboardingSeen: true),
+        ),
+        isA<LoginRoute>(),
+      );
     });
   });
 }

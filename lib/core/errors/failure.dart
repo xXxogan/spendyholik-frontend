@@ -22,6 +22,19 @@ final class EmailTakenFailure extends Failure {
   const EmailTakenFailure();
 }
 
+/// Почта не подтверждена: сервер закрыл данные до ввода кода из письма.
+final class EmailNotVerifiedFailure extends Failure {
+  const EmailNotVerifiedFailure();
+}
+
+/// 429 без поля: код запрошен слишком рано или исчерпан дневной лимит.
+final class RateLimitedFailure extends Failure {
+  const RateLimitedFailure({required this.daily});
+
+  /// true — лимит кодов на сутки, ждать до завтра; false — подождать минуту.
+  final bool daily;
+}
+
 final class ValidationFailure extends Failure {
   const ValidationFailure(this.field, this.reason);
 
@@ -49,5 +62,8 @@ enum FieldError {
   belowRepaid,
   emailTaken,
   currencyMismatch,
+  invalidCode,
+  codeExpired,
+  tooManyAttempts,
   invalid,
 }

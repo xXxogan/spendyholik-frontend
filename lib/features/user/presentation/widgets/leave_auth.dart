@@ -8,10 +8,15 @@ import 'package:spendyholik/features/user/presentation/cubit/session_cubit.dart'
 import 'package:spendyholik/l10n/l10n.dart';
 
 /// Пользователь приходит в сессию через userChanges, а не вместе с ответом
-/// входа — ждём его, иначе guard Главной вернёт на вход.
-Future<void> leaveAuth(BuildContext context) async {
+/// входа — ждём его, иначе guard Главной вернёт на вход. [until] — какого
+/// состояния ждать (после ввода кода — подтверждённой почты, иначе Splash
+/// вернёт на экран кода).
+Future<void> leaveAuth(
+  BuildContext context, {
+  bool Function(SessionState state)? until,
+}) async {
   final state = await getIt<SessionCubit>().waitFor(
-    (s) => s is SessionAuthenticated,
+    until ?? (s) => s is SessionAuthenticated,
   );
   if (!context.mounted) return;
   if (state == null) {

@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:spendyholik/core/network/api_interceptors.dart';
 import 'package:spendyholik/core/network/auth_tokens.dart';
+import 'package:spendyholik/core/network/email_verification_required.dart';
 import 'package:spendyholik/core/network/session_expiry.dart';
 import 'package:spendyholik/core/network/token_storage.dart';
 
@@ -58,6 +59,13 @@ class _Server implements HttpClientAdapter {
         'refresh_expires_at': '2026-12-07T10:00:00Z',
       });
     }
+    if (options.path == 'locked/') {
+      return _json(403, {
+        'code': 'email_not_verified',
+        'detail': 'd',
+        'errors': {},
+      });
+    }
     if (options.path.startsWith('auth/')) return _json(401, {'code': 'x'});
     if (auth != 'Bearer $validAccess') return _json(401, {'code': 'x'});
     return _json(200, {'path': options.path});
@@ -79,17 +87,19 @@ void main() {
   late _MemoryTokens tokens;
   late _Server server;
   late SessionExpiry expiry;
+  late EmailVerificationRequired verification;
   late Dio dio;
 
   setUp(() {
     tokens = _MemoryTokens(_pair('acc', 'ref'));
     server = _Server();
     expiry = SessionExpiry();
+    verification = EmailVerificationRequired();
     final options = BaseOptions(baseUrl: 'https://api.test/api/v1/');
     final plain = Dio(options)..httpClientAdapter = server;
     dio = Dio(options)
       ..httpClientAdapter = server
-      ..interceptors.add(AuthInterceptor(tokens, expiry, plain));
+      ..interceptors.add(AuthInterceptor(tokens, expiry, verification, plain));
   });
 
   test('обычный запрос — Bearer из хранилища', () async {
@@ -209,6 +219,29 @@ void main() {
         throwsA(isA<DioException>()),
       );
       expect(server.seen['auth/logout/'], isNull);
+      expect(server.refreshCalls, 0);
+    },
+  );
+
+  test(
+    '403 email_not_verified — сигнал «нужно подтвердить почту», ошибка дальше',
+    () async {
+      var signals = 0;
+      verification.required.listen((_) => signals++);
+
+      await expectLater(
+        dio.get<void>('locked/'),
+        throwsA(
+          isA<DioException>().having(
+            (e) => e.response?.statusCode,
+            'status',
+            403,
+          ),
+        ),
+      );
+      await pumpEventQueue();
+
+      expect(signals, 1);
       expect(server.refreshCalls, 0);
     },
   );

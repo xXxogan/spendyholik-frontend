@@ -16,5 +16,8 @@ String fieldErrorText(AppLocalizations l10n, FieldError error) =>
       FieldError.belowRepaid => l10n.fieldErrorBelowRepaid,
       FieldError.emailTaken => l10n.fieldErrorEmailTaken,
       FieldError.currencyMismatch => l10n.fieldErrorCurrencyMismatch,
+      FieldError.invalidCode => l10n.fieldErrorInvalidCode,
+      FieldError.codeExpired => l10n.fieldErrorCodeExpired,
+      FieldError.tooManyAttempts => l10n.fieldErrorTooManyAttempts,
       FieldError.invalid => l10n.fieldErrorInvalid,
     };

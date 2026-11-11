@@ -25,6 +25,12 @@ class AppRouter extends RootStackRouter {
       path: '/register',
       guards: [GuestGuard(_session)],
     ),
+    AutoRoute(page: PrivacyPolicyRoute.page, path: '/privacy'),
+    AutoRoute(
+      page: EmailConfirmRoute.page,
+      path: '/confirm-email',
+      guards: [EmailConfirmGuard(_session)],
+    ),
     AutoRoute(
       page: CurrencyRoute.page,
       path: '/currency',

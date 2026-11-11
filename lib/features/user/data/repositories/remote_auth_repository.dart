@@ -8,6 +8,7 @@ import 'package:spendyholik/core/models/currency.dart';
 import 'package:spendyholik/core/network/api_call.dart';
 import 'package:spendyholik/core/network/auth_tokens.dart';
 import 'package:spendyholik/core/network/cached_read.dart';
+import 'package:spendyholik/core/network/email_verification_required.dart';
 import 'package:spendyholik/core/network/session_expiry.dart';
 import 'package:spendyholik/core/network/token_storage.dart';
 import 'package:spendyholik/core/session/session_currency.dart';
@@ -29,7 +30,11 @@ class RemoteAuthRepository implements AuthRepository {
     this._sessionCurrency,
     this._talker,
     this._bus,
+    EmailVerificationRequired verification,
   ) {
+    // Почта стала неподтверждённой (сменили email) — свежий профиль уведёт
+    // сессию на экран кода.
+    verification.required.listen((_) => _refreshUser());
     // Токены уже стёрты интерсептором — остаётся вывести на вход.
     expiry.expired.listen((_) async {
       await _cache.clear();
@@ -43,6 +48,8 @@ class RemoteAuthRepository implements AuthRepository {
     'first_name': 'name',
     'old_password': 'currentPassword',
     'new_password': 'newPassword',
+    'personal_data_consent': 'consent',
+    'code': 'code',
   };
 
   final AuthApi _api;
@@ -82,12 +89,32 @@ class RemoteAuthRepository implements AuthRepository {
   );
 
   @override
-  Future<UserModel> register(String name, String email, String password) =>
-      _signInWith(
-        () => _api.register(
-          RegisterBody(email: email, password: password, firstName: name),
-        ),
-      );
+  Future<UserModel> register(
+    String name,
+    String email,
+    String password, {
+    required bool personalDataConsent,
+  }) => _signInWith(
+    () => _api.register(
+      RegisterBody(
+        email: email,
+        password: password,
+        firstName: name,
+        personalDataConsent: personalDataConsent,
+      ),
+    ),
+  );
+
+  @override
+  Future<UserModel> confirmEmail(String code) async {
+    await _call(() => _api.confirmEmail(ConfirmEmailBody(code: code)));
+    final user = _user(await _profile());
+    _changes.add(user);
+    return user;
+  }
+
+  @override
+  Future<void> resendEmailCode() => _call(_api.resendEmailCode);
 
   /// Сессия на сервере гасится по возможности: локально выходим в любом случае.
   @override
@@ -174,6 +201,14 @@ class RemoteAuthRepository implements AuthRepository {
     return user;
   }
 
+  Future<void> _refreshUser() async {
+    try {
+      _changes.add(_user(await _profile()));
+    } on Failure catch (error, stackTrace) {
+      _talker.handle(error, stackTrace, 'Profile refresh after 403 failed');
+    }
+  }
+
   Future<ProfileOutDto> _profile() => _reader.read(
     key: _profileKey,
     fetch: () => _call(_api.profile),
@@ -188,6 +223,7 @@ class RemoteAuthRepository implements AuthRepository {
       name: dto.firstName,
       email: dto.email,
       baseCurrency: Currency.fromCode(dto.baseCurrency),
+      emailVerified: dto.emailVerified,
     );
     if (user.baseCurrency case final currency?) {
       _sessionCurrency.value = currency;

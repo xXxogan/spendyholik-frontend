@@ -103,4 +103,41 @@ void main() {
       isA<UnknownFailure>(),
     );
   });
+
+  group('коды из письма (круг 3)', () {
+    test('403 email_not_verified — EmailNotVerifiedFailure', () {
+      expect(
+        mapDioException(_response(403, _error('email_not_verified'))),
+        isA<EmailNotVerifiedFailure>(),
+      );
+    });
+
+    test('коды у поля code — свои FieldError', () {
+      FieldError reason(int status, String code) => (mapDioException(
+        _response(status, _error(code, {'code': code})),
+      ) as ValidationFailure).reason;
+      expect(reason(422, 'invalid_code'), FieldError.invalidCode);
+      expect(reason(422, 'code_expired'), FieldError.codeExpired);
+      expect(reason(429, 'too_many_attempts'), FieldError.tooManyAttempts);
+    });
+
+    test('429 без поля — RateLimitedFailure: дневной лимит и «подождите»', () {
+      expect(
+        (mapDioException(
+          _response(429, _error('too_many_codes')),
+        ) as RateLimitedFailure).daily,
+        isTrue,
+      );
+      expect(
+        (mapDioException(
+          _response(429, _error('resend_too_soon')),
+        ) as RateLimitedFailure).daily,
+        isFalse,
+      );
+      expect(
+        mapDioException(_response(429, _error('throttled'))),
+        isA<RateLimitedFailure>(),
+      );
+    });
+  });
 }

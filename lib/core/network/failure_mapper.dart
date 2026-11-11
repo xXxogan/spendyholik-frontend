@@ -15,6 +15,9 @@ const _fieldCodes = {
   'below_repaid': FieldError.belowRepaid,
   'email_already_taken': FieldError.emailTaken,
   'currency_mismatch': FieldError.currencyMismatch,
+  'invalid_code': FieldError.invalidCode,
+  'code_expired': FieldError.codeExpired,
+  'too_many_attempts': FieldError.tooManyAttempts,
 };
 
 /// [fields] — JSON-имя поля → имя поля черновика (`amount_minor` → `amount`).
@@ -52,10 +55,16 @@ Failure _fromResponse(DioException e, Map<String, String> fields) {
       return const InvalidCredentialsFailure();
     case 'email_already_taken':
       return const EmailTakenFailure();
+    case 'email_not_verified':
+      return const EmailNotVerifiedFailure();
   }
   if (status == 401) return const UnauthorizedFailure();
 
   final entry = error.errors.entries.firstOrNull;
+  // 429 с полем (too_many_attempts у code) — ошибка формы; без поля — лимит частоты.
+  if (status == 429 && entry == null) {
+    return RateLimitedFailure(daily: error.code == 'too_many_codes');
+  }
   if (entry == null) return UnknownFailure(e);
   return ValidationFailure(
     fields[entry.key] ?? entry.key,

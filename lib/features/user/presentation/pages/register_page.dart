@@ -104,6 +104,14 @@ class RegisterView extends StatelessWidget {
                 ],
               ),
             ),
+            const SizedBox(height: 12),
+            ConsentCheckbox(
+              value: state.consent,
+              onChanged: cubit.consentChanged,
+              onPolicyTap: () =>
+                  context.router.push(const PrivacyPolicyRoute()),
+              errorText: error(.consent),
+            ),
             if (state.failure case final failure?) ...[
               const SizedBox(height: 12),
               Text(
@@ -125,14 +133,6 @@ class RegisterView extends StatelessWidget {
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   : Text(l10n.registerSubmit),
-            ),
-            const SizedBox(height: 20),
-            Text(
-              l10n.registerTerms,
-              textAlign: .center,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
             ),
           ],
         );

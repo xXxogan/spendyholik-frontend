@@ -37,12 +37,30 @@ class _SpendyHolikAppState extends State<SpendyHolikApp> {
         BlocProvider.value(value: getIt<SettingsCubit>()),
         BlocProvider.value(value: getIt<SessionCubit>()),
       ],
-      child: BlocListener<SessionCubit, SessionState>(
-        // Выход откуда угодно — на вход; стек сбрасывается, «Назад» во вкладки не ведёт.
-        listenWhen: (previous, current) =>
-            previous is SessionAuthenticated &&
-            current is SessionUnauthenticated,
-        listener: (_, _) => getIt<AppRouter>().replaceAll([const LoginRoute()]),
+      child: MultiBlocListener(
+        listeners: [
+          BlocListener<SessionCubit, SessionState>(
+            // Выход откуда угодно — на вход; стек сбрасывается, «Назад» во
+            // вкладки не ведёт.
+            listenWhen: (previous, current) =>
+                previous is SessionAuthenticated &&
+                current is SessionUnauthenticated,
+            listener: (_, _) =>
+                getIt<AppRouter>().replaceAll([const LoginRoute()]),
+          ),
+          BlocListener<SessionCubit, SessionState>(
+            // Подтверждённая почта стала неподтверждённой (сменили email, сервер
+            // ответил 403) — на экран кода. Вход, регистрацию и старт ведут
+            // Splash и guard'ы — здесь их не дублируем.
+            listenWhen: (previous, current) =>
+                previous is SessionAuthenticated &&
+                previous.user.emailVerified &&
+                current is SessionAuthenticated &&
+                !current.user.emailVerified,
+            listener: (_, _) =>
+                getIt<AppRouter>().replaceAll([const EmailConfirmRoute()]),
+          ),
+        ],
         child: BlocSelector<SettingsCubit, AppSettings, AppThemeMode>(
           selector: (settings) => settings.themeMode,
           builder: (context, themeMode) => MaterialApp.router(

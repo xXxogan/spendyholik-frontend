@@ -30,6 +30,9 @@ class RegisterCubit extends Cubit<RegisterState>
   void passwordChanged(String value) =>
       emit(state.copyWith(password: value, fieldErrors: _without(.password)));
 
+  void consentChanged(bool value) =>
+      emit(state.copyWith(consent: value, fieldErrors: _without(.consent)));
+
   Future<void> submit() async {
     final errors = <RegisterField, FieldError>{};
     final name = state.name.trim();
@@ -39,6 +42,7 @@ class RegisterCubit extends Cubit<RegisterState>
     if (state.password.length < minPasswordLength) {
       errors[.password] = .tooShort;
     }
+    if (!state.consent) errors[.consent] = .required;
     if (errors.isNotEmpty) {
       emit(state.copyWith(fieldErrors: errors));
       return;
@@ -46,7 +50,12 @@ class RegisterCubit extends Cubit<RegisterState>
 
     emit(state.copyWith(status: .submitting, failure: null));
     try {
-      await _auth.register(name, email, state.password);
+      await _auth.register(
+        name,
+        email,
+        state.password,
+        personalDataConsent: state.consent,
+      );
       emit(state.copyWith(status: .success));
     } on EmailTakenFailure catch (failure, stackTrace) {
       getIt<Talker>().handle(failure, stackTrace);
@@ -55,6 +64,17 @@ class RegisterCubit extends Cubit<RegisterState>
           status: .failure,
           fieldErrors: {RegisterField.email: FieldError.emailTaken},
         ),
+      );
+    } on ValidationFailure catch (failure, stackTrace) {
+      getIt<Talker>().handle(failure, stackTrace);
+      final field = RegisterField.values.asNameMap()[failure.field];
+      emit(
+        field == null
+            ? state.copyWith(status: .failure, failure: failure)
+            : state.copyWith(
+                status: .failure,
+                fieldErrors: {...state.fieldErrors, field: failure.reason},
+              ),
       );
     } on Failure catch (failure, stackTrace) {
       getIt<Talker>().handle(failure, stackTrace);

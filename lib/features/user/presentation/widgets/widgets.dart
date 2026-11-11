@@ -1,4 +1,5 @@
 export 'auth_layout.dart';
+export 'consent_checkbox.dart';
 export 'currency_label.dart';
 export 'leave_auth.dart';
 export 'onboarding_slide.dart';

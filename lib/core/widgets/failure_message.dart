@@ -6,5 +6,8 @@ String failureMessage(AppLocalizations l10n, Failure failure) =>
       NetworkFailure() => l10n.errorNetwork,
       NotFoundFailure() => l10n.errorNotFound,
       InvalidCredentialsFailure() => l10n.errorInvalidCredentials,
+      EmailNotVerifiedFailure() => l10n.errorEmailNotVerified,
+      RateLimitedFailure(daily: true) => l10n.errorRateLimitedDaily,
+      RateLimitedFailure() => l10n.errorRateLimitedSoon,
       _ => l10n.errorUnknown,
     };

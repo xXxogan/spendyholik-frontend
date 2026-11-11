@@ -2,16 +2,22 @@ import 'package:auto_route/auto_route.dart';
 import 'package:spendyholik/app/router/app_router.gr.dart';
 import 'package:spendyholik/features/user/user.dart';
 
-/// Куда увести с вкладок: нет сессии — на вход, нет валюты — на выбор валюты.
+/// Куда увести с вкладок: нет сессии — на вход, почта не подтверждена — на
+/// экран кода (сервер закрыт до него), нет валюты — на выбор валюты.
 PageRouteInfo? authRedirect(SessionState state) => switch (state) {
+  SessionAuthenticated(:final user) when !user.emailVerified =>
+    const EmailConfirmRoute(),
   SessionAuthenticated(:final user) when user.baseCurrency == null =>
     const CurrencyRoute(),
   SessionAuthenticated() => null,
   SessionUnauthenticated() || SessionUnknown() => const LoginRoute(),
 };
 
-/// Выбору валюты нужна только сессия.
+/// Выбору валюты нужна сессия с подтверждённой почтой: профиль без неё
+/// сохранится, но дальше вкладок всё равно не пустит.
 PageRouteInfo? sessionRedirect(SessionState state) => switch (state) {
+  SessionAuthenticated(:final user) when !user.emailVerified =>
+    const EmailConfirmRoute(),
   SessionAuthenticated() => null,
   SessionUnauthenticated() || SessionUnknown() => const LoginRoute(),
 };
@@ -27,9 +33,18 @@ PageRouteInfo? splashRoute(SessionState state) => switch (state) {
   SessionUnknown() => null,
   SessionUnauthenticated(onboardingSeen: false) => const OnboardingRoute(),
   SessionUnauthenticated() => const LoginRoute(),
+  SessionAuthenticated(:final user) when !user.emailVerified =>
+    const EmailConfirmRoute(),
   SessionAuthenticated(:final user) when user.baseCurrency == null =>
     const CurrencyRoute(),
   SessionAuthenticated() => const HomeRoute(),
+};
+
+/// Экран кода — только вошедшему с неподтверждённой почтой.
+PageRouteInfo? emailConfirmRedirect(SessionState state) => switch (state) {
+  SessionAuthenticated(:final user) when !user.emailVerified => null,
+  SessionAuthenticated() => splashRoute(state),
+  SessionUnauthenticated() || SessionUnknown() => const LoginRoute(),
 };
 
 /// Стартовый адрес, который откроется после Splash; null — обычный старт.
@@ -92,4 +107,11 @@ class GuestGuard extends _SessionAwareGuard {
 
   @override
   PageRouteInfo? redirect(SessionState state) => guestRedirect(state);
+}
+
+class EmailConfirmGuard extends _SessionAwareGuard {
+  EmailConfirmGuard(super.session);
+
+  @override
+  PageRouteInfo? redirect(SessionState state) => emailConfirmRedirect(state);
 }

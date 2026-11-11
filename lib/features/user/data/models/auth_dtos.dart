@@ -20,7 +20,7 @@ class AuthOutDto {
   final DateTime refreshExpiresAt;
 }
 
-/// `theme`, `onboarded`, `notify_*` не читаются: настройки локальные (решение 2026-11-07).
+/// `theme`, `onboarded` не читаются: настройки локальные (решение 2026-11-07).
 /// toJson — для кэша: без сети профиль берётся из последнего ответа.
 @JsonSerializable(fieldRename: FieldRename.snake)
 class ProfileOutDto {
@@ -28,6 +28,7 @@ class ProfileOutDto {
     required this.userId,
     required this.firstName,
     required this.email,
+    this.emailVerified = true,
     this.baseCurrency,
   });
 
@@ -37,6 +38,11 @@ class ProfileOutDto {
   final String userId;
   final String firstName;
   final String email;
+
+  /// По умолчанию true: в кэше профиля до круга 3 поля нет, а старые
+  /// пользователи подтверждены миграцией сервера.
+  @JsonKey(defaultValue: true)
+  final bool emailVerified;
   final String? baseCurrency;
 
   Map<String, dynamic> toJson() => _$ProfileOutDtoToJson(this);
@@ -58,13 +64,26 @@ class RegisterBody {
     required this.email,
     required this.password,
     required this.firstName,
+    required this.personalDataConsent,
   });
 
   final String email;
   final String password;
   final String firstName;
 
+  /// Согласие на обработку ПДн (152-ФЗ): без true сервер не регистрирует.
+  final bool personalDataConsent;
+
   Map<String, dynamic> toJson() => _$RegisterBodyToJson(this);
+}
+
+@JsonSerializable(createFactory: false)
+class ConfirmEmailBody {
+  const ConfirmEmailBody({required this.code});
+
+  final String code;
+
+  Map<String, dynamic> toJson() => _$ConfirmEmailBodyToJson(this);
 }
 
 @JsonSerializable(createFactory: false, fieldRename: FieldRename.snake)

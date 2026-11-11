@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 import 'package:spendyholik/core/network/auth_tokens.dart';
+import 'package:spendyholik/core/network/email_verification_required.dart';
 import 'package:spendyholik/core/network/session_expiry.dart';
 import 'package:spendyholik/core/network/token_storage.dart';
 
@@ -9,6 +10,7 @@ class AuthInterceptor extends QueuedInterceptor {
   AuthInterceptor(
     this._tokens,
     this._expiry,
+    this._verification,
     @Named(refreshDioName) this._plain,
   );
 
@@ -30,6 +32,7 @@ class AuthInterceptor extends QueuedInterceptor {
 
   final TokenStorage _tokens;
   final SessionExpiry _expiry;
+  final EmailVerificationRequired _verification;
 
   /// Dio без этого интерсептора: refresh и повтор через основной Dio
   /// снова попали бы в очередь onError, которую держит текущий вызов.
@@ -53,6 +56,12 @@ class AuthInterceptor extends QueuedInterceptor {
     ErrorInterceptorHandler handler,
   ) async {
     final options = err.requestOptions;
+    if (_isUnverified(err.response)) {
+      // Почта стала неподтверждённой (смена email) — экран кода, а не ошибки
+      // на каждой вкладке.
+      _verification.notify();
+      return handler.next(err);
+    }
     final tokens = await _tokens.read();
     if (err.response?.statusCode != 401 ||
         _public.contains(options.path) ||
@@ -82,6 +91,13 @@ class AuthInterceptor extends QueuedInterceptor {
     } on DioException catch (e) {
       handler.next(e);
     }
+  }
+
+  static bool _isUnverified(Response<dynamic>? response) {
+    final data = response?.data;
+    return response?.statusCode == 403 &&
+        data is Map &&
+        data['code'] == 'email_not_verified';
   }
 
   Future<AuthTokens> _refresh(String refresh) async {

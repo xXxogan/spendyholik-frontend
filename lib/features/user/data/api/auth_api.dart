@@ -28,4 +28,11 @@ abstract class AuthApi {
 
   @PATCH('profile/password/')
   Future<void> changePassword(@Body() PasswordBody body);
+
+  /// Ответ — UserOut; профиль после подтверждения перечитывается целиком.
+  @POST('auth/email/confirm/')
+  Future<void> confirmEmail(@Body() ConfirmEmailBody body);
+
+  @POST('auth/email/resend/')
+  Future<void> resendEmailCode();
 }

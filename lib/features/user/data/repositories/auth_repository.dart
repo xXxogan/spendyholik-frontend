@@ -11,8 +11,22 @@ abstract interface class AuthRepository {
   /// [InvalidCredentialsFailure] при неверной паре.
   Future<UserModel> signIn(String email, String password);
 
-  /// [EmailTakenFailure], если email занят.
-  Future<UserModel> register(String name, String email, String password);
+  /// [EmailTakenFailure], если email занят. Без [personalDataConsent] сервер
+  /// откажет: `ValidationFailure('consent', required)`. Новый пользователь —
+  /// с неподтверждённой почтой.
+  Future<UserModel> register(
+    String name,
+    String email,
+    String password, {
+    required bool personalDataConsent,
+  });
+
+  /// Код из письма; `ValidationFailure('code', invalidCode | codeExpired |
+  /// tooManyAttempts)` при ошибке.
+  Future<UserModel> confirmEmail(String code);
+
+  /// [RateLimitedFailure], если код запрошен раньше минуты или кончился лимит дня.
+  Future<void> resendEmailCode();
 
   Future<void> signOut();
 

@@ -5,6 +5,7 @@ import 'package:spendyholik/core/events/data_change_bus.dart';
 import 'package:spendyholik/core/models/models.dart';
 import 'package:spendyholik/core/network/auth_tokens.dart';
 import 'package:spendyholik/core/network/cached_read.dart';
+import 'package:spendyholik/core/network/email_verification_required.dart';
 import 'package:spendyholik/core/network/network_status.dart';
 import 'package:spendyholik/core/network/session_expiry.dart';
 import 'package:spendyholik/core/network/token_storage.dart';
@@ -46,6 +47,7 @@ void main() {
   late MockApiCache cache;
   late SessionCurrency sessionCurrency;
   late MockDataChangeBus bus;
+  late EmailVerificationRequired verification;
   late RemoteAuthRepository repository;
 
   final stored = AuthTokens(
@@ -59,9 +61,15 @@ void main() {
     registerFallbackValue(<DataTopic>{});
     registerFallbackValue(const LoginBody(email: '', password: ''));
     registerFallbackValue(
-      const RegisterBody(email: '', password: '', firstName: ''),
+      const RegisterBody(
+        email: '',
+        password: '',
+        firstName: '',
+        personalDataConsent: true,
+      ),
     );
     registerFallbackValue(const RefreshBody(refreshToken: ''));
+    registerFallbackValue(const ConfirmEmailBody(code: ''));
     registerFallbackValue(const ProfilePatchBody());
     registerFallbackValue(const PasswordBody(oldPassword: '', newPassword: ''));
     registerFallbackValue(
@@ -95,6 +103,7 @@ void main() {
       sessionCurrency = SessionCurrency(),
       Talker(settings: TalkerSettings(useConsoleLogs: false)),
       bus = MockDataChangeBus(),
+      verification = EmailVerificationRequired(),
     );
   });
 
@@ -261,16 +270,27 @@ void main() {
     'register: имя уходит в first_name; занятый email — EmailTakenFailure',
     () async {
       when(() => api.register(any())).thenAnswer((_) async => auth);
-      await repository.register('Мария', 'maria@example.com', 'secret-12');
+      await repository.register(
+        'Мария',
+        'maria@example.com',
+        'secret-12',
+        personalDataConsent: true,
+      );
       final body =
           verify(() => api.register(captureAny())).captured.single
               as RegisterBody;
       expect(body.firstName, 'Мария');
+      expect(body.toJson()['personal_data_consent'], isTrue);
 
       when(() => api.register(any()))
           .thenThrow(apiError(409, 'email_already_taken'));
       await expectLater(
-        repository.register('Мария', 'maria@example.com', 'secret-12'),
+        repository.register(
+          'Мария',
+          'maria@example.com',
+          'secret-12',
+          personalDataConsent: true,
+        ),
         throwsA(isA<EmailTakenFailure>()),
       );
     },
@@ -404,7 +424,12 @@ void main() {
   test('регистрация — кэш стёрт', () async {
     when(() => api.register(any())).thenAnswer((_) async => auth);
 
-    await repository.register('Мария', 'maria@example.com', 'secret-12');
+    await repository.register(
+      'Мария',
+      'maria@example.com',
+      'secret-12',
+      personalDataConsent: true,
+    );
 
     verify(() => cache.clear()).called(1);
   });
@@ -415,5 +440,119 @@ void main() {
     await repository.restoreSession();
 
     verify(() => cache.clear()).called(1);
+  });
+
+  group('подтверждение почты', () {
+    test(
+      'профиль: email_verified → emailVerified; без поля в старом кэше — true',
+      () async {
+        when(() => tokens.read()).thenAnswer((_) async => stored);
+        when(() => api.profile()).thenAnswer(
+          (_) async => ProfileOutDto.fromJson(const {
+            'user_id': 'u1',
+            'first_name': 'Мария',
+            'email': 'm@example.com',
+            'email_verified': false,
+          }),
+        );
+
+        expect((await repository.restoreSession())!.emailVerified, isFalse);
+        expect(
+          ProfileOutDto.fromJson(const {
+            'user_id': 'u1',
+            'first_name': 'М',
+            'email': 'm@example.com',
+          }).emailVerified,
+          isTrue,
+        );
+      },
+    );
+
+    test('confirmEmail — код на сервер, профиль заново, userChanges', () async {
+      when(() => api.confirmEmail(any())).thenAnswer((_) async {});
+      final changes = expectLater(repository.userChanges, emits(isNotNull));
+
+      final user = await repository.confirmEmail('482913');
+
+      final body =
+          verify(() => api.confirmEmail(captureAny())).captured.single
+              as ConfirmEmailBody;
+      expect(body.code, '482913');
+      expect(user.id, 'u1');
+      await changes;
+    });
+
+    test('confirmEmail: неверный код — ошибка у поля code', () async {
+      when(() => api.confirmEmail(any()))
+          .thenThrow(apiError(422, 'invalid_code', {'code': 'invalid_code'}));
+
+      await expectLater(
+        repository.confirmEmail('000000'),
+        throwsA(
+          isA<ValidationFailure>()
+              .having((f) => f.field, 'field', 'code')
+              .having((f) => f.reason, 'reason', FieldError.invalidCode),
+        ),
+      );
+    });
+
+    test('resendEmailCode — POST; слишком рано — RateLimitedFailure', () async {
+      when(() => api.resendEmailCode()).thenAnswer((_) async {});
+      await repository.resendEmailCode();
+      verify(() => api.resendEmailCode()).called(1);
+
+      when(() => api.resendEmailCode())
+          .thenThrow(apiError(429, 'resend_too_soon'));
+      await expectLater(
+        repository.resendEmailCode(),
+        throwsA(isA<RateLimitedFailure>()),
+      );
+    });
+
+    test('регистрация: нет согласия — ошибка у поля consent', () async {
+      when(() => api.register(any())).thenThrow(
+        apiError(422, 'validation_error', {
+          'personal_data_consent': 'required',
+        }),
+      );
+
+      await expectLater(
+        repository.register(
+          'Мария',
+          'maria@example.com',
+          'secret-12',
+          personalDataConsent: false,
+        ),
+        throwsA(
+          isA<ValidationFailure>().having((f) => f.field, 'field', 'consent'),
+        ),
+      );
+    });
+  });
+
+  test('сервер закрыл данные (403) — профиль заново, userChanges без подтверждения', () async {
+    when(() => tokens.read()).thenAnswer((_) async => stored);
+    when(() => api.profile()).thenAnswer(
+      (_) async => ProfileOutDto.fromJson(const {
+        'user_id': 'u1',
+        'first_name': 'Мария',
+        'email': 'new@example.com',
+        'email_verified': false,
+      }),
+    );
+    final changes = expectLater(
+      repository.userChanges,
+      emits(
+        isA<Object>().having(
+          (u) => (u as dynamic).emailVerified,
+          'verified',
+          false,
+        ),
+      ),
+    );
+
+    verification.notify();
+
+    await changes;
   });
 }
