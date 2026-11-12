@@ -630,5 +630,37 @@
   "forgotPasswordHint": "Укажите почту аккаунта — пришлём код из 6 цифр.",
   "forgotPasswordGetCode": "Получить код",
   "forgotPasswordSent": "Если адрес зарегистрирован, письмо с кодом отправлено. Введите код и новый пароль.",
-  "forgotPasswordDone": "Пароль изменён, войдите с новым"
+  "forgotPasswordDone": "Пароль изменён, войдите с новым",
+  "accountFeedDebtBorrowed": "Получение займа · {name}",
+  "@accountFeedDebtBorrowed": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "accountFeedDebtLent": "Выдача займа · {name}",
+  "@accountFeedDebtLent": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "accountFeedDebtRepayment": "Погашение долга · {name}",
+  "@accountFeedDebtRepayment": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "accountFeedGoalContribution": "Пополнение цели · {name}",
+  "@accountFeedGoalContribution": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  }
 }

@@ -403,5 +403,9 @@
   "forgotPasswordHint": "Enter your account email — we will send a 6-digit code.",
   "forgotPasswordGetCode": "Get code",
   "forgotPasswordSent": "If the address is registered, an email with the code has been sent. Enter the code and a new password.",
-  "forgotPasswordDone": "Password changed, sign in with the new one"
+  "forgotPasswordDone": "Password changed, sign in with the new one",
+  "accountFeedDebtBorrowed": "Loan received · {name}",
+  "accountFeedDebtLent": "Loan given · {name}",
+  "accountFeedDebtRepayment": "Debt repayment · {name}",
+  "accountFeedGoalContribution": "Goal top-up · {name}"
 }

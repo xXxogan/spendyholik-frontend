@@ -6,7 +6,6 @@ import 'package:spendyholik/app/router/app_router.gr.dart';
 import 'package:spendyholik/core/widgets/widgets.dart';
 import 'package:spendyholik/features/accounts/presentation/cubit/account_detail_cubit.dart';
 import 'package:spendyholik/features/accounts/presentation/widgets/widgets.dart';
-import 'package:spendyholik/features/transactions/transactions.dart';
 import 'package:spendyholik/l10n/l10n.dart';
 
 @RoutePage()
@@ -92,8 +91,8 @@ class AccountDetailView extends StatelessWidget {
                               currency: account.currency,
                             ),
                           ),
-                          TransactionsSection.sliver(
-                            filter: TransactionFilter(accountId: account.id),
+                          AccountFeedSection.sliver(
+                            accountId: account.id,
                             title: context.l10n.accountDetailTransactions,
                           ),
                         ],
