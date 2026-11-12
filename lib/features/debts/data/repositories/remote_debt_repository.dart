@@ -26,6 +26,11 @@ class RemoteDebtRepository implements DebtRepository {
     'person_name': 'counterparty',
     'amount_minor': 'amount',
   };
+  static const _createFields = {
+    'person_name': 'counterparty',
+    'amount_minor': 'amount',
+    'account_id': 'accountId',
+  };
   static const _repayFields = {
     'amount_minor': 'amount',
     'account_id': 'accountId',
@@ -87,15 +92,20 @@ class RemoteDebtRepository implements DebtRepository {
           personName: draft.counterparty,
           direction: _directionCode(draft.direction),
           amountMinor: draft.amount,
-          // Выбора валюты в форме нет: новый долг — в базовой (решение 2026-11-07).
-          currency: _session.value.code,
+          // Выбора валюты в форме нет: долг — в валюте счёта, без счёта — в базовой.
+          currency: (draft.currency ?? _session.value).code,
           dueDate: _date(draft.dueDate),
           note: draft.note ?? '',
+          accountId: draft.accountId,
+          date: _day.format(draft.openedOn ?? DateTime.now()),
         ),
       ),
-      _formFields,
+      _createFields,
     );
-    _bus.emit({DataTopic.debts});
+    _bus.emit({
+      DataTopic.debts,
+      if (draft.accountId != null) DataTopic.accounts,
+    });
     return _debt(created);
   }
 

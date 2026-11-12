@@ -100,6 +100,8 @@ class DebtCreateBody {
     required this.currency,
     required this.note,
     this.dueDate,
+    this.accountId,
+    this.date,
   });
 
   final String personName;
@@ -107,6 +109,13 @@ class DebtCreateBody {
   final int amountMinor;
   final String currency;
   final String? dueDate;
+
+  /// Без счёта поле не уходит: сервер тогда не трогает баланс.
+  @JsonKey(includeIfNull: false)
+  final String? accountId;
+
+  /// yyyy-MM-dd; по умолчанию сегодня.
+  final String? date;
 
   /// Пустая заметка — "": сервер не принимает null.
   final String note;

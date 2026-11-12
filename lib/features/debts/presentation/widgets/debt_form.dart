@@ -1,6 +1,7 @@
 import 'package:intl/intl.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:spendyholik/core/widgets/widgets.dart';
+import 'package:spendyholik/features/accounts/accounts.dart';
 import 'package:spendyholik/features/debts/presentation/cubit/debt_form_cubit.dart';
 import 'package:spendyholik/features/debts/presentation/widgets/widgets.dart';
 import 'package:spendyholik/l10n/l10n.dart';
@@ -19,8 +20,11 @@ class DebtForm extends StatelessWidget {
       final error? => fieldErrorText(l10n, error),
       null => null,
     };
-    final currencySymbol = CurrencyScope.of(context).symbol;
+    final currencySymbol =
+        (state.accountCurrency ?? CurrencyScope.of(context)).symbol;
     final dueDate = state.dueDate;
+    final openedOn = state.openedOn;
+    final isCreate = state.debtId == null;
 
     return Column(
       crossAxisAlignment: .stretch,
@@ -51,6 +55,37 @@ class DebtForm extends StatelessWidget {
             errorText: error(.amount),
           ),
         ),
+        if (isCreate) ...[
+          AccountPicker(
+            label: l10n.debtFormAccount,
+            selected: state.accountId,
+            onSelected: cubit.accountChanged,
+            errorText: error(.accountId),
+          ),
+          // У выпадающего списка нет пункта «пусто» — сброс отдельной кнопкой.
+          if (state.accountId != null)
+            Align(
+              alignment: .centerLeft,
+              child: TextButton(
+                onPressed: () => cubit.accountChanged(null),
+                child: Text(l10n.debtFormNoAccount),
+              ),
+            ),
+          InputDecorator(
+            decoration: InputDecoration(
+              labelText: l10n.debtFormDate,
+              suffixIcon: const Icon(Icons.event_outlined),
+            ),
+            child: InkWell(
+              onTap: () => _pickOpenedOn(context),
+              child: Text(
+                openedOn == null
+                    ? l10n.commonToday
+                    : DateFormat.yMMMMd(locale).format(openedOn),
+              ),
+            ),
+          ),
+        ],
         InputDecorator(
           decoration: InputDecoration(
             labelText: l10n.debtFormDueDate,
@@ -106,5 +141,17 @@ class DebtForm extends StatelessWidget {
       initialDate: current ?? today,
     );
     if (picked != null) cubit.dueDateChanged(picked);
+  }
+
+  Future<void> _pickOpenedOn(BuildContext context) async {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final picked = await showDatePicker(
+      context: context,
+      firstDate: DateTime(now.year - 10),
+      lastDate: today,
+      initialDate: state.openedOn ?? today,
+    );
+    if (picked != null) cubit.openedOnChanged(picked);
   }
 }

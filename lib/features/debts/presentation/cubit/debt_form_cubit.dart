@@ -6,6 +6,7 @@ import 'package:spendyholik/core/bloc/cubit_logging.dart';
 import 'package:spendyholik/core/errors/failure.dart';
 import 'package:spendyholik/core/format/format.dart';
 import 'package:spendyholik/core/models/models.dart';
+import 'package:spendyholik/features/accounts/accounts.dart';
 import 'package:spendyholik/features/debts/data/models/models.dart';
 import 'package:spendyholik/features/debts/data/repositories/repositories.dart';
 import 'package:talker_flutter/talker_flutter.dart';
@@ -16,9 +17,13 @@ part 'debt_form_state.dart';
 @injectable
 class DebtFormCubit extends Cubit<DebtFormState>
     with CubitLogging<DebtFormState> {
-  DebtFormCubit(this._repository) : super(const DebtFormState());
+  DebtFormCubit(this._repository, this._accounts)
+    : super(const DebtFormState());
 
   final DebtRepository _repository;
+  final AccountRepository _accounts;
+
+  final _currencies = <String, Currency>{};
 
   void start(DebtDirection direction) =>
       emit(DebtFormState(direction: direction));
@@ -60,6 +65,36 @@ class DebtFormCubit extends Cubit<DebtFormState>
 
   void noteChanged(String value) => emit(state.copyWith(note: value));
 
+  /// null — «без счёта». В правке счёт не меняется: он относится к созданию.
+  Future<void> accountChanged(String? value) async {
+    if (state.debtId != null) return;
+    emit(
+      state.copyWith(
+        accountId: value,
+        accountCurrency: _currencies[value],
+        fieldErrors: _without(.accountId),
+      ),
+    );
+    if (value == null || _currencies.containsKey(value)) return;
+    try {
+      for (final account in await _accounts.getAccounts()) {
+        _currencies[account.id] = account.currency;
+      }
+    } on Failure catch (failure, stackTrace) {
+      // Суффикс остаётся базовой валютой, сохранению это не мешает.
+      getIt<Talker>().handle(failure, stackTrace);
+      return;
+    }
+    if (state.accountId == value) {
+      emit(state.copyWith(accountCurrency: _currencies[value]));
+    }
+  }
+
+  void openedOnChanged(DateTime value) {
+    if (state.debtId != null) return;
+    emit(state.copyWith(openedOn: value));
+  }
+
   Future<void> save() async {
     final errors = <DebtField, FieldError>{};
     final counterparty = state.counterparty.trim();
@@ -78,6 +113,9 @@ class DebtFormCubit extends Cubit<DebtFormState>
       amount: amount!,
       dueDate: state.dueDate,
       note: note.isEmpty ? null : note,
+      accountId: state.debtId == null ? state.accountId : null,
+      currency: state.debtId == null ? state.accountCurrency : null,
+      openedOn: state.debtId == null ? state.openedOn : null,
     );
     emit(state.copyWith(status: .submitting, failure: null));
     try {

@@ -192,8 +192,105 @@ void main() {
         'currency': 'USD',
         'due_date': '2026-12-01',
         'note': '',
+        'date': matches(RegExp(r'^\d{4}-\d{2}-\d{2}$')),
       });
       verify(() => bus.emit({DataTopic.debts})).called(1);
+    });
+
+    test(
+      'create со счётом — account_id, date, шина {debts, accounts}',
+      () async {
+        when(() => api.create(any())).thenAnswer((_) async => debt());
+
+        await repository.create(
+          DebtDraft(
+            counterparty: 'Иван',
+            direction: DebtDirection.iOwe,
+            amount: 500000,
+            accountId: 'a1',
+            currency: Currency.usd,
+            openedOn: DateTime(2026, 11, 3),
+          ),
+        );
+
+        final body =
+            verify(() => api.create(captureAny())).captured.single
+                as DebtCreateBody;
+        expect(body.toJson()['account_id'], 'a1');
+        expect(body.currency, 'USD');
+        expect(body.toJson()['date'], '2026-11-03');
+        verify(() => bus.emit({DataTopic.debts, DataTopic.accounts})).called(1);
+      },
+    );
+
+    test(
+      'create без счёта — без account_id, date — сегодня, шина {debts}',
+      () async {
+        when(() => api.create(any())).thenAnswer((_) async => debt());
+
+        await repository.create(
+          const DebtDraft(
+            counterparty: 'Иван',
+            direction: DebtDirection.iOwe,
+            amount: 500000,
+          ),
+        );
+
+        final json =
+            (verify(() => api.create(captureAny())).captured.single
+                    as DebtCreateBody)
+                .toJson();
+        expect(json.containsKey('account_id'), isFalse);
+        expect(json['date'], matches(RegExp(r'^\d{4}-\d{2}-\d{2}$')));
+        verify(() => bus.emit({DataTopic.debts})).called(1);
+      },
+    );
+
+    test('create: insufficient_funds — у суммы', () async {
+      when(() => api.create(any())).thenThrow(
+        apiError(409, 'insufficient_funds', {
+          'amount_minor': 'insufficient_funds',
+        }),
+      );
+
+      await expectLater(
+        repository.create(
+          const DebtDraft(
+            counterparty: 'Иван',
+            direction: DebtDirection.owedToMe,
+            amount: 1,
+            accountId: 'a1',
+          ),
+        ),
+        throwsA(
+          isA<ValidationFailure>()
+              .having((f) => f.field, 'field', 'amount')
+              .having((f) => f.reason, 'reason', FieldError.exceedsBalance),
+        ),
+      );
+      verifyNever(() => bus.emit(any()));
+    });
+
+    test('create: currency_mismatch — у счёта', () async {
+      when(() => api.create(any())).thenThrow(
+        apiError(400, 'currency_mismatch', {'account_id': 'currency_mismatch'}),
+      );
+
+      await expectLater(
+        repository.create(
+          const DebtDraft(
+            counterparty: 'Иван',
+            direction: DebtDirection.iOwe,
+            amount: 1,
+            accountId: 'a1',
+          ),
+        ),
+        throwsA(
+          isA<ValidationFailure>()
+              .having((f) => f.field, 'field', 'accountId')
+              .having((f) => f.reason, 'reason', FieldError.currencyMismatch),
+        ),
+      );
     });
 
     test('update — без направления, снятый срок null, заметка ""', () async {

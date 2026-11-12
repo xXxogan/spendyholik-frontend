@@ -69,6 +69,9 @@ class DebtDraft {
     required this.amount,
     this.dueDate,
     this.note,
+    this.accountId,
+    this.currency,
+    this.openedOn,
   });
 
   final String counterparty;
@@ -76,4 +79,11 @@ class DebtDraft {
   final int amount;
   final DateTime? dueDate;
   final String? note;
+
+  /// Только при создании: счёт, через который прошёл заём, и его дата.
+  final String? accountId;
+  final DateTime? openedOn;
+
+  /// Валюта счёта: сервер требует её совпадения с валютой долга. null — базовая.
+  final Currency? currency;
 }

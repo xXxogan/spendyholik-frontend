@@ -1,7 +1,7 @@
 part of 'debt_form_cubit.dart';
 
 /// Имена совпадают с `ValidationFailure.field` репозитория.
-enum DebtField { counterparty, amount }
+enum DebtField { counterparty, amount, accountId }
 
 /// Сумма — строка ввода: разбирается только при сохранении.
 @freezed
@@ -13,6 +13,13 @@ abstract class DebtFormState with _$DebtFormState {
     @Default('') String amount,
     DateTime? dueDate,
     @Default('') String note,
+    String? accountId,
+
+    /// Валюта выбранного счёта; null — счёт не выбран или валюта ещё не известна.
+    Currency? accountCurrency,
+
+    /// Дата получения/выдачи займа; null — сегодня.
+    DateTime? openedOn,
     @Default(false) bool isLoading,
     @Default(FormStatus.idle) FormStatus status,
     @Default({}) Map<DebtField, FieldError> fieldErrors,
