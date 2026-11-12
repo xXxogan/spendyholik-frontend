@@ -46,14 +46,27 @@ void main() {
     const settings = AppSettings(
       themeMode: AppThemeMode.dark,
       pushEnabled: false,
-      budgetReminders: false,
-      weeklyReport: true,
     );
 
     await repository.save(settings);
 
     expect(await repository.load(), settings);
     expect(storage.values['settings.themeMode'], 'dark');
+  });
+
+  test('старые ключи уведомлений не читаются и не пишутся', () async {
+    storage.values['settings.budgetReminders'] = false;
+    storage.values['settings.weeklyReport'] = true;
+
+    final loaded = await repository.load();
+    storage.values.clear();
+    await repository.save(loaded);
+
+    expect(loaded, const AppSettings());
+    expect(storage.values.keys, {
+      'settings.themeMode',
+      'settings.pushEnabled',
+    });
   });
 
   test('мусор в themeMode — system', () async {

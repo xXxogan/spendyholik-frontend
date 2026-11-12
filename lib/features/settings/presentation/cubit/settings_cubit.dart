@@ -29,12 +29,6 @@ class SettingsCubit extends Cubit<AppSettings> with CubitLogging<AppSettings> {
 
   void setPush(bool value) => _update(state.copyWith(pushEnabled: value));
 
-  void setBudgetReminders(bool value) =>
-      _update(state.copyWith(budgetReminders: value));
-
-  void setWeeklyReport(bool value) =>
-      _update(state.copyWith(weeklyReport: value));
-
   /// Переключатель меняется сразу; не сохранилось — значение живёт
   /// до перезапуска, а ошибка уходит в лог.
   Future<void> _update(AppSettings settings) async {

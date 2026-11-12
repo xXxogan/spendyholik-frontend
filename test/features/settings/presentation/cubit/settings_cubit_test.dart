@@ -53,21 +53,12 @@ void main() {
   );
 
   blocTest<SettingsCubit, AppSettings>(
-    'переключатели уведомлений сохраняются',
+    'push — локально, сохраняется',
     build: build,
-    act: (cubit) => cubit
-      ..setPush(false)
-      ..setBudgetReminders(false)
-      ..setWeeklyReport(true),
-    expect: () => [
-      const AppSettings(pushEnabled: false),
-      const AppSettings(pushEnabled: false, budgetReminders: false),
-      const AppSettings(
-        pushEnabled: false,
-        budgetReminders: false,
-        weeklyReport: true,
-      ),
-    ],
-    verify: (_) => verify(() => repository.save(any())).called(3),
+    act: (cubit) => cubit.setPush(false),
+    expect: () => [const AppSettings(pushEnabled: false)],
+    verify: (_) => verify(
+      () => repository.save(const AppSettings(pushEnabled: false)),
+    ).called(1),
   );
 }

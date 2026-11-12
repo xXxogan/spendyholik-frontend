@@ -9,7 +9,5 @@ abstract class AppSettings with _$AppSettings {
   const factory AppSettings({
     @Default(AppThemeMode.system) AppThemeMode themeMode,
     @Default(true) bool pushEnabled,
-    @Default(true) bool budgetReminders,
-    @Default(false) bool weeklyReport,
   }) = _AppSettings;
 }

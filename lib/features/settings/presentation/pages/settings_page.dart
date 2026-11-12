@@ -5,6 +5,7 @@ import 'package:spendyholik/app/di/injection.dart';
 import 'package:spendyholik/app/router/app_router.gr.dart';
 import 'package:spendyholik/core/widgets/widgets.dart';
 import 'package:spendyholik/features/settings/presentation/cubit/data_reset_cubit.dart';
+import 'package:spendyholik/features/settings/presentation/cubit/notification_preferences_cubit.dart';
 import 'package:spendyholik/features/settings/presentation/widgets/widgets.dart';
 import 'package:spendyholik/l10n/l10n.dart';
 
@@ -19,8 +20,13 @@ class SettingsPage extends StatelessWidget {
     final l10n = context.l10n;
     final title = l10n.settingsTitle;
 
-    return BlocProvider(
-      create: (_) => getIt<DataResetCubit>(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (_) => getIt<DataResetCubit>()),
+        BlocProvider(
+          create: (_) => getIt<NotificationPreferencesCubit>()..load(),
+        ),
+      ],
       child: BlocListener<DataResetCubit, DataResetState>(
         listenWhen: (previous, current) => previous.status != current.status,
         listener: (context, state) {

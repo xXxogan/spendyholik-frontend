@@ -12,8 +12,6 @@ class LocalSettingsRepository implements SettingsRepository {
 
   static const _themeMode = 'settings.themeMode';
   static const _pushEnabled = 'settings.pushEnabled';
-  static const _budgetReminders = 'settings.budgetReminders';
-  static const _weeklyReport = 'settings.weeklyReport';
 
   @override
   Future<AppSettings> load() => _guard(() async {
@@ -24,10 +22,6 @@ class LocalSettingsRepository implements SettingsRepository {
       themeMode:
           AppThemeMode.values.asNameMap()[themeMode] ?? defaults.themeMode,
       pushEnabled: await _storage.getBool(_pushEnabled) ?? defaults.pushEnabled,
-      budgetReminders:
-          await _storage.getBool(_budgetReminders) ?? defaults.budgetReminders,
-      weeklyReport:
-          await _storage.getBool(_weeklyReport) ?? defaults.weeklyReport,
     );
   });
 
@@ -35,8 +29,6 @@ class LocalSettingsRepository implements SettingsRepository {
   Future<void> save(AppSettings settings) => _guard(() async {
     await _storage.setString(_themeMode, settings.themeMode.name);
     await _storage.setBool(_pushEnabled, settings.pushEnabled);
-    await _storage.setBool(_budgetReminders, settings.budgetReminders);
-    await _storage.setBool(_weeklyReport, settings.weeklyReport);
   });
 
   Future<T> _guard<T>(Future<T> Function() body) async {
