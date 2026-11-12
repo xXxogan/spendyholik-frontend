@@ -12,7 +12,8 @@ import 'package:spendyholik/features/settings/presentation/widgets/widgets.dart'
 
 import '../../../../helpers/pump_app.dart';
 
-class MockSettingsCubit extends MockCubit<AppSettings> implements SettingsCubit {}
+class MockSettingsCubit extends MockCubit<AppSettings>
+    implements SettingsCubit {}
 
 class MockNotificationPreferencesCubit
     extends MockCubit<NotificationPreferencesState>
@@ -33,16 +34,18 @@ void main() {
   late MockNotificationPreferencesCubit notifications;
   late MockDataResetCubit reset;
 
-  setUpAll(() => registerFallbackValue(NotificationPreference.budget));
+  setUpAll(() {
+    registerFallbackValue(NotificationPreference.budget);
+    registerFallbackValue(AppLanguage.system);
+  });
 
   setUp(() {
     settings = MockSettingsCubit();
     when(() => settings.state).thenReturn(const AppSettings());
     notifications = MockNotificationPreferencesCubit();
-    when(
-      () => notifications.toggle(any(), any()),
-    ).thenAnswer((_) async {});
+    when(() => notifications.toggle(any(), any())).thenAnswer((_) async {});
     when(() => notifications.load()).thenAnswer((_) async {});
+    when(() => settings.setLanguage(any())).thenReturn(null);
     reset = MockDataResetCubit();
     when(() => reset.state).thenReturn(const DataResetState());
   });
@@ -66,9 +69,8 @@ void main() {
   testWidgets('push и четыре серверных переключателя, без отчёта', (
     tester,
   ) async {
-    when(
-      () => notifications.state,
-    ).thenReturn(const NotificationPreferencesState.loaded(preferences));
+    when(() => notifications.state)
+        .thenReturn(const NotificationPreferencesState.loaded(preferences));
     await pump(tester);
 
     expect(find.byType(SwitchListTile), findsNWidgets(5));
@@ -80,10 +82,21 @@ void main() {
     expect(find.textContaining('Еженедельный'), findsNothing);
   });
 
+  testWidgets('сегмент языка вызывает setLanguage', (tester) async {
+    when(() => notifications.state)
+        .thenReturn(const NotificationPreferencesState.loaded(preferences));
+    await pump(tester);
+
+    expect(find.text('Язык'), findsOneWidget);
+    await tester.tap(find.text('English'));
+    verify(() => settings.setLanguage(.en)).called(1);
+    await tester.tap(find.text('Русский'));
+    verify(() => settings.setLanguage(.ru)).called(1);
+  });
+
   testWidgets('переключение уходит в Cubit уведомлений', (tester) async {
-    when(
-      () => notifications.state,
-    ).thenReturn(const NotificationPreferencesState.loaded(preferences));
+    when(() => notifications.state)
+        .thenReturn(const NotificationPreferencesState.loaded(preferences));
     await pump(tester);
 
     await tester.tap(find.text('Цели'));
@@ -94,9 +107,8 @@ void main() {
   });
 
   testWidgets('ошибка загрузки — «Повторить» перечитывает', (tester) async {
-    when(
-      () => notifications.state,
-    ).thenReturn(const NotificationPreferencesState.error(NetworkFailure()));
+    when(() => notifications.state)
+        .thenReturn(const NotificationPreferencesState.error(NetworkFailure()));
     await pump(tester);
 
     expect(find.byType(SwitchListTile), findsOneWidget);

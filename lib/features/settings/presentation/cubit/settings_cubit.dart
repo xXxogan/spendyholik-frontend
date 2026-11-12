@@ -27,6 +27,9 @@ class SettingsCubit extends Cubit<AppSettings> with CubitLogging<AppSettings> {
   void setThemeMode(AppThemeMode mode) =>
       _update(state.copyWith(themeMode: mode));
 
+  void setLanguage(AppLanguage language) =>
+      _update(state.copyWith(language: language));
+
   void setPush(bool value) => _update(state.copyWith(pushEnabled: value));
 
   /// Переключатель меняется сразу; не сохранилось — значение живёт

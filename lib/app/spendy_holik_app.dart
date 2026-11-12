@@ -61,9 +61,11 @@ class _SpendyHolikAppState extends State<SpendyHolikApp> {
                 getIt<AppRouter>().replaceAll([const EmailConfirmRoute()]),
           ),
         ],
-        child: BlocSelector<SettingsCubit, AppSettings, AppThemeMode>(
-          selector: (settings) => settings.themeMode,
-          builder: (context, themeMode) => MaterialApp.router(
+        child: BlocBuilder<SettingsCubit, AppSettings>(
+          buildWhen: (previous, current) =>
+              previous.themeMode != current.themeMode ||
+              previous.language != current.language,
+          builder: (context, settings) => MaterialApp.router(
             onGenerateTitle: (context) => context.l10n.appTitle,
             builder: (_, child) =>
                 BlocSelector<SessionCubit, SessionState, Currency>(
@@ -79,11 +81,13 @@ class _SpendyHolikAppState extends State<SpendyHolikApp> {
                 ),
             theme: AppTheme.light(),
             darkTheme: AppTheme.dark(),
-            themeMode: switch (themeMode) {
+            themeMode: switch (settings.themeMode) {
               AppThemeMode.system => ThemeMode.system,
               AppThemeMode.light => ThemeMode.light,
               AppThemeMode.dark => ThemeMode.dark,
             },
+            // null — системные языки, ru на случай неподдерживаемой системной.
+            locale: settings.language.locale,
             localizationsDelegates: AppLocalizationsSetup.delegates,
             supportedLocales: AppLocalizationsSetup.supportedLocales,
             localeListResolutionCallback: AppLocalizationsSetup.resolve,

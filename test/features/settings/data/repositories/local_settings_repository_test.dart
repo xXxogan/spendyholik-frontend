@@ -45,6 +45,7 @@ void main() {
   test('save → load возвращает то же', () async {
     const settings = AppSettings(
       themeMode: AppThemeMode.dark,
+      language: AppLanguage.en,
       pushEnabled: false,
     );
 
@@ -52,6 +53,7 @@ void main() {
 
     expect(await repository.load(), settings);
     expect(storage.values['settings.themeMode'], 'dark');
+    expect(storage.values['settings.language'], 'en');
   });
 
   test('старые ключи уведомлений не читаются и не пишутся', () async {
@@ -65,6 +67,7 @@ void main() {
     expect(loaded, const AppSettings());
     expect(storage.values.keys, {
       'settings.themeMode',
+      'settings.language',
       'settings.pushEnabled',
     });
   });
@@ -73,6 +76,12 @@ void main() {
     storage.values['settings.themeMode'] = 'purple';
 
     expect((await repository.load()).themeMode, AppThemeMode.system);
+  });
+
+  test('мусор в language — system', () async {
+    storage.values['settings.language'] = 'klingon';
+
+    expect((await repository.load()).language, AppLanguage.system);
   });
 
   test('хранилище бросает при load — UnknownFailure', () async {

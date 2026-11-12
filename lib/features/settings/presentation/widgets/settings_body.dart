@@ -61,6 +61,33 @@ class SettingsBody extends StatelessWidget {
                   ),
                 ),
               ),
+              ListTile(
+                leading: const Icon(Icons.language),
+                title: Text(l10n.settingsLanguage),
+                subtitle: Padding(
+                  padding: const .only(top: 12, bottom: 4),
+                  child: SegmentedButton<AppLanguage>(
+                    showSelectedIcon: false,
+                    segments: [
+                      ButtonSegment(
+                        value: .system,
+                        label: Text(l10n.settingsLanguageSystem),
+                      ),
+                      ButtonSegment(
+                        value: .ru,
+                        label: Text(l10n.settingsLanguageRu),
+                      ),
+                      ButtonSegment(
+                        value: .en,
+                        label: Text(l10n.settingsLanguageEn),
+                      ),
+                    ],
+                    selected: {state.language},
+                    onSelectionChanged: (selection) =>
+                        settings.setLanguage(selection.single),
+                  ),
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 24),

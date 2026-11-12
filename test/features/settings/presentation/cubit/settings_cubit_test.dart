@@ -1,4 +1,7 @@
 import 'package:bloc_test/bloc_test.dart';
+
+import 'dart:ui';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:spendyholik/features/settings/data/models/app_settings.dart';
@@ -40,6 +43,22 @@ void main() {
   );
 
   blocTest<SettingsCubit, AppSettings>(
+    'setLanguage(en) → en и сохранение',
+    build: build,
+    act: (cubit) => cubit.setLanguage(AppLanguage.en),
+    expect: () => [const AppSettings(language: AppLanguage.en)],
+    verify: (_) => verify(
+      () => repository.save(const AppSettings(language: AppLanguage.en)),
+    ).called(1),
+  );
+
+  test('AppLanguage.locale: system → null, ru и en — свои', () {
+    expect(AppLanguage.system.locale, isNull);
+    expect(AppLanguage.ru.locale, const Locale('ru'));
+    expect(AppLanguage.en.locale, const Locale('en'));
+  });
+
+  blocTest<SettingsCubit, AppSettings>(
     'после ручного выбора можно вернуть системную',
     build: build,
     act: (cubit) => cubit
@@ -57,8 +76,8 @@ void main() {
     build: build,
     act: (cubit) => cubit.setPush(false),
     expect: () => [const AppSettings(pushEnabled: false)],
-    verify: (_) => verify(
-      () => repository.save(const AppSettings(pushEnabled: false)),
-    ).called(1),
+    verify: (_) =>
+        verify(() => repository.save(const AppSettings(pushEnabled: false)))
+            .called(1),
   );
 }

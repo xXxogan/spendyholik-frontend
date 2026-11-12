@@ -11,16 +11,19 @@ class LocalSettingsRepository implements SettingsRepository {
   final PreferencesStorage _storage;
 
   static const _themeMode = 'settings.themeMode';
+  static const _language = 'settings.language';
   static const _pushEnabled = 'settings.pushEnabled';
 
   @override
   Future<AppSettings> load() => _guard(() async {
     const defaults = AppSettings();
     final themeMode = await _storage.getString(_themeMode);
+    final language = await _storage.getString(_language);
     return AppSettings(
       // Неизвестное значение (старая версия, ручная правка) — как без значения.
       themeMode:
           AppThemeMode.values.asNameMap()[themeMode] ?? defaults.themeMode,
+      language: AppLanguage.values.asNameMap()[language] ?? defaults.language,
       pushEnabled: await _storage.getBool(_pushEnabled) ?? defaults.pushEnabled,
     );
   });
@@ -28,6 +31,7 @@ class LocalSettingsRepository implements SettingsRepository {
   @override
   Future<void> save(AppSettings settings) => _guard(() async {
     await _storage.setString(_themeMode, settings.themeMode.name);
+    await _storage.setString(_language, settings.language.name);
     await _storage.setBool(_pushEnabled, settings.pushEnabled);
   });
 
