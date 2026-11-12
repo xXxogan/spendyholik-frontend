@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 import 'package:retrofit/retrofit.dart';
 import 'package:spendyholik/features/accounts/data/models/account_dtos.dart';
+import 'package:spendyholik/features/accounts/data/models/feed_dtos.dart';
 
 part 'accounts_api.g.dart';
 
@@ -39,6 +40,14 @@ abstract class AccountsApi {
     @Path() String id,
     @Query('weeks') int weeks,
   );
+
+  /// Операции счёта вместе с событиями долгов и пополнениями целей.
+  @GET('feed/')
+  Future<FeedPageDto> feed({
+    @Query('account_id') required String accountId,
+    @Query('cursor') String? cursor,
+    @Query('limit') int? limit,
+  });
 
   @GET('dashboard/')
   Future<DashboardOutDto> dashboard();

@@ -12,6 +12,7 @@ import 'package:spendyholik/features/transactions/data/api/transactions_api.dart
 import 'package:spendyholik/features/transactions/data/models/models.dart';
 import 'package:spendyholik/features/transactions/data/models/transaction_dtos.dart';
 import 'package:spendyholik/features/transactions/data/repositories/remote_transaction_repository.dart';
+import 'package:spendyholik/features/transactions/data/repositories/transaction_mapper.dart';
 import 'package:talker/talker.dart';
 
 import '../../../../helpers/dio_errors.dart';
@@ -114,8 +115,10 @@ void main() {
       api,
       CachedReader(cache, NetworkStatus(), Talker()),
       bus,
-      session,
-      Talker(settings: TalkerSettings(useConsoleLogs: false)),
+      TransactionMapper(
+        session,
+        Talker(settings: TalkerSettings(useConsoleLogs: false)),
+      ),
     );
   });
 

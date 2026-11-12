@@ -2,17 +2,13 @@ import 'package:injectable/injectable.dart';
 import 'package:intl/intl.dart';
 import 'package:spendyholik/core/config/app_config.dart';
 import 'package:spendyholik/core/events/data_change_bus.dart';
-import 'package:spendyholik/core/models/models.dart';
 import 'package:spendyholik/core/network/api_call.dart';
 import 'package:spendyholik/core/network/cached_read.dart';
-import 'package:spendyholik/core/session/session_currency.dart';
-import 'package:spendyholik/features/accounts/accounts.dart';
-import 'package:spendyholik/features/categories/categories.dart';
 import 'package:spendyholik/features/transactions/data/api/transactions_api.dart';
 import 'package:spendyholik/features/transactions/data/models/models.dart';
 import 'package:spendyholik/features/transactions/data/models/transaction_dtos.dart';
+import 'package:spendyholik/features/transactions/data/repositories/transaction_mapper.dart';
 import 'package:spendyholik/features/transactions/data/repositories/transaction_repository.dart';
-import 'package:talker/talker.dart';
 
 @LazySingleton(as: TransactionRepository)
 class RemoteTransactionRepository implements TransactionRepository {
@@ -20,8 +16,7 @@ class RemoteTransactionRepository implements TransactionRepository {
     this._api,
     this._reader,
     this._bus,
-    this._session,
-    this._talker,
+    this._mapper,
   );
 
   static const _fields = {
@@ -45,8 +40,7 @@ class RemoteTransactionRepository implements TransactionRepository {
   final TransactionsApi _api;
   final CachedReader _reader;
   final DataChangeBus _bus;
-  final SessionCurrency _session;
-  final Talker _talker;
+  final TransactionMapper _mapper;
 
   @override
   Future<TransactionPage> getPage(
@@ -98,7 +92,7 @@ class RemoteTransactionRepository implements TransactionRepository {
           )
         : await fetch();
     return TransactionPage(
-      items: dto.items.map(_transaction).toList(),
+      items: dto.items.map(_mapper.transaction).toList(),
       nextCursor: dto.nextCursor,
     );
   }
@@ -108,7 +102,7 @@ class RemoteTransactionRepository implements TransactionRepository {
       getPage(filter).then((page) => page.items);
 
   @override
-  Future<TransactionModel> getTransaction(String id) async => _transaction(
+  Future<TransactionModel> getTransaction(String id) async => _mapper.transaction(
     await _reader.read(
       key: cacheKey('transactions/$id'),
       fetch: () => _call(() => _api.get(id)),
@@ -136,7 +130,7 @@ class RemoteTransactionRepository implements TransactionRepository {
       ),
     );
     _bus.emit(_changedTopics);
-    return _transaction(created);
+    return _mapper.transaction(created);
   }
 
   @override
@@ -157,77 +151,13 @@ class RemoteTransactionRepository implements TransactionRepository {
       ),
     );
     _bus.emit(_changedTopics);
-    return _transaction(updated);
+    return _mapper.transaction(updated);
   }
 
   @override
   Future<void> delete(String id) async {
     await _call(() => _api.delete(id));
     _bus.emit(_changedTopics);
-  }
-
-  TransactionModel _transaction(TransactionOutDto dto) {
-    final type =
-        TransactionType.values.asNameMap()[dto.type] ?? TransactionType.expense;
-    final day = DateTime.parse(dto.date);
-    // Без времени — полдень, чтобы операция не уезжала на соседний день.
-    final parts = (dto.time ?? '12:00:00').split(':');
-    final note = dto.note;
-    return TransactionModel(
-      id: dto.id,
-      currency: _currency(dto.amount.currency),
-      type: type,
-      amount: dto.amount.minor,
-      title: _ownTitle(dto, type),
-      category: switch (dto.category) {
-        final ref? => CategoryRef(
-          id: ref.id,
-          name: ref.name ?? '',
-          icon: EntityIcon.values.asNameMap()[ref.icon] ?? EntityIcon.other,
-          color: EntityColor.values.asNameMap()[ref.color] ?? EntityColor.gray,
-        ),
-        null => null,
-      },
-      account: _accountRef(dto.account),
-      toAccount: switch (dto.transferToAccount) {
-        final ref? => _accountRef(ref),
-        null => null,
-      },
-      occurredAt: DateTime(
-        day.year,
-        day.month,
-        day.day,
-        int.tryParse(parts[0]) ?? 12,
-        parts.length > 1 ? int.tryParse(parts[1]) ?? 0 : 0,
-        parts.length > 2 ? int.tryParse(parts[2].split('.').first) ?? 0 : 0,
-      ),
-      note: note == null || note.isEmpty ? null : note,
-    );
-  }
-
-  /// Без своего названия сервер отдаёт имя категории (у перевода — счёта или
-  /// «Перевод», renderers.py). Это не название пользователя: иначе форма правки
-  /// вернула бы его на сервер навсегда, и переименование категории до операции
-  /// уже не дошло бы (аудит 2026-11-09). Пустое название плитка показывает
-  /// именем категории или «откуда → куда» сама.
-  static String _ownTitle(TransactionOutDto dto, TransactionType type) {
-    final fallbacks = type == TransactionType.transfer
-        ? {dto.account.name, 'Перевод'}
-        : {dto.category?.name ?? ''};
-    return fallbacks.contains(dto.title) ? '' : dto.title;
-  }
-
-  AccountRef _accountRef(AccountRefDto dto) => AccountRef(
-    id: dto.id,
-    name: dto.name,
-    color: EntityColor.values.asNameMap()[dto.color] ?? EntityColor.gray,
-  );
-
-  Currency _currency(String code) {
-    final currency = Currency.fromCode(code);
-    if (currency != null) return currency;
-    _talker.warning('Unknown transaction currency $code, using base');
-    return _session.value;
   }
 
   Future<T> _call<T>(Future<T> Function() request) =>
