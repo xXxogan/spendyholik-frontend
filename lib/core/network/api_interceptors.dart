@@ -24,6 +24,8 @@ class AuthInterceptor extends QueuedInterceptor {
     'auth/login/',
     'auth/register/',
     'auth/logout/',
+    'auth/password/reset/',
+    'auth/password/confirm/',
     _refreshPath,
   };
 

@@ -1,9 +1,8 @@
-import 'dart:async';
-
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:spendyholik/app/di/injection.dart';
+import 'package:spendyholik/core/bloc/countdown.dart';
 import 'package:spendyholik/core/bloc/cubit_logging.dart';
 import 'package:spendyholik/core/errors/failure.dart';
 import 'package:spendyholik/core/models/models.dart';
@@ -22,7 +21,7 @@ class EmailConfirmCubit extends Cubit<EmailConfirmState>
   static const resendCooldown = 60;
 
   final AuthRepository _auth;
-  Timer? _timer;
+  final _cooldown = Countdown();
 
   /// Код уже отправлен регистрацией или сменой email — отсчёт сразу.
   void init(String email) {
@@ -83,19 +82,14 @@ class EmailConfirmCubit extends Cubit<EmailConfirmState>
 
   Future<void> signOut() => _auth.signOut();
 
-  void _startCooldown() {
-    _timer?.cancel();
-    emit(state.copyWith(resendIn: resendCooldown));
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      final left = state.resendIn - 1;
-      emit(state.copyWith(resendIn: left));
-      if (left <= 0) timer.cancel();
-    });
-  }
+  void _startCooldown() => _cooldown.start(
+    resendCooldown,
+    (left) => emit(state.copyWith(resendIn: left)),
+  );
 
   @override
   Future<void> close() {
-    _timer?.cancel();
+    _cooldown.cancel();
     return super.close();
   }
 }

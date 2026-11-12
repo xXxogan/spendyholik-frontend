@@ -1,8 +1,9 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:spendyholik/app/router/app_router.gr.dart';
 import 'package:spendyholik/core/models/models.dart';
 import 'package:spendyholik/core/widgets/widgets.dart';
 import 'package:spendyholik/features/user/presentation/cubit/profile_edit_cubit.dart';
-import 'package:spendyholik/features/user/presentation/cubit/register_cubit.dart';
 import 'package:spendyholik/features/user/presentation/widgets/widgets.dart';
 import 'package:spendyholik/l10n/l10n.dart';
 
@@ -15,7 +16,6 @@ class ProfileForm extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final theme = Theme.of(context);
     String? error(ProfileField field) => switch (state.fieldErrors[field]) {
       final error? => fieldErrorText(l10n, error),
       null => null,
@@ -43,6 +43,15 @@ class ProfileForm extends StatelessWidget {
             errorText: error(.email),
           ),
         ),
+        // Сервер меняет email только с текущим паролем — поле лишь при смене.
+        if (state.emailChanged)
+          PasswordField(
+            label: l10n.profileCurrentPassword,
+            hint: l10n.profileCurrentPasswordHint,
+            onChanged: cubit.currentPasswordChanged,
+            autofillHints: const [AutofillHints.password],
+            errorText: error(.currentPassword),
+          ),
         DropdownButtonFormField<Currency>(
           initialValue: state.currency,
           isExpanded: true,
@@ -61,19 +70,13 @@ class ProfileForm extends StatelessWidget {
           },
         ),
         const SizedBox(height: 4),
-        Text(l10n.profileChangePassword, style: theme.textTheme.titleMedium),
-        PasswordField(
-          label: l10n.profileCurrentPassword,
-          onChanged: cubit.currentPasswordChanged,
-          autofillHints: const [AutofillHints.password],
-          errorText: error(.currentPassword),
-        ),
-        PasswordField(
-          label: l10n.profileNewPassword,
-          hint: l10n.registerPasswordHint(RegisterCubit.minPasswordLength),
-          onChanged: cubit.newPasswordChanged,
-          autofillHints: const [AutofillHints.newPassword],
-          errorText: error(.newPassword),
+        OutlinedButton.icon(
+          onPressed: () => context.router.push(const PasswordChangeRoute()),
+          icon: const Icon(Icons.lock_reset_outlined),
+          label: Text(l10n.profileChangePassword),
+          style: OutlinedButton.styleFrom(
+            minimumSize: const Size.fromHeight(48),
+          ),
         ),
         const SizedBox(height: 8),
         FilledButton(

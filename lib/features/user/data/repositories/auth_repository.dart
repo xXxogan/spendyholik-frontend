@@ -30,13 +30,28 @@ abstract interface class AuthRepository {
 
   Future<void> signOut();
 
+  /// [currentPassword] — при смене email (иначе `ValidationFailure(
+  /// 'currentPassword', required)`); после смены новый адрес не подтверждён.
   Future<UserModel> updateProfile({
     required String name,
     required String email,
+    String? currentPassword,
   });
 
   Future<UserModel> setBaseCurrency(Currency currency);
 
-  /// `ValidationFailure('currentPassword', wrongPassword)` при неверном текущем.
-  Future<void> changePassword(String current, String next);
+  /// Код для смены пароля уходит на почту; [RateLimitedFailure] — слишком часто.
+  Future<void> requestPasswordChangeCode();
+
+  /// Новый пароль по коду из письма; `ValidationFailure('code', …)` при ошибке
+  /// кода. Сервер отзывает все сессии — репозиторий сразу входит заново.
+  Future<void> changePassword(String code, String next);
+
+  /// Код для сброса пароля уходит на [email] (без входа); ответ не говорит,
+  /// есть ли адрес. [RateLimitedFailure] — слишком часто.
+  Future<void> requestPasswordReset(String email);
+
+  /// Новый пароль по коду; `ValidationFailure('code', …)` при ошибке кода.
+  /// Сервер отзывает все сессии, пользователь не входит.
+  Future<void> confirmPasswordReset(String email, String code, String next);
 }

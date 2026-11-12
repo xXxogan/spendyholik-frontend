@@ -8,7 +8,6 @@ import 'package:spendyholik/core/models/models.dart';
 import 'package:spendyholik/core/validation/email.dart';
 import 'package:spendyholik/features/user/data/models/models.dart';
 import 'package:spendyholik/features/user/data/repositories/repositories.dart';
-import 'package:spendyholik/features/user/presentation/cubit/register_cubit.dart';
 import 'package:talker_flutter/talker_flutter.dart';
 
 part 'profile_edit_cubit.freezed.dart';
@@ -27,6 +26,7 @@ class ProfileEditCubit extends Cubit<ProfileEditState>
       ProfileEditState(
         name: user.name,
         email: user.email,
+        initialEmail: user.email,
         currency: currency,
         initialCurrency: currency,
       ),
@@ -48,26 +48,16 @@ class ProfileEditCubit extends Cubit<ProfileEditState>
     ),
   );
 
-  void newPasswordChanged(String value) => emit(
-    state.copyWith(newPassword: value, fieldErrors: _without(.newPassword)),
-  );
-
-  /// Пароль — последним: если профиль не сохранится (занят email), пароль
-  /// останется старым. Обратное (имя сохранено, пароль нет) безопасно —
-  /// повторное сохранение ничего не ломает.
+  /// Пароль здесь не меняется: у него свой экран с кодом из письма.
   Future<void> save() async {
     final errors = <ProfileField, FieldError>{};
     final name = state.name.trim();
     final email = state.email.trim();
     if (name.isEmpty) errors[.name] = .required;
     if (!isValidEmail(email)) errors[.email] = .invalidEmail;
-    final changesPassword =
-        state.currentPassword.isNotEmpty || state.newPassword.isNotEmpty;
-    if (changesPassword) {
-      if (state.currentPassword.isEmpty) errors[.currentPassword] = .required;
-      if (state.newPassword.length < RegisterCubit.minPasswordLength) {
-        errors[.newPassword] = .tooShort;
-      }
+    final emailChanged = state.emailChanged;
+    if (emailChanged && state.currentPassword.isEmpty) {
+      errors[.currentPassword] = .required;
     }
     if (errors.isNotEmpty) {
       emit(state.copyWith(fieldErrors: errors));
@@ -76,12 +66,13 @@ class ProfileEditCubit extends Cubit<ProfileEditState>
 
     emit(state.copyWith(status: .submitting, failure: null));
     try {
-      await _auth.updateProfile(name: name, email: email);
+      await _auth.updateProfile(
+        name: name,
+        email: email,
+        currentPassword: emailChanged ? state.currentPassword : null,
+      );
       if (state.currency != state.initialCurrency) {
         await _auth.setBaseCurrency(state.currency);
-      }
-      if (changesPassword) {
-        await _auth.changePassword(state.currentPassword, state.newPassword);
       }
       emit(state.copyWith(status: .success));
     } on ValidationFailure catch (failure, stackTrace) {

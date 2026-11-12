@@ -33,9 +33,8 @@ void main() {
   });
 
   test('неверный код — ошибка у поля, поле очищено', () async {
-    when(() => auth.confirmEmail(any())).thenThrow(
-      const ValidationFailure('code', FieldError.invalidCode),
-    );
+    when(() => auth.confirmEmail(any()))
+        .thenThrow(const ValidationFailure('code', FieldError.invalidCode));
     final cubit = build();
 
     await cubit.submit('000000');
@@ -57,9 +56,8 @@ void main() {
   });
 
   test('ввод снимает ошибку кода', () async {
-    when(() => auth.confirmEmail(any())).thenThrow(
-      const ValidationFailure('code', FieldError.invalidCode),
-    );
+    when(() => auth.confirmEmail(any()))
+        .thenThrow(const ValidationFailure('code', FieldError.invalidCode));
     final cubit = build();
     await cubit.submit('000000');
 
@@ -84,24 +82,27 @@ void main() {
     });
   });
 
-  test('resend: до конца отсчёта — без запроса; после — запрос и новый отсчёт', () {
-    fakeAsync((async) {
-      when(() => auth.resendEmailCode()).thenAnswer((_) async {});
-      final cubit = build();
+  test(
+    'resend: до конца отсчёта — без запроса; после — запрос и новый отсчёт',
+    () {
+      fakeAsync((async) {
+        when(() => auth.resendEmailCode()).thenAnswer((_) async {});
+        final cubit = build();
 
-      cubit.resend();
-      async.flushMicrotasks();
-      verifyNever(() => auth.resendEmailCode());
+        cubit.resend();
+        async.flushMicrotasks();
+        verifyNever(() => auth.resendEmailCode());
 
-      async.elapse(const Duration(seconds: 60));
-      cubit.resend();
-      async.flushMicrotasks();
+        async.elapse(const Duration(seconds: 60));
+        cubit.resend();
+        async.flushMicrotasks();
 
-      verify(() => auth.resendEmailCode()).called(1);
-      expect(cubit.state.resendIn, 60);
-      cubit.close();
-    });
-  });
+        verify(() => auth.resendEmailCode()).called(1);
+        expect(cubit.state.resendIn, 60);
+        cubit.close();
+      });
+    },
+  );
 
   test('resend: дневной лимит — ошибка, отсчёт не запускается', () {
     fakeAsync((async) {

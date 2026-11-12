@@ -46,7 +46,7 @@ class RemoteAuthRepository implements AuthRepository {
 
   static const _fields = {
     'first_name': 'name',
-    'old_password': 'currentPassword',
+    'current_password': 'currentPassword',
     'new_password': 'newPassword',
     'personal_data_consent': 'consent',
     'code': 'code',
@@ -137,7 +137,14 @@ class RemoteAuthRepository implements AuthRepository {
   Future<UserModel> updateProfile({
     required String name,
     required String email,
-  }) => _patch(ProfilePatchBody(firstName: name, email: email));
+    String? currentPassword,
+  }) => _patch(
+    ProfilePatchBody(
+      firstName: name,
+      email: email,
+      currentPassword: currentPassword,
+    ),
+  );
 
   @override
   Future<UserModel> setBaseCurrency(Currency currency) async {
@@ -149,11 +156,26 @@ class RemoteAuthRepository implements AuthRepository {
   }
 
   @override
-  Future<void> changePassword(String current, String next) async {
+  Future<void> requestPasswordReset(String email) => _call(
+    () => _api.requestPasswordReset(RequestPasswordResetBody(email: email)),
+  );
+
+  @override
+  Future<void> confirmPasswordReset(String email, String code, String next) =>
+      _call(
+        () => _api.confirmPasswordReset(
+          ConfirmPasswordResetBody(email: email, code: code, newPassword: next),
+        ),
+      );
+
+  @override
+  Future<void> requestPasswordChangeCode() =>
+      _call(_api.requestPasswordChangeCode);
+
+  @override
+  Future<void> changePassword(String code, String next) async {
     await _call(
-      () => _api.changePassword(
-        PasswordBody(oldPassword: current, newPassword: next),
-      ),
+      () => _api.changePassword(PasswordBody(code: code, newPassword: next)),
     );
     // Сервер отзывает все сессии при смене пароля, включая эту: без нового
     // входа через 15 минут (срок access) пользователя выкинуло бы на экран входа.

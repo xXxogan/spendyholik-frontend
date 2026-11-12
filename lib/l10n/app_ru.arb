@@ -614,5 +614,18 @@
   "emailConfirmTitle": "Подтвердите почту",
   "emailConfirmSubtitle": "Мы отправили код из 6 цифр на {email}. Введите его, чтобы продолжить.",
   "@emailConfirmSubtitle": {"placeholders": {"email": {"type": "String"}}},
-  "emailConfirmSignOut": "Выйти"
+  "emailConfirmSignOut": "Выйти",
+  "passwordChangeTitle": "Смена пароля",
+  "passwordChangeHint": "Пришлём код из 6 цифр на {email} — введите его и новый пароль.",
+  "@passwordChangeHint": {"placeholders": {"email": {"type": "String"}}},
+  "passwordChangeSendCode": "Отправить код",
+  "passwordChangeSubmit": "Сменить пароль",
+  "passwordChanged": "Пароль изменён",
+  "profileCurrentPasswordHint": "Нужен, чтобы сменить почту. На новый адрес придёт код подтверждения.",
+  "loginForgotPassword": "Забыли пароль?",
+  "forgotPasswordTitle": "Восстановление пароля",
+  "forgotPasswordHint": "Укажите почту аккаунта — пришлём код из 6 цифр.",
+  "forgotPasswordGetCode": "Получить код",
+  "forgotPasswordSent": "Если адрес зарегистрирован, письмо с кодом отправлено. Введите код и новый пароль.",
+  "forgotPasswordDone": "Пароль изменён, войдите с новым"
 }

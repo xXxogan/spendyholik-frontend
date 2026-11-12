@@ -388,5 +388,17 @@
   "codeResendIn": "Send again in {seconds} s",
   "emailConfirmTitle": "Confirm your email",
   "emailConfirmSubtitle": "We sent a 6-digit code to {email}. Enter it to continue.",
-  "emailConfirmSignOut": "Sign out"
+  "emailConfirmSignOut": "Sign out",
+  "passwordChangeTitle": "Change password",
+  "passwordChangeHint": "We will send a 6-digit code to {email} — enter it and the new password.",
+  "passwordChangeSendCode": "Send code",
+  "passwordChangeSubmit": "Change password",
+  "passwordChanged": "Password changed",
+  "profileCurrentPasswordHint": "Required to change the email. A confirmation code will be sent to the new address.",
+  "loginForgotPassword": "Forgot password?",
+  "forgotPasswordTitle": "Password recovery",
+  "forgotPasswordHint": "Enter your account email — we will send a 6-digit code.",
+  "forgotPasswordGetCode": "Get code",
+  "forgotPasswordSent": "If the address is registered, an email with the code has been sent. Enter the code and a new password.",
+  "forgotPasswordDone": "Password changed, sign in with the new one"
 }

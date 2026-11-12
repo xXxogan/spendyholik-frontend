@@ -223,6 +223,17 @@ void main() {
     },
   );
 
+  test('сброс пароля — без Bearer и без refresh при 401', () async {
+    for (final path in ['auth/password/reset/', 'auth/password/confirm/']) {
+      await expectLater(
+        dio.post<void>(path, data: {'email': 'a@b.co'}),
+        throwsA(isA<DioException>()),
+      );
+      expect(server.seen[path], isNull);
+    }
+    expect(server.refreshCalls, 0);
+  });
+
   test(
     '403 email_not_verified — сигнал «нужно подтвердить почту», ошибка дальше',
     () async {

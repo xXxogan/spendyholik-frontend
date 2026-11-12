@@ -27,6 +27,7 @@ void main() {
       () => auth.updateProfile(
         name: any(named: 'name'),
         email: any(named: 'email'),
+        currentPassword: any(named: 'currentPassword'),
       ),
     ).thenAnswer((_) async => maria);
     when(() => auth.setBaseCurrency(any())).thenAnswer((_) async => maria);
@@ -58,6 +59,7 @@ void main() {
       () => auth.updateProfile(
         name: any(named: 'name'),
         email: any(named: 'email'),
+        currentPassword: any(named: 'currentPassword'),
       ),
     ),
   );
@@ -97,53 +99,9 @@ void main() {
   );
 
   blocTest<ProfileEditCubit, ProfileEditState>(
-    'новый пароль короче 8 — tooShort, без текущего — required',
+    'сохранение профиля пароль не трогает — он меняется на своём экране по коду',
     build: build,
-    act: (cubit) => cubit
-      ..newPasswordChanged('1234')
-      ..save(),
-    skip: 1,
-    expect: () => [
-      isA<ProfileEditState>().having((s) => s.fieldErrors, 'errors', {
-        ProfileField.currentPassword: FieldError.required,
-        ProfileField.newPassword: FieldError.tooShort,
-      }),
-    ],
-  );
-
-  blocTest<ProfileEditCubit, ProfileEditState>(
-    'неверный текущий пароль — ошибка у поля',
-    setUp: () => when(() => auth.changePassword(any(), any())).thenThrow(
-      const ValidationFailure('currentPassword', FieldError.wrongPassword),
-    ),
-    build: build,
-    act: (cubit) => cubit
-      ..currentPasswordChanged('wrong-pass')
-      ..newPasswordChanged('new-pass-123')
-      ..save(),
-    skip: 3,
-    expect: () => [
-      isA<ProfileEditState>()
-          .having((s) => s.status, 'status', FormStatus.failure)
-          .having((s) => s.fieldErrors, 'errors', {
-            ProfileField.currentPassword: FieldError.wrongPassword,
-          }),
-    ],
-  );
-
-  blocTest<ProfileEditCubit, ProfileEditState>(
-    'email занят — пароль не меняется (иначе старый уже не подойдёт)',
-    setUp: () => when(
-      () => auth.updateProfile(
-        name: any(named: 'name'),
-        email: any(named: 'email'),
-      ),
-    ).thenThrow(const EmailTakenFailure()),
-    build: build,
-    act: (cubit) => cubit
-      ..currentPasswordChanged('old-pass-123')
-      ..newPasswordChanged('new-pass-123')
-      ..save(),
+    act: (cubit) => cubit.save(),
     verify: (_) => verifyNever(() => auth.changePassword(any(), any())),
   );
 
@@ -153,6 +111,7 @@ void main() {
       () => auth.updateProfile(
         name: any(named: 'name'),
         email: any(named: 'email'),
+        currentPassword: any(named: 'currentPassword'),
       ),
     ).thenThrow(const EmailTakenFailure()),
     build: build,
@@ -164,4 +123,95 @@ void main() {
       }),
     ],
   );
+
+  group('смена email (круг 3)', () {
+    blocTest<ProfileEditCubit, ProfileEditState>(
+      'только имя — без текущего пароля',
+      setUp: () => when(
+        () => auth.updateProfile(
+          name: any(named: 'name'),
+          email: any(named: 'email'),
+          currentPassword: any(named: 'currentPassword'),
+        ),
+      ).thenAnswer((_) async => maria),
+      build: build,
+      act: (cubit) => cubit
+        ..nameChanged('Мария Иванова')
+        ..save(),
+      verify: (cubit) {
+        expect(cubit.state.emailChanged, isFalse);
+        verify(
+          () => auth.updateProfile(
+            name: 'Мария Иванова',
+            email: maria.email,
+            currentPassword: null,
+          ),
+        ).called(1);
+      },
+    );
+
+    blocTest<ProfileEditCubit, ProfileEditState>(
+      'email изменён без пароля — ошибка у поля, запрос не уходит',
+      build: build,
+      act: (cubit) => cubit
+        ..emailChanged('new@example.com')
+        ..save(),
+      verify: (cubit) {
+        expect(cubit.state.emailChanged, isTrue);
+        expect(cubit.state.fieldErrors, {
+          ProfileField.currentPassword: FieldError.required,
+        });
+        verifyNever(
+          () => auth.updateProfile(
+            name: any(named: 'name'),
+            email: any(named: 'email'),
+            currentPassword: any(named: 'currentPassword'),
+          ),
+        );
+      },
+    );
+
+    blocTest<ProfileEditCubit, ProfileEditState>(
+      'email с паролем — пароль уходит; неверный — ошибка у поля',
+      setUp: () =>
+          when(
+            () => auth.updateProfile(
+              name: any(named: 'name'),
+              email: any(named: 'email'),
+              currentPassword: any(named: 'currentPassword'),
+            ),
+          ).thenThrow(
+            const ValidationFailure(
+              'currentPassword',
+              FieldError.wrongPassword,
+            ),
+          ),
+      build: build,
+      act: (cubit) => cubit
+        ..emailChanged('new@example.com')
+        ..currentPasswordChanged('nope')
+        ..save(),
+      verify: (cubit) {
+        verify(
+          () => auth.updateProfile(
+            name: any(named: 'name'),
+            email: 'new@example.com',
+            currentPassword: 'nope',
+          ),
+        ).called(1);
+        expect(cubit.state.fieldErrors, {
+          ProfileField.currentPassword: FieldError.wrongPassword,
+        });
+      },
+    );
+
+    blocTest<ProfileEditCubit, ProfileEditState>(
+      'вернул прежний email — пароль снова не нужен',
+      build: build,
+      act: (cubit) => cubit
+        ..emailChanged('new@example.com')
+        ..emailChanged(maria.email),
+      verify: (cubit) => expect(cubit.state.emailChanged, isFalse),
+    );
+  });
 }

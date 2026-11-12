@@ -71,7 +71,11 @@ void main() {
     registerFallbackValue(const RefreshBody(refreshToken: ''));
     registerFallbackValue(const ConfirmEmailBody(code: ''));
     registerFallbackValue(const ProfilePatchBody());
-    registerFallbackValue(const PasswordBody(oldPassword: '', newPassword: ''));
+    registerFallbackValue(const PasswordBody(code: '', newPassword: ''));
+    registerFallbackValue(const RequestPasswordResetBody(email: ''));
+    registerFallbackValue(
+      const ConfirmPasswordResetBody(email: '', code: '', newPassword: ''),
+    );
     registerFallbackValue(
       AuthTokens(
         access: '',
@@ -343,20 +347,42 @@ void main() {
     },
   );
 
-  test('changePassword: wrong_password — ошибка у currentPassword', () async {
-    when(() => api.changePassword(any())).thenThrow(
-      apiError(422, 'validation_error', {'old_password': 'wrong_password'}),
-    );
+  test(
+    'requestPasswordChangeCode — POST за кодом; часто — RateLimited',
+    () async {
+      when(() => api.requestPasswordChangeCode()).thenAnswer((_) async {});
+      await repository.requestPasswordChangeCode();
+      verify(() => api.requestPasswordChangeCode()).called(1);
 
-    await expectLater(
-      repository.changePassword('old', 'new-secret'),
-      throwsA(
-        isA<ValidationFailure>()
-            .having((f) => f.field, 'field', 'currentPassword')
-            .having((f) => f.reason, 'reason', FieldError.wrongPassword),
-      ),
-    );
-  });
+      when(() => api.requestPasswordChangeCode())
+          .thenThrow(apiError(429, 'resend_too_soon'));
+      await expectLater(
+        repository.requestPasswordChangeCode(),
+        throwsA(isA<RateLimitedFailure>()),
+      );
+    },
+  );
+
+  test(
+    'changePassword: тело {code, new_password}; неверный код — у поля code',
+    () async {
+      when(() => api.changePassword(any()))
+          .thenThrow(apiError(422, 'invalid_code', {'code': 'invalid_code'}));
+
+      await expectLater(
+        repository.changePassword('000000', 'new-secret'),
+        throwsA(
+          isA<ValidationFailure>()
+              .having((f) => f.field, 'field', 'code')
+              .having((f) => f.reason, 'reason', FieldError.invalidCode),
+        ),
+      );
+      final body =
+          verify(() => api.changePassword(captureAny())).captured.single
+              as PasswordBody;
+      expect(body.toJson(), {'code': '000000', 'new_password': 'new-secret'});
+    },
+  );
 
   test(
     'changePassword: сервер отозвал все сессии — новый вход с новым паролем',
@@ -366,7 +392,7 @@ void main() {
       when(() => api.changePassword(any())).thenAnswer((_) async {});
       when(() => api.login(any())).thenAnswer((_) async => auth);
 
-      await repository.changePassword('old', 'new-secret');
+      await repository.changePassword('482913', 'new-secret');
 
       final body =
           verify(() => api.login(captureAny())).captured.single as LoginBody;
@@ -554,5 +580,91 @@ void main() {
     verification.notify();
 
     await changes;
+  });
+
+  group('смена email', () {
+    test(
+      'с текущим паролем — current_password в теле; без — ключа нет',
+      () async {
+        when(() => api.updateProfile(any())).thenAnswer((_) async => profile);
+
+        await repository.updateProfile(
+          name: 'Мария',
+          email: 'new@example.com',
+          currentPassword: 'secret-1',
+        );
+        await repository.updateProfile(
+          name: 'Мария',
+          email: 'maria@example.com',
+        );
+
+        final bodies = verify(() => api.updateProfile(captureAny())).captured
+            .cast<ProfilePatchBody>();
+        expect(bodies.first.toJson()['current_password'], 'secret-1');
+        expect(bodies.last.toJson().containsKey('current_password'), isFalse);
+      },
+    );
+
+    test('неверный текущий пароль — ошибка у currentPassword', () async {
+      when(() => api.updateProfile(any())).thenThrow(
+        apiError(422, 'wrong_password', {'current_password': 'wrong_password'}),
+      );
+
+      await expectLater(
+        repository.updateProfile(
+          name: 'Мария',
+          email: 'new@example.com',
+          currentPassword: 'nope',
+        ),
+        throwsA(
+          isA<ValidationFailure>()
+              .having((f) => f.field, 'field', 'currentPassword')
+              .having((f) => f.reason, 'reason', FieldError.wrongPassword),
+        ),
+      );
+    });
+  });
+
+  test('requestPasswordReset: тело {email}; 429 — RateLimited', () async {
+    when(() => api.requestPasswordReset(any())).thenAnswer((_) async {});
+    await repository.requestPasswordReset('maria@example.com');
+    final body =
+        verify(() => api.requestPasswordReset(captureAny())).captured.single
+            as RequestPasswordResetBody;
+    expect(body.toJson(), {'email': 'maria@example.com'});
+
+    when(() => api.requestPasswordReset(any()))
+        .thenThrow(apiError(429, 'resend_too_soon'));
+    await expectLater(
+      repository.requestPasswordReset('maria@example.com'),
+      throwsA(isA<RateLimitedFailure>()),
+    );
+  });
+
+  test('confirmPasswordReset: тело {email, code, new_password}; неверный код — у code', () async {
+    when(() => api.confirmPasswordReset(any()))
+        .thenThrow(apiError(422, 'invalid_code', {'code': 'invalid_code'}));
+
+    await expectLater(
+      repository.confirmPasswordReset(
+        'maria@example.com',
+        '000000',
+        'pw-12345',
+      ),
+      throwsA(
+        isA<ValidationFailure>()
+            .having((f) => f.field, 'field', 'code')
+            .having((f) => f.reason, 'reason', FieldError.invalidCode),
+      ),
+    );
+    final body =
+        verify(() => api.confirmPasswordReset(captureAny())).captured.single
+            as ConfirmPasswordResetBody;
+    expect(body.toJson(), {
+      'email': 'maria@example.com',
+      'code': '000000',
+      'new_password': 'pw-12345',
+    });
+    verifyNever(() => api.login(any()));
   });
 }

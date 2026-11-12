@@ -25,6 +25,11 @@ class AppRouter extends RootStackRouter {
       path: '/register',
       guards: [GuestGuard(_session)],
     ),
+    AutoRoute(
+      page: ForgotPasswordRoute.page,
+      path: '/forgot-password',
+      guards: [GuestGuard(_session)],
+    ),
     AutoRoute(page: PrivacyPolicyRoute.page, path: '/privacy'),
     AutoRoute(
       page: EmailConfirmRoute.page,
@@ -91,6 +96,7 @@ class AppRouter extends RootStackRouter {
         AutoRoute(page: DebtEditRoute.page, path: 'debts/:debtId/edit'),
         AutoRoute(page: NotificationsRoute.page, path: 'notifications'),
         AutoRoute(page: ProfileEditRoute.page, path: 'profile/edit'),
+        AutoRoute(page: PasswordChangeRoute.page, path: 'profile/password'),
         AutoRoute(page: SettingsRoute.page, path: 'settings'),
         AutoRoute(page: AboutRoute.page, path: 'about'),
         AutoRoute(page: CategoriesRoute.page, path: 'categories'),

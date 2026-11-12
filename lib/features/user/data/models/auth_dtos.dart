@@ -101,21 +101,54 @@ class RefreshBody {
   includeIfNull: false,
 )
 class ProfilePatchBody {
-  const ProfilePatchBody({this.firstName, this.email, this.baseCurrency});
+  const ProfilePatchBody({
+    this.firstName,
+    this.email,
+    this.currentPassword,
+    this.baseCurrency,
+  });
 
   final String? firstName;
   final String? email;
+
+  /// Сервер спрашивает его только при смене email.
+  final String? currentPassword;
   final String? baseCurrency;
 
   Map<String, dynamic> toJson() => _$ProfilePatchBodyToJson(this);
 }
 
 @JsonSerializable(createFactory: false, fieldRename: FieldRename.snake)
+/// Старого пароля сервер больше не спрашивает: смену подтверждает код из письма.
 class PasswordBody {
-  const PasswordBody({required this.oldPassword, required this.newPassword});
+  const PasswordBody({required this.code, required this.newPassword});
 
-  final String oldPassword;
+  final String code;
   final String newPassword;
 
   Map<String, dynamic> toJson() => _$PasswordBodyToJson(this);
+}
+
+@JsonSerializable(createFactory: false, fieldRename: FieldRename.snake)
+class RequestPasswordResetBody {
+  const RequestPasswordResetBody({required this.email});
+
+  final String email;
+
+  Map<String, dynamic> toJson() => _$RequestPasswordResetBodyToJson(this);
+}
+
+@JsonSerializable(createFactory: false, fieldRename: FieldRename.snake)
+class ConfirmPasswordResetBody {
+  const ConfirmPasswordResetBody({
+    required this.email,
+    required this.code,
+    required this.newPassword,
+  });
+
+  final String email;
+  final String code;
+  final String newPassword;
+
+  Map<String, dynamic> toJson() => _$ConfirmPasswordResetBodyToJson(this);
 }

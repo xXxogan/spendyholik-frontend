@@ -106,7 +106,15 @@ class LoginView extends StatelessWidget {
                 ),
               ),
             ],
-            const SizedBox(height: 20),
+            Align(
+              alignment: .centerRight,
+              child: TextButton(
+                onPressed: () =>
+                    context.router.push(const ForgotPasswordRoute()),
+                child: Text(l10n.loginForgotPassword),
+              ),
+            ),
+            const SizedBox(height: 8),
             FilledButton(
               onPressed: busy ? null : cubit.submit,
               style: FilledButton.styleFrom(
