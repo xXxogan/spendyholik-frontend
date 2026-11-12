@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:spendyholik/core/models/models.dart';
+import 'package:spendyholik/core/models/money_dto.dart';
 
 void main() {
   test('MoneyDto из ответа API — minor и валюта', () {

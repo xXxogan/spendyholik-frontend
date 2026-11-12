@@ -24,7 +24,7 @@ abstract class NetworkModule {
     ),
   );
 
-  // Заголовки и тела не пишутся: в них токены, пароли и личные данные.
+  // Заголовки и тела (в т. ч. ошибок) не пишутся: в них токены, пароли и личные данные.
   static TalkerDioLogger _logger(Talker talker) => TalkerDioLogger(
     talker: talker,
     settings: const TalkerDioLoggerSettings(
@@ -32,6 +32,7 @@ abstract class NetworkModule {
       printRequestData: false,
       printResponseData: false,
       printErrorHeaders: false,
+      printErrorData: false,
     ),
   );
 }

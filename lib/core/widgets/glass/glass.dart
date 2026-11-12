@@ -1,6 +1,7 @@
 export 'app_back_button.dart';
 export 'app_bottom_nav.dart';
 export 'app_dialog.dart';
+export 'app_glass_chip.dart';
 export 'app_glass_fab.dart';
 export 'app_glass_icon_button.dart';
 export 'app_glass_scaffold.dart';

@@ -5,6 +5,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:spendyholik/app/di/injection.dart';
 import 'package:spendyholik/core/bloc/cubit_logging.dart';
+import 'package:spendyholik/core/config/app_config.dart';
 import 'package:spendyholik/features/user/data/models/models.dart';
 import 'package:spendyholik/features/user/data/repositories/repositories.dart';
 import 'package:talker_flutter/talker_flutter.dart';
@@ -54,7 +55,7 @@ class SessionCubit extends Cubit<SessionState> with CubitLogging<SessionState> {
   /// userChanges. null — не дождались: поток оборвался или сервер молчит.
   Future<SessionState?> waitFor(
     bool Function(SessionState state) test, {
-    Duration timeout = const Duration(seconds: 10),
+    Duration timeout = AppConfig.sessionWaitTimeout,
   }) async {
     if (test(state)) return state;
     try {

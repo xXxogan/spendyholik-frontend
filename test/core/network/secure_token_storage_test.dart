@@ -3,8 +3,10 @@ import 'dart:async';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:spendyholik/app/di/injection.dart';
 import 'package:spendyholik/core/network/auth_tokens.dart';
 import 'package:spendyholik/core/network/secure_token_storage.dart';
+import 'package:talker_flutter/talker_flutter.dart';
 
 class MockSecureStorage extends Mock implements FlutterSecureStorage {}
 
@@ -92,5 +94,17 @@ void main() {
     await writes;
 
     expect(maxActive, 1);
+  });
+
+  test('битый JSON: содержимое строки не попадает в лог', () async {
+    saved['auth.tokens'] = '{"access": SECRET-PART';
+
+    expect(await storage.read(), isNull);
+
+    final logged = getIt<Talker>().history
+        .map((e) => '${e.message} ${e.exception} ${e.stackTrace}')
+        .join('\n');
+    expect(logged, isNot(contains('SECRET-PART')));
+    expect(logged, contains('FormatException'));
   });
 }

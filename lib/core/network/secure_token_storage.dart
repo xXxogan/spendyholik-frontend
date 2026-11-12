@@ -25,9 +25,10 @@ class SecureTokenStorage implements TokenStorage {
       final raw = await _secure.read(key: _key);
       if (raw == null) return null;
       return AuthTokens.fromJson(jsonDecode(raw) as Map<String, dynamic>);
-    } on Object catch (error, stackTrace) {
+    } on Object catch (error) {
       // На Web ошибка расшифровки — JS OperationError, а не Exception.
-      getIt<Talker>().handle(error, stackTrace, 'Token read failed');
+      // Только тип: FormatException несёт в тексте кусок строки с токенами.
+      getIt<Talker>().warning('Token read failed: ${error.runtimeType}');
       await _secure.delete(key: _key);
       return null;
     }

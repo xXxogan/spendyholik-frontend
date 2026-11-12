@@ -8,6 +8,9 @@ abstract final class AppConfig {
   static const connectTimeout = Duration(seconds: 10);
   static const receiveTimeout = Duration(seconds: 20);
 
+  /// Ожидание ответа входа или смены валюты через userChanges.
+  static const sessionWaitTimeout = Duration(seconds: 10);
+
   /// limit API операций: 1–100.
   static const transactionsPageSize = 50;
 }
