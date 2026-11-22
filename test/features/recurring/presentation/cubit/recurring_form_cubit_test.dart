@@ -309,4 +309,20 @@ void main() {
       ),
     ],
   );
+
+  test('ошибка anchor_date — у даты, смена даты её снимает', () async {
+    when(() => repository.create(any()))
+        .thenThrow(const ValidationFailure('anchor', FieldError.invalid));
+    final cubit = build()..emit(filled);
+
+    await cubit.save();
+
+    expect(cubit.state.failure, isNull);
+    expect(cubit.state.fieldErrors, {
+      RecurringField.anchor: FieldError.invalid,
+    });
+    cubit.anchorChanged(DateTime(2026, 12));
+    expect(cubit.state.fieldErrors, isEmpty);
+    await cubit.close();
+  });
 }

@@ -42,8 +42,6 @@ class RemoteAuthRepository implements AuthRepository {
     });
   }
 
-  static final _profileKey = cacheKey('profile');
-
   static const _fields = {
     'first_name': 'name',
     'current_password': 'currentPassword',
@@ -60,8 +58,7 @@ class RemoteAuthRepository implements AuthRepository {
   final Talker _talker;
   final DataChangeBus _bus;
 
-  /// Email текущего пользователя — для нового входа после смены пароля.
-  String? _email;
+  UserModel? _currentUser;
   final _changes = StreamController<UserModel?>.broadcast();
 
   @override
@@ -107,14 +104,55 @@ class RemoteAuthRepository implements AuthRepository {
 
   @override
   Future<UserModel> confirmEmail(String code) async {
-    await _call(() => _api.confirmEmail(ConfirmEmailBody(code: code)));
-    final user = _user(await _profile());
-    _changes.add(user);
-    return user;
+    final generation = _cache.generation;
+    final ConfirmedUserDto confirmed;
+    try {
+      confirmed = await _call(
+        () => _api.confirmEmail(ConfirmEmailBody(code: code)),
+      );
+    } on EmailAlreadyVerifiedFailure {
+      return _publishVerifiedProfile(await _call(_api.profile), generation);
+    }
+    return _publishVerifiedProfile(
+      ProfileOutDto(
+        userId: confirmed.id,
+        firstName: confirmed.firstName,
+        email: confirmed.email,
+        emailVerified: confirmed.emailVerified,
+        baseCurrency: _currentUser?.baseCurrency?.code,
+      ),
+      generation,
+    );
   }
 
   @override
-  Future<void> resendEmailCode() => _call(_api.resendEmailCode);
+  Future<bool> resendEmailCode() async {
+    final generation = _cache.generation;
+    try {
+      await _call(_api.resendEmailCode);
+      return false;
+    } on EmailAlreadyVerifiedFailure {
+      await _publishVerifiedProfile(await _call(_api.profile), generation);
+      return true;
+    }
+  }
+
+  Future<UserModel> _publishVerifiedProfile(
+    ProfileOutDto dto,
+    int generation,
+  ) async {
+    final current = _currentUser;
+    if (_cache.generation != generation ||
+        (current != null && current.id != dto.userId)) {
+      throw const UnauthorizedFailure();
+    }
+    if (!dto.emailVerified) throw const EmailNotVerifiedFailure();
+    await _cache.write(ApiCache.profileKey, jsonEncode(dto.toJson()));
+    if (_cache.generation != generation) throw const UnauthorizedFailure();
+    final user = _user(dto);
+    _changes.add(user);
+    return user;
+  }
 
   /// Сессия на сервере гасится по возможности: локально выходим в любом случае.
   @override
@@ -179,7 +217,7 @@ class RemoteAuthRepository implements AuthRepository {
     );
     // Сервер отзывает все сессии при смене пароля, включая эту: без нового
     // входа через 15 минут (срок access) пользователя выкинуло бы на экран входа.
-    final email = _email;
+    final email = _currentUser?.email;
     if (email == null) return;
     try {
       await _signInWith(
@@ -217,7 +255,7 @@ class RemoteAuthRepository implements AuthRepository {
   Future<UserModel> _patch(ProfilePatchBody body) async {
     final dto = await _call(() => _api.updateProfile(body));
     // Иначе без сети после правки показался бы прежний профиль.
-    await _cache.write(_profileKey, jsonEncode(dto.toJson()));
+    await _cache.write(ApiCache.profileKey, jsonEncode(dto.toJson()));
     final user = _user(dto);
     _changes.add(user);
     return user;
@@ -232,7 +270,7 @@ class RemoteAuthRepository implements AuthRepository {
   }
 
   Future<ProfileOutDto> _profile() => _reader.read(
-    key: _profileKey,
+    key: ApiCache.profileKey,
     fetch: () => _call(_api.profile),
     toJson: (dto) => dto.toJson(),
     fromJson: (json) => ProfileOutDto.fromJson(json! as Map<String, dynamic>),
@@ -250,7 +288,7 @@ class RemoteAuthRepository implements AuthRepository {
     if (user.baseCurrency case final currency?) {
       _sessionCurrency.value = currency;
     }
-    _email = user.email;
+    _currentUser = user;
     return user;
   }
 

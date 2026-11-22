@@ -60,8 +60,8 @@ class RemoteCategoryRepository implements CategoryRepository {
         id,
         CategoryPatchBody(
           name: draft.name,
-          icon: draft.icon.name,
-          color: draft.color.name,
+          icon: draft.sendIcon ? draft.icon.name : null,
+          color: draft.sendColor ? draft.color.name : null,
           parentId: draft.parentId,
         ),
       ),
@@ -79,15 +79,21 @@ class RemoteCategoryRepository implements CategoryRepository {
   static CategoryKind _kind(String type) =>
       CategoryKind.values.asNameMap()[type] ?? CategoryKind.expense;
 
-  CategoryModel _category(CategoryOutDto dto) => CategoryModel(
-    id: dto.id,
-    name: dto.name,
-    kind: _kind(dto.type),
-    icon: EntityIcon.values.asNameMap()[dto.icon] ?? EntityIcon.other,
-    color: EntityColor.values.asNameMap()[dto.color] ?? EntityColor.gray,
-    parentId: dto.parentId,
-    transactionCount: dto.transactionCount,
-  );
+  CategoryModel _category(CategoryOutDto dto) {
+    final icon = EntityIcon.values.asNameMap()[dto.icon];
+    final color = EntityColor.values.asNameMap()[dto.color];
+    return CategoryModel(
+      id: dto.id,
+      name: dto.name,
+      kind: _kind(dto.type),
+      icon: icon ?? .other,
+      color: color ?? .gray,
+      parentId: dto.parentId,
+      transactionCount: dto.transactionCount,
+      hasKnownIcon: icon != null,
+      hasKnownColor: color != null,
+    );
+  }
 
   Future<T> _call<T>(Future<T> Function() request) =>
       callApi(request, fields: _fields);

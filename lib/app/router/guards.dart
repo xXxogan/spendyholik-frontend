@@ -55,11 +55,17 @@ String? deepLinkNext(String path) {
 }
 
 /// Можно ли со Splash открыть сохранённый адрес [next] вместо [target].
-bool canFollowNext(PageRouteInfo target, String next) => switch (target) {
-  HomeRoute() => true,
-  LoginRoute() => Uri.parse(next).path == '/register',
-  _ => false,
-};
+bool canFollowNext(PageRouteInfo target, String next) {
+  final uri = Uri.tryParse(next);
+  if (uri != null && !uri.hasScheme && !uri.hasAuthority && uri.path == '/privacy') {
+    return true;
+  }
+  return switch (target) {
+    HomeRoute() => true,
+    LoginRoute() => uri?.path == '/register',
+    _ => false,
+  };
+}
 
 abstract class _SessionAwareGuard extends AutoRouteGuard {
   _SessionAwareGuard(this._session);

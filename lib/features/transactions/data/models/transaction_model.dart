@@ -13,6 +13,7 @@ class TransactionModel {
     required this.title,
     required this.account,
     required this.occurredAt,
+    this.hasTime = true,
     this.category,
     this.toAccount,
     this.note,
@@ -29,6 +30,7 @@ class TransactionModel {
   final AccountRef account;
   final AccountRef? toAccount;
   final DateTime occurredAt;
+  final bool hasTime;
   final String? note;
 }
 
@@ -39,6 +41,7 @@ class TransactionDraft {
     required this.title,
     required this.accountId,
     required this.occurredAt,
+    this.hasTime = true,
     this.categoryId,
     this.toAccountId,
     this.note,
@@ -51,6 +54,7 @@ class TransactionDraft {
   final String accountId;
   final String? toAccountId;
   final DateTime occurredAt;
+  final bool hasTime;
   final String? note;
 }
 

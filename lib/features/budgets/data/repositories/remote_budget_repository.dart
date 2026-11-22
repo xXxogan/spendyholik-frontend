@@ -17,7 +17,9 @@ class RemoteBudgetRepository implements BudgetRepository {
   static const _fields = {
     'category_id': 'categoryId',
     'amount_minor': 'limit',
-    'end_date': 'onceEnd',
+    // Отдельных полей дат у формы нет: даты разового бюджета — в выборе периода.
+    'start_date': 'period',
+    'end_date': 'period',
   };
 
   static const _changedTopics = {DataTopic.budgets};

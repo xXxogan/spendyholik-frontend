@@ -313,41 +313,60 @@ void main() {
       verifyNever(() => bus.emit(any()));
     });
 
-    test('422 по amount_minor → limit, по end_date → onceEnd', () async {
-      when(() => api.create(any())).thenThrow(
-        apiError(422, 'validation_error', {'amount_minor': 'too_small'}),
-      );
-      await expectLater(
-        repository.create(
-          const BudgetDraft(
-            categoryId: 'food',
-            limit: 0,
-            period: BudgetPeriod.monthly,
+    test(
+      '422 по amount_minor → limit, по датам → period (у формы нет полей дат)',
+      () async {
+        when(() => api.create(any())).thenThrow(
+          apiError(422, 'validation_error', {'amount_minor': 'too_small'}),
+        );
+        await expectLater(
+          repository.create(
+            const BudgetDraft(
+              categoryId: 'food',
+              limit: 0,
+              period: BudgetPeriod.monthly,
+            ),
           ),
-        ),
-        throwsA(
-          isA<ValidationFailure>()
-              .having((f) => f.field, 'field', 'limit')
-              .having((f) => f.reason, 'reason', FieldError.invalidAmount),
-        ),
-      );
+          throwsA(
+            isA<ValidationFailure>()
+                .having((f) => f.field, 'field', 'limit')
+                .having((f) => f.reason, 'reason', FieldError.invalidAmount),
+          ),
+        );
 
-      when(
-        () => api.create(any()),
-      ).thenThrow(apiError(422, 'validation_error', {'end_date': 'invalid'}));
-      await expectLater(
-        repository.create(
-          const BudgetDraft(
-            categoryId: 'food',
-            limit: 1,
-            period: BudgetPeriod.monthly,
+        when(
+          () => api.create(any()),
+        ).thenThrow(apiError(422, 'validation_error', {'end_date': 'invalid'}));
+        await expectLater(
+          repository.create(
+            const BudgetDraft(
+              categoryId: 'food',
+              limit: 1,
+              period: BudgetPeriod.monthly,
+            ),
           ),
-        ),
-        throwsA(
-          isA<ValidationFailure>().having((f) => f.field, 'field', 'onceEnd'),
-        ),
-      );
-    });
+          throwsA(
+            isA<ValidationFailure>().having((f) => f.field, 'field', 'period'),
+          ),
+        );
+
+        when(() => api.create(any())).thenThrow(
+          apiError(422, 'validation_error', {'start_date': 'invalid'}),
+        );
+        await expectLater(
+          repository.create(
+            const BudgetDraft(
+              categoryId: 'food',
+              limit: 1,
+              period: BudgetPeriod.monthly,
+            ),
+          ),
+          throwsA(
+            isA<ValidationFailure>().having((f) => f.field, 'field', 'period'),
+          ),
+        );
+      },
+    );
 
     test('delete — emit', () async {
       when(() => api.delete('b1')).thenAnswer((_) async {});

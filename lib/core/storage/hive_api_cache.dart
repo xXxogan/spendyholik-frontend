@@ -30,9 +30,16 @@ class HiveApiCache implements ApiCache {
   );
 
   @override
-  Future<void> clear() {
+  Future<void> clear({Set<String> keep = const {}}) {
     generation++;
-    return _guard('clear', () async => (await _open()).clear(), orElse: null);
+    return _guard('clear', () async {
+      final box = await _open();
+      if (keep.isEmpty) {
+        await box.clear();
+        return;
+      }
+      await box.deleteAll(box.keys.where((key) => !keep.contains(key)).toList());
+    }, orElse: null);
   }
 
   Future<Box<CacheEntry>> _open() =>

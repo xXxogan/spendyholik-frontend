@@ -1,10 +1,16 @@
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
+import 'package:hive_ce/hive_ce.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:spendyholik/core/errors/failure.dart';
 import 'package:spendyholik/core/events/data_change_bus.dart';
 import 'package:spendyholik/core/storage/api_cache.dart';
+import 'package:spendyholik/core/storage/cache_entry.dart';
+import 'package:spendyholik/core/storage/hive_api_cache.dart';
 import 'package:spendyholik/features/settings/data/api/data_reset_api.dart';
 import 'package:spendyholik/features/settings/data/repositories/remote_data_reset_repository.dart';
+import 'package:talker_flutter/talker_flutter.dart';
 
 import '../../../../helpers/dio_errors.dart';
 
@@ -27,7 +33,7 @@ void main() {
     cache = MockApiCache();
     when(() => cache.generation).thenReturn(0);
     bus = MockDataChangeBus();
-    when(() => cache.clear()).thenAnswer((_) async {});
+    when(() => cache.clear(keep: any(named: 'keep'))).thenAnswer((_) async {});
     repository = RemoteDataResetRepository(api, cache, bus);
   });
 
@@ -38,7 +44,7 @@ void main() {
 
     verifyInOrder([
       () => api.wipeData(),
-      () => cache.clear(),
+      () => cache.clear(keep: {ApiCache.profileKey}),
       () => bus.emit(DataTopic.values.toSet()),
     ]);
   });
@@ -48,8 +54,29 @@ void main() {
 
     await expectLater(repository.wipeAll(), throwsA(isA<Failure>()));
 
-    verifyNever(() => cache.clear());
+    verifyZeroInteractions(cache);
     verifyNever(() => bus.emit(any()));
+  });
+
+  test('после удаления данных и переоткрытия кэша профиль доступен', () async {
+    final dir = await Directory.systemTemp.createTemp('data_reset_cache');
+    Hive.init(dir.path);
+    Hive.registerAdapter(CacheEntryAdapter());
+    addTearDown(() async {
+      await Hive.close();
+      await dir.delete(recursive: true);
+    });
+    final storage = HiveApiCache(Hive, Talker());
+    await storage.write('profile', '{"email_verified":true}');
+    await storage.write('accounts', '[1]');
+    when(() => api.wipeData()).thenAnswer((_) async {});
+
+    await RemoteDataResetRepository(api, storage, bus).wipeAll();
+    await Hive.close();
+    final reopened = HiveApiCache(Hive, Talker());
+
+    expect(await reopened.read('profile'), '{"email_verified":true}');
+    expect(await reopened.read('accounts'), isNull);
   });
 
   test('без сети: NetworkFailure', () async {
@@ -57,6 +84,6 @@ void main() {
 
     await expectLater(repository.wipeAll(), throwsA(isA<NetworkFailure>()));
 
-    verifyNever(() => cache.clear());
+    verifyZeroInteractions(cache);
   });
 }

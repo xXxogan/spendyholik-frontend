@@ -8,16 +8,20 @@ import 'package:spendyholik/core/network/cached_read.dart';
 import 'package:spendyholik/core/network/network_status.dart';
 import 'package:spendyholik/core/session/session_currency.dart';
 import 'package:spendyholik/core/storage/api_cache.dart';
+import 'package:spendyholik/features/accounts/accounts.dart';
 import 'package:spendyholik/features/transactions/data/api/transactions_api.dart';
 import 'package:spendyholik/features/transactions/data/models/models.dart';
 import 'package:spendyholik/features/transactions/data/models/transaction_dtos.dart';
 import 'package:spendyholik/features/transactions/data/repositories/remote_transaction_repository.dart';
 import 'package:spendyholik/features/transactions/data/repositories/transaction_mapper.dart';
+import 'package:spendyholik/features/transactions/presentation/cubit/transaction_form_cubit.dart';
 import 'package:talker/talker.dart';
 
 import '../../../../helpers/dio_errors.dart';
 
 class MockTransactionsApi extends Mock implements TransactionsApi {}
+
+class MockAccountRepository extends Mock implements AccountRepository {}
 
 class MockApiCache extends Mock implements ApiCache {}
 
@@ -390,6 +394,22 @@ void main() {
       expect(body.toJson()['amount_minor'], 300000);
       expect(body.toJson()['time'], '09:05:07');
       verify(() => bus.emit(topics)).called(1);
+    });
+
+    test('правка операции без времени не добавляет time в PATCH', () async {
+      when(() => api.get('t1')).thenAnswer((_) async => tx(time: null));
+      when(() => api.update('t1', any())).thenAnswer((_) async => tx(time: null));
+      final cubit = TransactionFormCubit(repository, MockAccountRepository());
+      addTearDown(cubit.close);
+      await cubit.init('t1');
+
+      cubit.titleChanged('Обед');
+      await cubit.save();
+
+      final body = verify(() => api.update('t1', captureAny())).captured.single
+          as TransactionPatchBody;
+      expect(body.toJson(), isNot(contains('time')));
+      expect(body.toJson()['date'], '2026-10-23');
     });
 
     test('delete — emit тем', () async {

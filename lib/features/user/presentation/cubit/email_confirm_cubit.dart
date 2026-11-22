@@ -29,8 +29,10 @@ class EmailConfirmCubit extends Cubit<EmailConfirmState>
     _startCooldown();
   }
 
-  void codeChanged(String value) =>
-      emit(state.copyWith(code: value, codeError: null, failure: null));
+  void codeChanged(String value) {
+    if (value == state.code) return;
+    emit(state.copyWith(code: value, codeError: null, failure: null));
+  }
 
   Future<void> submit(String code) async {
     // Pinput зовёт onCompleted снова при повторном вводе — отправка одна.
@@ -66,7 +68,11 @@ class EmailConfirmCubit extends Cubit<EmailConfirmState>
   Future<void> resend() async {
     if (state.resendIn > 0) return;
     try {
-      await _auth.resendEmailCode();
+      final alreadyVerified = await _auth.resendEmailCode();
+      if (alreadyVerified) {
+        emit(state.copyWith(status: .success, failure: null, codeError: null));
+        return;
+      }
       emit(state.copyWith(failure: null, codeError: null, code: ''));
       _startCooldown();
     } on RateLimitedFailure catch (failure, stackTrace) {

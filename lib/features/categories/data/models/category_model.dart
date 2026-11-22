@@ -12,6 +12,8 @@ class CategoryModel {
     required this.color,
     required this.transactionCount,
     this.parentId,
+    this.hasKnownIcon = true,
+    this.hasKnownColor = true,
   });
 
   final String id;
@@ -21,6 +23,8 @@ class CategoryModel {
   final EntityColor color;
   final String? parentId;
   final int transactionCount;
+  final bool hasKnownIcon;
+  final bool hasKnownColor;
 
   CategoryModel copyWith({int? transactionCount}) => CategoryModel(
     id: id,
@@ -30,6 +34,8 @@ class CategoryModel {
     color: color,
     parentId: parentId,
     transactionCount: transactionCount ?? this.transactionCount,
+    hasKnownIcon: hasKnownIcon,
+    hasKnownColor: hasKnownColor,
   );
 
   CategoryRef toRef() =>
@@ -57,6 +63,8 @@ class CategoryDraft {
     required this.icon,
     required this.color,
     this.parentId,
+    this.sendIcon = true,
+    this.sendColor = true,
   });
 
   final String name;
@@ -64,6 +72,8 @@ class CategoryDraft {
   final EntityIcon icon;
   final EntityColor color;
   final String? parentId;
+  final bool sendIcon;
+  final bool sendColor;
 }
 
 class CategoryNode {

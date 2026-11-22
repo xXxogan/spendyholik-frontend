@@ -98,6 +98,7 @@ class RecurringForm extends StatelessWidget {
             decoration: InputDecoration(
               labelText: l10n.recurringFormAnchor,
               suffixIcon: const Icon(Icons.calendar_today_outlined),
+              errorText: error(.anchor),
             ),
             child: Text(
               anchor == null ? '' : DateFormat.yMMMMd(locale).format(anchor),

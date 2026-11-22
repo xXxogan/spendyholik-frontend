@@ -20,7 +20,7 @@ class GoalForm extends StatelessWidget {
       final error? => fieldErrorText(l10n, error),
       null => null,
     };
-    final currencySymbol = CurrencyScope.of(context).symbol;
+    final currencySymbol = (state.currency ?? CurrencyScope.of(context)).symbol;
     final deadline = state.deadline;
 
     return Column(

@@ -1,0 +1,84 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spendyholik-web
+  namespace: spendyholik
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: spendyholik-web
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: spendyholik-web
+    spec:
+      containers:
+        - name: web
+          image: spendyholik-web:2026-11-22.2
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 80
+          readinessProbe:
+            httpGet:
+              path: /index.html
+              port: http
+          volumeMounts:
+            - name: privacy-policy
+              mountPath: /usr/share/nginx/html/privacy-policy.md
+              subPath: privacy_policy_ru.md
+              readOnly: true
+      volumes:
+        - name: privacy-policy
+          configMap:
+            name: spendyholik-web-policy
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: spendyholik-web
+  namespace: spendyholik
+spec:
+  selector:
+    app.kubernetes.io/name: spendyholik-web
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: spendyholik-web-tls
+  namespace: spendyholik
+spec:
+  secretName: spendyholik-web-tls
+  dnsNames:
+    - spendyholik.duckdns.org
+  issuerRef:
+    kind: ClusterIssuer
+    name: letsencrypt-prod
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: spendyholik-web
+  namespace: spendyholik
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - spendyholik.duckdns.org
+      secretName: spendyholik-web-tls
+  rules:
+    - host: spendyholik.duckdns.org
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: spendyholik-web
+                port:
+                  name: http

@@ -6,6 +6,9 @@ import 'package:spendyholik/core/models/models.dart';
 import 'package:spendyholik/features/goals/data/models/goal_model.dart';
 import 'package:spendyholik/features/goals/data/repositories/goal_repository.dart';
 import 'package:spendyholik/features/goals/presentation/cubit/goal_form_cubit.dart';
+import 'package:spendyholik/features/goals/presentation/widgets/goal_form.dart';
+
+import '../../../../helpers/pump_app.dart';
 
 class MockGoalRepository extends Mock implements GoalRepository {}
 
@@ -31,6 +34,25 @@ void main() {
 
   GoalFormCubit build() => GoalFormCubit(repository);
 
+  testWidgets('правка показывает валюту цели у суммы', (tester) async {
+    when(() => repository.getGoal('usd')).thenAnswer(
+      (_) async => const GoalModel(
+        id: 'usd',
+        name: 'Поездка',
+        currency: .usd,
+        target: 10000,
+        saved: 0,
+      ),
+    );
+    final cubit = build();
+    addTearDown(cubit.close);
+    await cubit.init('usd');
+
+    await pumpPage(tester, GoalForm(state: cubit.state, cubit: cubit));
+
+    expect(find.text(r'$'), findsOneWidget);
+  });
+
   blocTest<GoalFormCubit, GoalFormState>(
     'правка: поля заполняются из цели',
     setUp: () =>
@@ -43,6 +65,7 @@ void main() {
         goalId: 'trip',
         name: 'Отпуск',
         target: '90000',
+        currency: .rub,
         deadline: DateTime(2027, 7),
       ),
     ],

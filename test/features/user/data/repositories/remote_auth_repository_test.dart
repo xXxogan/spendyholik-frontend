@@ -13,6 +13,7 @@ import 'package:spendyholik/core/session/session_currency.dart';
 import 'package:spendyholik/core/storage/api_cache.dart';
 import 'package:spendyholik/features/user/data/api/auth_api.dart';
 import 'package:spendyholik/features/user/data/models/auth_dtos.dart';
+import 'package:spendyholik/features/user/data/models/user_model.dart';
 import 'package:spendyholik/features/user/data/repositories/remote_auth_repository.dart';
 import 'package:talker_flutter/talker_flutter.dart';
 
@@ -38,6 +39,13 @@ const profile = ProfileOutDto(
   firstName: 'Мария',
   email: 'maria@example.com',
   baseCurrency: 'RUB',
+);
+
+const confirmedUser = ConfirmedUserDto(
+  id: 'u1',
+  firstName: 'Мария',
+  email: 'maria@example.com',
+  emailVerified: true,
 );
 
 void main() {
@@ -494,8 +502,8 @@ void main() {
       },
     );
 
-    test('confirmEmail — код на сервер, профиль заново, userChanges', () async {
-      when(() => api.confirmEmail(any())).thenAnswer((_) async {});
+    test('confirmEmail — код на сервер, ответ публикуется в userChanges', () async {
+      when(() => api.confirmEmail(any())).thenAnswer((_) async => confirmedUser);
       final changes = expectLater(repository.userChanges, emits(isNotNull));
 
       final user = await repository.confirmEmail('482913');
@@ -506,6 +514,58 @@ void main() {
       expect(body.code, '482913');
       expect(user.id, 'u1');
       await changes;
+    });
+
+    test('успешное подтверждение не зависит от доступности GET профиля', () async {
+      when(() => tokens.read()).thenAnswer((_) async => stored);
+      when(() => api.profile()).thenAnswer((_) async => const ProfileOutDto(
+        userId: 'u1',
+        firstName: 'Мария',
+        email: 'maria@example.com',
+        baseCurrency: 'USD',
+        emailVerified: false,
+      ));
+      expect((await repository.restoreSession())?.emailVerified, isFalse);
+      verify(() => api.profile()).called(1);
+      when(() => api.confirmEmail(any())).thenAnswer((_) async => confirmedUser);
+      when(() => api.profile()).thenThrow(networkError());
+
+      final user = await repository.confirmEmail('482913');
+
+      expect(user.emailVerified, isTrue);
+      expect(user.baseCurrency, Currency.usd);
+      verifyNever(() => api.profile());
+      verify(() => cache.write(
+        ApiCache.profileKey,
+        any(that: contains('"email_verified":true')),
+      )).called(1);
+    });
+
+    test('confirmEmail после подтверждения на другом устройстве обновляет сессию', () async {
+      when(() => api.confirmEmail(any()))
+          .thenThrow(apiError(409, 'email_already_verified'));
+      final changes = <UserModel?>[];
+      final subscription = repository.userChanges.listen(changes.add);
+      addTearDown(subscription.cancel);
+
+      expect((await repository.confirmEmail('482913')).emailVerified, isTrue);
+      await Future<void>.delayed(Duration.zero);
+      expect(changes.single?.emailVerified, isTrue);
+      verify(() => api.profile()).called(1);
+    });
+
+    test('resendEmailCode после подтверждения на другом устройстве обновляет сессию', () async {
+      when(() => api.resendEmailCode())
+          .thenThrow(apiError(409, 'email_already_verified'));
+      final changes = <UserModel?>[];
+      final subscription = repository.userChanges.listen(changes.add);
+      addTearDown(subscription.cancel);
+
+      expect(await repository.resendEmailCode(), isTrue);
+
+      await Future<void>.delayed(Duration.zero);
+      expect(changes.single?.emailVerified, isTrue);
+      verify(() => api.profile()).called(1);
     });
 
     test('confirmEmail: неверный код — ошибка у поля code', () async {
@@ -524,7 +584,7 @@ void main() {
 
     test('resendEmailCode — POST; слишком рано — RateLimitedFailure', () async {
       when(() => api.resendEmailCode()).thenAnswer((_) async {});
-      await repository.resendEmailCode();
+      expect(await repository.resendEmailCode(), isFalse);
       verify(() => api.resendEmailCode()).called(1);
 
       when(() => api.resendEmailCode())

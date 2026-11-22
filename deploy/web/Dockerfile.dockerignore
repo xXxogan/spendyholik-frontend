@@ -1,0 +1,7 @@
+**
+!deploy/
+!deploy/web/
+!deploy/web/default.conf
+!build/
+!build/web/
+!build/web/**

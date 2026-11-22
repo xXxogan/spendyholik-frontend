@@ -1,7 +1,7 @@
 part of 'recurring_form_cubit.dart';
 
 /// Имена совпадают с `ValidationFailure.field` репозитория.
-enum RecurringField { title, amount, categoryId, accountId }
+enum RecurringField { title, amount, categoryId, accountId, anchor }
 
 /// Сумма — строка ввода: разбирается только при сохранении.
 @freezed

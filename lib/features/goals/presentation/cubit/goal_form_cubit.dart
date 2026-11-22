@@ -29,6 +29,7 @@ class GoalFormCubit extends Cubit<GoalFormState>
           goalId: goalId,
           name: goal.name,
           target: formatAmountInput(goal.target),
+          currency: goal.currency,
           deadline: goal.deadline,
         ),
       );

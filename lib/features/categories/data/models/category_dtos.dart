@@ -55,14 +55,16 @@ class CategoryCreateBody {
 class CategoryPatchBody {
   const CategoryPatchBody({
     required this.name,
-    required this.icon,
-    required this.color,
+    this.icon,
+    this.color,
     this.parentId,
   });
 
   final String name;
-  final String icon;
-  final String color;
+  @JsonKey(includeIfNull: false)
+  final String? icon;
+  @JsonKey(includeIfNull: false)
+  final String? color;
   final String? parentId;
 
   Map<String, dynamic> toJson() => _$CategoryPatchBodyToJson(this);

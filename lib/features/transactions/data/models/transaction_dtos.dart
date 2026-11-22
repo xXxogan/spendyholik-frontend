@@ -138,6 +138,7 @@ class TransactionPatchBody {
   final int amountMinor;
   final String date;
   final String? categoryId;
+  @JsonKey(includeIfNull: false)
   final String? time;
   final String note;
   final String title;

@@ -136,6 +136,12 @@ void main() {
     });
   });
 
+  test('прямая ссылка на политику доступна до входа и подтверждения почты', () {
+    expect(canFollowNext(const OnboardingRoute(), '/privacy'), isTrue);
+    expect(canFollowNext(const LoginRoute(), '/privacy'), isTrue);
+    expect(canFollowNext(const EmailConfirmRoute(), '/privacy'), isTrue);
+  });
+
   group('AuthGuard', () {
     late MockSessionCubit session;
     late MockResolver resolver;

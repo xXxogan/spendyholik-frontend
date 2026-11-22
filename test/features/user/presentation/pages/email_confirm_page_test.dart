@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:spendyholik/core/errors/failure.dart';
+import 'package:spendyholik/features/user/data/repositories/auth_repository.dart';
 import 'package:spendyholik/features/user/presentation/cubit/email_confirm_cubit.dart';
 import 'package:spendyholik/features/user/presentation/pages/email_confirm_page.dart';
 
@@ -11,6 +12,8 @@ import '../../../../helpers/pump_app.dart';
 
 class MockEmailConfirmCubit extends MockCubit<EmailConfirmState>
     implements EmailConfirmCubit {}
+
+class MockAuthRepository extends Mock implements AuthRepository {}
 
 void main() {
   late MockEmailConfirmCubit cubit;
@@ -52,6 +55,33 @@ void main() {
     );
 
     expect(find.text('Код устарел, запросите новый'), findsOneWidget);
+  });
+
+  testWidgets('поле очищается, ошибка остаётся до следующего ввода', (
+    tester,
+  ) async {
+    final auth = MockAuthRepository();
+    when(() => auth.confirmEmail('482913')).thenThrow(
+      const ValidationFailure('code', FieldError.codeExpired),
+    );
+    final realCubit = EmailConfirmCubit(auth);
+    addTearDown(realCubit.close);
+    await pumpPage(
+      tester,
+      BlocProvider.value(value: realCubit, child: const EmailConfirmView()),
+      width: 600,
+    );
+
+    final field = find.byType(EditableText);
+    await tester.enterText(field, '482913');
+    await settle(tester);
+
+    expect(tester.widget<EditableText>(field).controller.text, isEmpty);
+    expect(find.text('Код устарел, запросите новый'), findsOneWidget);
+
+    await tester.enterText(field, '1');
+    await settle(tester);
+    expect(find.text('Код устарел, запросите новый'), findsNothing);
   });
 
   testWidgets('дневной лимит — сообщение', (tester) async {

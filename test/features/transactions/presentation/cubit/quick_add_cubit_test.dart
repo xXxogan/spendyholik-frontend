@@ -213,4 +213,42 @@ void main() {
     expect(cubit.state.failure, const NetworkFailure());
     expect(cubit.state.amount, '100');
   });
+
+  for (final (field, expected) in [
+    ('amount', QuickAddField.amount),
+    ('accountId', QuickAddField.account),
+    ('categoryId', QuickAddField.category),
+  ]) {
+    test(
+      'ValidationFailure($field) — ошибка у поля, без общего failure',
+      () async {
+        when(() => transactions.create(any()))
+            .thenThrow(ValidationFailure(field, FieldError.exceedsBalance));
+        final cubit = await ready();
+        cubit
+          ..amountChanged('100')
+          ..categoryChanged('c8');
+
+        await cubit.submit();
+
+        expect(cubit.state.status, FormStatus.failure);
+        expect(cubit.state.failure, isNull);
+        expect(cubit.state.fieldErrors, {expected: FieldError.exceedsBalance});
+      },
+    );
+  }
+
+  test('ValidationFailure чужого поля — общий failure', () async {
+    const failure = ValidationFailure('note', FieldError.invalid);
+    when(() => transactions.create(any())).thenThrow(failure);
+    final cubit = await ready();
+    cubit
+      ..amountChanged('100')
+      ..categoryChanged('c8');
+
+    await cubit.submit();
+
+    expect(cubit.state.failure, failure);
+    expect(cubit.state.fieldErrors, isEmpty);
+  });
 }

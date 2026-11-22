@@ -57,6 +57,8 @@ Failure _fromResponse(DioException e, Map<String, String> fields) {
       return const EmailTakenFailure();
     case 'email_not_verified':
       return const EmailNotVerifiedFailure();
+    case 'email_already_verified':
+      return const EmailAlreadyVerifiedFailure();
   }
   if (status == 401) return const UnauthorizedFailure();
 

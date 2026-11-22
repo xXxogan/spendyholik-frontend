@@ -39,6 +39,8 @@ class CategoryFormCubit extends Cubit<CategoryFormState>
           kind: category.kind,
           icon: category.icon,
           color: category.color,
+          sendIcon: category.hasKnownIcon,
+          sendColor: category.hasKnownColor,
           parentId: category.parentId,
           categories: categories,
         ),
@@ -65,9 +67,11 @@ class CategoryFormCubit extends Cubit<CategoryFormState>
     );
   }
 
-  void iconChanged(EntityIcon value) => emit(state.copyWith(icon: value));
+  void iconChanged(EntityIcon value) =>
+      emit(state.copyWith(icon: value, sendIcon: true));
 
-  void colorChanged(EntityColor value) => emit(state.copyWith(color: value));
+  void colorChanged(EntityColor value) =>
+      emit(state.copyWith(color: value, sendColor: true));
 
   void parentChanged(String? value) => emit(state.copyWith(parentId: value));
 
@@ -83,6 +87,8 @@ class CategoryFormCubit extends Cubit<CategoryFormState>
       kind: state.kind,
       icon: state.icon,
       color: state.color,
+      sendIcon: state.sendIcon,
+      sendColor: state.sendColor,
       parentId: state.canHaveParent ? state.parentId : null,
     );
     emit(state.copyWith(status: .submitting, failure: null));

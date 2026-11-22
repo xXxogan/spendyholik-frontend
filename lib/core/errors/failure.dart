@@ -27,6 +27,10 @@ final class EmailNotVerifiedFailure extends Failure {
   const EmailNotVerifiedFailure();
 }
 
+final class EmailAlreadyVerifiedFailure extends Failure {
+  const EmailAlreadyVerifiedFailure();
+}
+
 /// 429 без поля: код запрошен слишком рано или исчерпан дневной лимит.
 final class RateLimitedFailure extends Failure {
   const RateLimitedFailure({required this.daily});

@@ -66,6 +66,7 @@ class TransactionFormCubit extends Cubit<TransactionFormState>
           accountCurrency: t.currency,
           toAccountId: t.toAccount?.id,
           occurredAt: t.occurredAt,
+          hasTime: t.hasTime,
           note: t.note ?? '',
         ),
       );
@@ -179,6 +180,7 @@ class TransactionFormCubit extends Cubit<TransactionFormState>
       accountId: accountId!,
       toAccountId: isTransfer ? state.toAccountId : null,
       occurredAt: state.occurredAt ?? DateTime.now(),
+      hasTime: state.hasTime,
       note: note.isEmpty ? null : note,
     );
     emit(state.copyWith(status: .submitting, failure: null));

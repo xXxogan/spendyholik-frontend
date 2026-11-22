@@ -10,6 +10,7 @@ import 'package:spendyholik/features/categories/data/api/categories_api.dart';
 import 'package:spendyholik/features/categories/data/models/category_dtos.dart';
 import 'package:spendyholik/features/categories/data/models/models.dart';
 import 'package:spendyholik/features/categories/data/repositories/remote_category_repository.dart';
+import 'package:spendyholik/features/categories/presentation/cubit/category_form_cubit.dart';
 import 'package:talker/talker.dart';
 
 import '../../../../helpers/dio_errors.dart';
@@ -140,6 +141,39 @@ void main() {
           DataTopic.recurring,
         }),
       ).called(1);
+    });
+
+    test('переименование не отправляет неизвестные иконку и цвет', () async {
+      final original = category(icon: 'new_icon', color: 'new_color');
+      when(() => api.list()).thenAnswer((_) async => [original]);
+      when(() => api.update('c1', any())).thenAnswer((_) async => original);
+      final cubit = CategoryFormCubit(repository);
+      addTearDown(cubit.close);
+      await cubit.init('c1');
+
+      cubit.nameChanged('Кофе');
+      await cubit.save();
+
+      final body = verify(() => api.update('c1', captureAny())).captured.single
+          as CategoryPatchBody;
+      expect(body.toJson(), {'name': 'Кофе', 'parent_id': null});
+    });
+
+    test('явный выбор иконки сохраняется без замены неизвестного цвета', () async {
+      final original = category(icon: 'new_icon', color: 'new_color');
+      when(() => api.list()).thenAnswer((_) async => [original]);
+      when(() => api.update('c1', any())).thenAnswer((_) async => original);
+      final cubit = CategoryFormCubit(repository);
+      addTearDown(cubit.close);
+      await cubit.init('c1');
+
+      cubit.iconChanged(.cafe);
+      await cubit.save();
+
+      final body = verify(() => api.update('c1', captureAny())).captured.single
+          as CategoryPatchBody;
+      expect(body.toJson()['icon'], 'cafe');
+      expect(body.toJson(), isNot(contains('color')));
     });
 
     test('422 name — ValidationFailure у поля name, без emit', () async {

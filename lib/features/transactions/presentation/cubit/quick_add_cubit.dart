@@ -78,11 +78,30 @@ class QuickAddCubit extends Cubit<QuickAddState>
         ),
       );
       emit(state.copyWith(status: .success));
+    } on ValidationFailure catch (failure, stackTrace) {
+      getIt<Talker>().handle(failure, stackTrace);
+      final field = _fields[failure.field];
+      emit(
+        field == null
+            ? state.copyWith(status: .failure, failure: failure)
+            : state.copyWith(
+                status: .failure,
+                fieldErrors: {field: failure.reason},
+              ),
+      );
     } on Failure catch (failure, stackTrace) {
       getIt<Talker>().handle(failure, stackTrace);
       emit(state.copyWith(status: .failure, failure: failure));
     }
   }
+
+  /// Поля `ValidationFailure` репозитория операций → поля листа: счёт листа —
+  /// карта, выбранная за пользователя, но ошибку его баланса видно у строки счёта.
+  static const _fields = {
+    'amount': QuickAddField.amount,
+    'accountId': QuickAddField.account,
+    'categoryId': QuickAddField.category,
+  };
 
   AccountModel? _card(List<AccountModel> accounts) => accounts
       .where((a) => !a.isArchived && a.type == AccountType.debit)

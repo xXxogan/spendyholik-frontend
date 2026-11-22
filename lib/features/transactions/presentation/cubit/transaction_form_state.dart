@@ -21,6 +21,7 @@ abstract class TransactionFormState with _$TransactionFormState {
 
     /// null только до init.
     DateTime? occurredAt,
+    @Default(true) bool hasTime,
     @Default('') String note,
     @Default(false) bool isLoading,
     @Default(FormStatus.idle) FormStatus status,

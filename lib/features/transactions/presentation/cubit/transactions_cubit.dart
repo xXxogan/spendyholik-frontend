@@ -64,6 +64,7 @@ class TransactionsCubit extends Cubit<TransactionsState>
       );
     } on Failure catch (failure, stackTrace) {
       getIt<Talker>().handle(failure, stackTrace);
+      if (generation != _generation) return;
       emit(TransactionsState.error(failure));
     }
   }

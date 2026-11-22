@@ -50,6 +50,7 @@ class TransactionMapper {
         parts.length > 1 ? int.tryParse(parts[1]) ?? 0 : 0,
         parts.length > 2 ? int.tryParse(parts[2].split('.').first) ?? 0 : 0,
       ),
+      hasTime: dto.time != null,
       note: note == null || note.isEmpty ? null : note,
     );
   }

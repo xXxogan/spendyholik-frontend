@@ -143,7 +143,7 @@ class RemoteTransactionRepository implements TransactionRepository {
           amountMinor: draft.amount,
           date: _day.format(draft.occurredAt),
           categoryId: draft.categoryId,
-          time: _clock.format(draft.occurredAt),
+          time: draft.hasTime ? _clock.format(draft.occurredAt) : null,
           note: draft.note ?? '',
           title: draft.title,
           transferToAccountId: draft.toAccountId,

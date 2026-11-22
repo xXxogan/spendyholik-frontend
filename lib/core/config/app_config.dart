@@ -2,6 +2,8 @@ abstract final class AppConfig {
   static const appVersion = '1.0.0';
 
   static const apiBaseUrl = 'https://api.spendyholik.duckdns.org/api/v1/';
+  static const privacyPolicyUrl =
+      'https://spendyholik.duckdns.org/privacy-policy.md';
 
   // Медиана ответа 85–330 мс, холодный старт до 0,7 с (спайк S-03).
   // sendTimeout не задаётся: на Web без тела запроса Dio на нём падает.

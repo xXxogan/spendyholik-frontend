@@ -26,7 +26,8 @@ abstract interface class AuthRepository {
   Future<UserModel> confirmEmail(String code);
 
   /// [RateLimitedFailure], если код запрошен раньше минуты или кончился лимит дня.
-  Future<void> resendEmailCode();
+  /// Возвращает true, если сервер уже подтвердил почту и сессия обновлена.
+  Future<bool> resendEmailCode();
 
   Future<void> signOut();
 

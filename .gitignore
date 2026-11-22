@@ -25,6 +25,7 @@ migrate_working_dir/
 docs/pipeline/
 pid
 design/
+assets/legal/privacy_policy_ru.md
 
 # Flutter/Dart/Pub related
 **/doc/api/

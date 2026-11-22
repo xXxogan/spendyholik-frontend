@@ -17,7 +17,7 @@ class RemoteDataResetRepository implements DataResetRepository {
   Future<void> wipeAll() async {
     await callApi(_api.wipeData);
     // Кэш чистим только после успеха: при ошибке данные на сервере целы.
-    await _cache.clear();
+    await _cache.clear(keep: {ApiCache.profileKey});
     _bus.emit(DataTopic.values.toSet());
   }
 }

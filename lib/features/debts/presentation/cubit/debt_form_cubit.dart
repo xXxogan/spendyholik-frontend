@@ -38,6 +38,7 @@ class DebtFormCubit extends Cubit<DebtFormState>
           counterparty: debt.counterparty,
           direction: debt.direction,
           amount: formatAmountInput(debt.total),
+          accountCurrency: debt.currency,
           dueDate: debt.dueDate,
           note: debt.note ?? '',
         ),

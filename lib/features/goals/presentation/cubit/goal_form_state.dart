@@ -10,6 +10,7 @@ abstract class GoalFormState with _$GoalFormState {
     String? goalId,
     @Default('') String name,
     @Default('') String target,
+    Currency? currency,
 
     /// Только при создании: при правке взнос уже списан со счёта.
     @Default('') String initialContribution,

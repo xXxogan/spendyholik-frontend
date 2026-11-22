@@ -32,9 +32,8 @@ abstract class AuthApi {
   @PATCH('profile/password/')
   Future<void> changePassword(@Body() PasswordBody body);
 
-  /// Ответ — UserOut; профиль после подтверждения перечитывается целиком.
   @POST('auth/email/confirm/')
-  Future<void> confirmEmail(@Body() ConfirmEmailBody body);
+  Future<ConfirmedUserDto> confirmEmail(@Body() ConfirmEmailBody body);
 
   /// Всегда 200: сервер не раскрывает, есть ли такой адрес.
   @POST('auth/password/reset/')

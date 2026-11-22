@@ -118,8 +118,9 @@ class RecurringFormCubit extends Cubit<RecurringFormState>
   void frequencyChanged(RecurrenceFrequency value) =>
       emit(state.copyWith(frequency: value));
 
-  void anchorChanged(DateTime value) =>
-      emit(state.copyWith(anchor: _atNoon(value)));
+  void anchorChanged(DateTime value) => emit(
+    state.copyWith(anchor: _atNoon(value), fieldErrors: _without(.anchor)),
+  );
 
   Future<void> save() async {
     final errors = <RecurringField, FieldError>{};

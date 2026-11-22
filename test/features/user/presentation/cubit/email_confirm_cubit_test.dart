@@ -86,7 +86,7 @@ void main() {
     'resend: до конца отсчёта — без запроса; после — запрос и новый отсчёт',
     () {
       fakeAsync((async) {
-        when(() => auth.resendEmailCode()).thenAnswer((_) async {});
+        when(() => auth.resendEmailCode()).thenAnswer((_) async => false);
         final cubit = build();
 
         cubit.resend();
@@ -115,6 +115,21 @@ void main() {
       async.flushMicrotasks();
 
       expect(cubit.state.failure, isA<RateLimitedFailure>());
+      expect(cubit.state.resendIn, 0);
+      cubit.close();
+    });
+  });
+
+  test('resend: подтверждённый профиль завершает сценарий', () {
+    fakeAsync((async) {
+      when(() => auth.resendEmailCode()).thenAnswer((_) async => true);
+      final cubit = build();
+      async.elapse(const Duration(seconds: 60));
+
+      cubit.resend();
+      async.flushMicrotasks();
+
+      expect(cubit.state.status, FormStatus.success);
       expect(cubit.state.resendIn, 0);
       cubit.close();
     });

@@ -70,6 +70,26 @@ void main() {
     expect(find.text('Категория'), findsOneWidget);
     expect(find.text('Продукты'), findsOneWidget);
     expect(find.text('К ужину'), findsOneWidget);
+    expect(find.textContaining('18:05'), findsOneWidget);
+  });
+
+  testWidgets('у операции без времени видна только дата', (tester) async {
+    await pump(
+      tester,
+      TransactionModel(
+        currency: .rub,
+        id: 'date-only',
+        type: .expense,
+        amount: 124000,
+        title: 'Пятёрочка',
+        account: card,
+        occurredAt: DateTime(2026, 3, 12, 12),
+        hasTime: false,
+      ),
+    );
+
+    expect(find.textContaining('12 марта'), findsOneWidget);
+    expect(find.textContaining('12:00'), findsNothing);
   });
 
   testWidgets('перевод — «Откуда»/«Куда», строки «Категория» нет', (

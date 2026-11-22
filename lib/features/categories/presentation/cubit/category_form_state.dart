@@ -10,6 +10,8 @@ abstract class CategoryFormState with _$CategoryFormState {
     @Default(CategoryKind.expense) CategoryKind kind,
     @Default(EntityIcon.other) EntityIcon icon,
     @Default(EntityColor.pink) EntityColor color,
+    @Default(true) bool sendIcon,
+    @Default(true) bool sendColor,
     String? parentId,
 
     /// Все категории: из них собираются варианты родителя.

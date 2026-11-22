@@ -146,6 +146,30 @@ void main() {
             .called(2),
   );
 
+  test('ошибка предыдущей загрузки не заменяет новый список', () async {
+    const previousFilter = TransactionFilter(type: .expense);
+    const currentFilter = TransactionFilter(type: .income);
+    final previousPage = Completer<TransactionPage>();
+    when(() => repository.getPage(previousFilter)).thenAnswer(
+      (_) => previousPage.future,
+    );
+    when(() => repository.getPage(currentFilter)).thenAnswer(
+      (_) async => TransactionPage(items: [
+        tx('income', DateTime(2026, 11, 22), type: .income),
+      ]),
+    );
+    final cubit = build();
+    addTearDown(cubit.close);
+
+    final previousLoad = cubit.load(previousFilter);
+    await cubit.load(currentFilter);
+    previousPage.completeError(const NetworkFailure());
+    await previousLoad;
+
+    expect(cubit.state, isA<TransactionsLoaded>());
+    expect((cubit.state as TransactionsLoaded).filter, currentFilter);
+  });
+
   blocTest<TransactionsCubit, TransactionsState>(
     'applyFilter заменяет фильтр целиком',
     setUp: () =>

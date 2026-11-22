@@ -20,6 +20,24 @@ class AuthOutDto {
   final DateTime refreshExpiresAt;
 }
 
+@JsonSerializable(createToJson: false, fieldRename: FieldRename.snake)
+class ConfirmedUserDto {
+  const ConfirmedUserDto({
+    required this.id,
+    required this.email,
+    required this.firstName,
+    required this.emailVerified,
+  });
+
+  factory ConfirmedUserDto.fromJson(Map<String, dynamic> json) =>
+      _$ConfirmedUserDtoFromJson(json);
+
+  final String id;
+  final String email;
+  final String firstName;
+  final bool emailVerified;
+}
+
 /// `theme`, `onboarded` не читаются: настройки локальные (решение 2026-11-07).
 /// toJson — для кэша: без сети профиль берётся из последнего ответа.
 @JsonSerializable(fieldRename: FieldRename.snake)

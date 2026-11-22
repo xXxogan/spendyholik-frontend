@@ -44,7 +44,9 @@ class TransactionDetailContent extends StatelessWidget {
       TransactionType.transfer => l10n.transactionTypeTransfer,
     };
     final day = formatDayLabel(t.occurredAt, DateTime.now(), l10n, locale);
-    final time = DateFormat.Hm(locale).format(t.occurredAt);
+    final dayAndTime = t.hasTime
+        ? '$day · ${DateFormat.Hm(locale).format(t.occurredAt)}'
+        : day;
 
     return Column(
       crossAxisAlignment: .stretch,
@@ -68,7 +70,7 @@ class TransactionDetailContent extends StatelessWidget {
               ),
             ),
             Text(
-              '$day · $time',
+              dayAndTime,
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),

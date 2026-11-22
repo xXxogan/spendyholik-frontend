@@ -90,4 +90,19 @@ void main() {
 
     expect(find.text('Нет активной дебетовой карты'), findsOneWidget);
   });
+
+  testWidgets('серверная ошибка счёта — её текст, не «нет карты»', (
+    tester,
+  ) async {
+    await pump(
+      tester,
+      ready.copyWith(
+        status: FormStatus.failure,
+        fieldErrors: {QuickAddField.account: FieldError.invalid},
+      ),
+    );
+
+    expect(find.text('Нет активной дебетовой карты'), findsNothing);
+    expect(find.text('Некорректное значение'), findsOneWidget);
+  });
 }

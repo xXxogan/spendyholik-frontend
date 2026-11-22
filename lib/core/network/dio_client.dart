@@ -16,6 +16,10 @@ abstract class NetworkModule {
   @lazySingleton
   Dio refreshDio(Talker talker) => _base()..interceptors.add(_logger(talker));
 
+  @Named('publicDocumentsDio')
+  @lazySingleton
+  Dio publicDocumentsDio() => _base();
+
   static Dio _base() => Dio(
     BaseOptions(
       baseUrl: AppConfig.apiBaseUrl,

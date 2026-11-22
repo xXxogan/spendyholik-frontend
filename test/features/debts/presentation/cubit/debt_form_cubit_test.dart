@@ -17,7 +17,7 @@ void main() {
   late MockAccountRepository accounts;
 
   final dmitry = DebtModel(
-    currency: Currency.rub,
+    currency: Currency.usd,
     id: 'dmitry',
     counterparty: 'Дмитрий',
     direction: DebtDirection.owedToMe,
@@ -92,6 +92,7 @@ void main() {
         counterparty: 'Дмитрий',
         direction: .owedToMe,
         amount: '15000',
+        accountCurrency: .usd,
       ),
     ],
   );

@@ -108,8 +108,12 @@ class QuickAddView extends StatelessWidget {
                 ),
               if (error(.category) case final text?)
                 Text(text, style: errorStyle),
-              if (state.fieldErrors.containsKey(QuickAddField.account))
-                Text(l10n.quickAddNoDebit, style: errorStyle),
+              // required ставит сам Cubit, когда не нашёл карту; остальное — от сервера.
+              if (state.fieldErrors[QuickAddField.account] case final reason?)
+                Text(
+                  reason == .required ? l10n.quickAddNoDebit : error(.account)!,
+                  style: errorStyle,
+                ),
               if (state.status == FormStatus.failure)
                 if (state.failure case final failure?)
                   Text(failureMessage(l10n, failure), style: errorStyle),
