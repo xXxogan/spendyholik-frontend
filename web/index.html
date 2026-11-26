@@ -19,6 +19,25 @@
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
   <meta name="description" content="A new Flutter project.">
+  <meta name="color-scheme" content="light dark">
+
+  <style>
+    :root {
+      color-scheme: light;
+      --app-background: #ffffff;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        color-scheme: dark;
+        --app-background: #111111;
+      }
+    }
+
+    html, body {
+      background-color: var(--app-background);
+    }
+  </style>
 
   <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">

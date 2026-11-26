@@ -6,6 +6,8 @@ import 'package:spendyholik/app/router/app_router.dart';
 import 'package:spendyholik/app/router/app_router.gr.dart';
 import 'package:spendyholik/app/router/guards.dart';
 import 'package:spendyholik/app/theme/app_theme.dart';
+import 'package:spendyholik/app/theme/web_page_theme_stub.dart'
+    if (dart.library.js_interop) 'package:spendyholik/app/theme/web_page_theme.dart';
 import 'package:spendyholik/core/logger/talker_auto_route_observer.dart';
 import 'package:spendyholik/core/models/models.dart';
 import 'package:spendyholik/core/widgets/widgets.dart';
@@ -67,18 +69,24 @@ class _SpendyHolikAppState extends State<SpendyHolikApp> {
               previous.language != current.language,
           builder: (context, settings) => MaterialApp.router(
             onGenerateTitle: (context) => context.l10n.appTitle,
-            builder: (_, child) =>
-                BlocSelector<SessionCubit, SessionState, Currency>(
-                  selector: (state) => switch (state) {
-                    SessionAuthenticated(:final user) =>
-                      user.baseCurrency ?? Currency.rub,
-                    _ => Currency.rub,
-                  },
-                  builder: (_, currency) => CurrencyScope(
-                    currency: currency,
-                    child: Material(type: .transparency, child: child),
-                  ),
+            builder: (context, child) {
+              final theme = Theme.of(context);
+              updateWebPageTheme(
+                theme.brightness.name,
+                theme.scaffoldBackgroundColor.toARGB32(),
+              );
+              return BlocSelector<SessionCubit, SessionState, Currency>(
+                selector: (state) => switch (state) {
+                  SessionAuthenticated(:final user) =>
+                    user.baseCurrency ?? Currency.rub,
+                  _ => Currency.rub,
+                },
+                builder: (_, currency) => CurrencyScope(
+                  currency: currency,
+                  child: Material(type: .transparency, child: child),
                 ),
+              );
+            },
             theme: AppTheme.light(),
             darkTheme: AppTheme.dark(),
             themeMode: switch (settings.themeMode) {
